@@ -5,8 +5,10 @@ makes existing web apps agent-ready via [WebMCP](https://webmachinelearning.gith
 (`document.modelContext`), with a human approval gate and real-browser verification of
 every exposed tool.
 
-Static single-file site (no build step): `index.html` + `robots.txt` + `sitemap.xml`.
-English default with a client-side German toggle.
+Static site (no build step): `index.html` + `robots.txt` + `sitemap.xml`.
+English default with a client-side German toggle. `/de/` is the crawlable German
+variant — regenerate it with `python3 build-de.py` after editing `index.html`
+and commit both files (hreflang pairs live in both pages and `sitemap.xml`).
 
 Production: https://webmcpify.at
 
