@@ -1,0 +1,16 @@
+# webmcpify
+
+> webmcpify is an MIT-licensed agent skill that makes an existing web application agent-ready: it inventories the app's user actions, lets a human approve a tool manifest, integrates the approved tools via WebMCP (`document.modelContext`, the W3C Web Machine Learning CG proposal currently in Chrome origin trial), verifies every tool in a real browser, heals failures, and audits that no unrelated code changed.
+
+Key facts:
+- Install: `git clone https://github.com/TueJon/webmcpify ~/.claude/skills/webmcpify`, then run `/webmcpify` in Claude Code (output works with any WebMCP-speaking browser agent).
+- Pipeline: DETECT → INVENTORY → GATE (human approval) → INTEGRATE → VERIFY → HEAL → AUDIT.
+- Security model: tools only call code paths the app's UI already uses; the server remains the only trust boundary; server-mutating tools require explicit per-tool human approval; destructive or payment actions are never exposed in a first integration.
+- Zero runtime dependencies; the integration is feature-detected and byte-identical for browsers without WebMCP.
+- This site itself registers WebMCP tools (get_install_command, get_pipeline_overview, get_faq, set_language) — agents visiting webmcpify.at can use them directly.
+
+## Links
+
+- [webmcpify source (GitHub)](https://github.com/TueJon/webmcpify): the skill, runtime, and verification harness
+- [WebMCP proposal](https://webmachinelearning.github.io/webmcp/): the W3C Web Machine Learning CG spec draft
+- [Chrome WebMCP documentation](https://developer.chrome.com/docs/ai/webmcp): origin trial details

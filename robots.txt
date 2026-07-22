@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# AI/agent crawlers are explicitly welcome — this site exists to be understood by them.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://webmcpify.at/sitemap.xml
