@@ -255,7 +255,7 @@
       <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
       <button type="button" data-set-lang="de" aria-pressed="true">DE</button>
     </div>
-    <a class="btn" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">GitHub ↗</a>
+    <a class="btn" data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">GitHub ↗</a>
   </div>
 </header>
 
@@ -278,7 +278,7 @@
         </p>
         <div class="hero-ctas">
           <a class="btn primary" href="#install"><span lang="en">Install the skill</span><span lang="de">Skill installieren</span></a>
-          <a class="btn" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener"><span lang="en">Read the source</span><span lang="de">Quellcode lesen</span></a>
+          <a class="btn" data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener"><span lang="en">Read the source</span><span lang="de">Quellcode lesen</span></a>
         </div>
         <p class="hero-fine">
           <span lang="en">Open source · MIT · zero dependencies · Chrome origin trial · works with Claude Code</span>
@@ -548,7 +548,7 @@
 <footer>
   <div class="wrap foot">
     <span>webmcpify.at</span>
-    <a href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">GitHub</a>
+    <a data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">GitHub</a>
     <a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP <span lang="en">proposal</span><span lang="de">Proposal</span></a>
     <span class="fill"></span>
     <span>MIT License</span>
@@ -593,12 +593,14 @@
         }
       }
       if (ok) {
+        window.dispatchEvent(new CustomEvent("webmcpify:install-copy"));
         toast.classList.add("show");
         setTimeout(() => toast.classList.remove("show"), 1800);
       }
     });
   });
 </script>
+<script type="module" src="/measurement.js"></script>
 <script type="module" src="/webmcp/site-tools.js"></script>
 </body>
 </html>

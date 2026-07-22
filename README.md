@@ -12,6 +12,12 @@ and commit both files (hreflang pairs live in both pages and `sitemap.xml`).
 
 Production: https://webmcpify.at
 
+Privacy-safe first-party launch-event measurement is documented in
+[`MEASUREMENT.md`](MEASUREMENT.md). It is review-ready but requires a separate
+nginx configuration step; repository changes alone do not activate collection.
+
+Run its dependency-free contract tests with `node --test tests/measurement.test.mjs`.
+
 ## Deploy
 
 The site is served directly from a git clone on the host — no build, no pipeline:

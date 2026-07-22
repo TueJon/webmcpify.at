@@ -1,0 +1,14 @@
+/var/log/nginx/webmcpify-events.log {
+    daily
+    rotate 30
+    maxage 30
+    missingok
+    notifempty
+    compress
+    delaycompress
+    create 0640 www-data adm
+    sharedscripts
+    postrotate
+        [ ! -f /run/nginx.pid ] || kill -USR1 $(cat /run/nginx.pid)
+    endscript
+}
