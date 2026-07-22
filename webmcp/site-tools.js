@@ -5,7 +5,8 @@
 import { createToolScope } from './webmcpify.js';
 
 const INSTALL = [
-  '$ git clone https://github.com/TueJon/webmcpify ~/.claude/skills/webmcpify',
+  '$ npx skills add TueJon/webmcpify',
+  '# or: git clone https://github.com/TueJon/webmcpify ~/.claude/skills/webmcpify',
   '$ claude',
   '> /webmcpify',
 ].join('\n');
