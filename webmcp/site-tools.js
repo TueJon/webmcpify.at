@@ -31,7 +31,7 @@ const faqEntries = () =>
     return `Q: ${q}\nA: ${a}`;
   });
 
-createToolScope('webmcpify-site', [
+const TOOLS = [
   {
     name: 'get_install_command',
     description:
@@ -77,4 +77,14 @@ createToolScope('webmcpify-site', [
       return `Page language switched to ${language === 'de' ? 'German' : 'English'}.`;
     },
   },
-]);
+];
+
+// The WebMCP surface may be injected after page load (extension content scripts,
+// origin-trial timing). Retry until it appears instead of probing once and giving up.
+const surface = () => document.modelContext ?? navigator.modelContext;
+let attempts = 0;
+const tryRegister = () => {
+  if (surface()) { createToolScope('webmcpify-site', TOOLS); return; }
+  if (++attempts < 40) setTimeout(tryRegister, 500);
+};
+tryRegister();
