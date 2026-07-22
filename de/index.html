@@ -38,9 +38,12 @@
   "operatingSystem": "Any (agent skill for Claude Code and compatible coding agents)",
   "license": "https://opensource.org/license/MIT",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+  "author": { "@type": "Person", "name": "Jonas Tüchler", "url": "https://jonastuechler.at" },
+  "publisher": { "@type": "Organization", "name": "TWB-Digital OG", "url": "https://twb-digital.at" },
   "sameAs": ["https://github.com/TueJon/webmcpify"]
 }
 </script>
+<script type="application/ld+json" id="faq-schema">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Was ist WebMCP?", "acceptedAnswer": {"@type": "Answer", "text": "Ein vorgeschlagener Webstandard (W3C Web Machine Learning CG), mit dem eine Seite typisierte Tools registriert, die Browser-KI-Agents aufrufen können, statt das DOM zu scrapen. Läuft aktuell als Chrome Origin Trial."}}, {"@type": "Question", "name": "Fasst webmcpify Code an, den ich nicht freigegeben habe?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Jeder Diff-Hunk muss einem freigegebenen Tool oder dokumentiertem Setup zuordenbar sein; alles andere flaggt die Audit-Phase im Report. Dateien, die vor dem Run dirty waren, werden nie angefasst."}}, {"@type": "Question", "name": "Ist das ein Sicherheitsrisiko für meine App?", "acceptedAnswer": {"@type": "Answer", "text": "Tools dürfen nur Code-Pfade aufrufen, die deine UI ohnehin nutzt: gleiche Endpoints, gleiche Validierung, gleiche Auth. Dein Server bleibt die einzige Trust Boundary, und mutierende Tools brauchen explizite Freigabe pro Tool."}}, {"@type": "Question", "name": "Welche Agents können webmcpify ausführen, und welche das Ergebnis nutzen?", "acceptedAnswer": {"@type": "Answer", "text": "Die Pipeline läuft als Claude-Code-Skill. Das Ergebnis ist reine, dependency-freie WebMCP-Integration: jeder Browser-Agent, der WebMCP spricht, kann deine Tools aufrufen."}}]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -252,7 +255,7 @@
       <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
       <button type="button" data-set-lang="de" aria-pressed="true">DE</button>
     </div>
-    <a class="btn" href="https://github.com/TueJon/webmcpify">GitHub ↗</a>
+    <a class="btn" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">GitHub ↗</a>
   </div>
 </header>
 
@@ -275,7 +278,7 @@
         </p>
         <div class="hero-ctas">
           <a class="btn primary" href="#install"><span lang="en">Install the skill</span><span lang="de">Skill installieren</span></a>
-          <a class="btn" href="https://github.com/TueJon/webmcpify"><span lang="en">Read the source</span><span lang="de">Quellcode lesen</span></a>
+          <a class="btn" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener"><span lang="en">Read the source</span><span lang="de">Quellcode lesen</span></a>
         </div>
         <p class="hero-fine">
           <span lang="en">Open source · MIT · zero dependencies · Chrome origin trial · works with Claude Code</span>
@@ -545,8 +548,8 @@
 <footer>
   <div class="wrap foot">
     <span>webmcpify.at</span>
-    <a href="https://github.com/TueJon/webmcpify">GitHub</a>
-    <a href="https://webmachinelearning.github.io/webmcp/">WebMCP <span lang="en">proposal</span><span lang="de">Proposal</span></a>
+    <a href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP <span lang="en">proposal</span><span lang="de">Proposal</span></a>
     <span class="fill"></span>
     <span>MIT License</span>
     <a href="/imprint.html"><span lang="en">Imprint</span><span lang="de">Impressum</span></a>
