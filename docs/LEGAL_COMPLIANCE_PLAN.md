@@ -1,12 +1,11 @@
 # Legal Compliance Plan — webmcpify.at
 
-- **Audit date:** 2026-07-24
+- **Audit date:** 2026-07-24 (re-audit, same day — iteration 2, post-merge)
 - **Jurisdiction:** Austria (operator seat, `.at` domain, WKO member; German-language variant targets DACH visitors)
-- **Site:** https://webmcpify.at (static landing page, EN + `/de/`) — deployed from `main` @ `350f00c`, docroot `/opt/webmcpify` on tuejon.at (nginx, netcup DE)
+- **Site:** https://webmcpify.at (static landing page, EN + `/de/`) — deployed from `main` @ `65e392c`, docroot `/opt/webmcpify` on tuejon.at (nginx, netcup DE). Live deployment confirmed in this audit: response `content-length`/`etag` for `/` and `/privacy.html` match the local repo byte-for-byte, `last-modified: Fri, 24 Jul 2026 18:39:25 GMT`.
 - **Business entity:** TWB-Digital OG, FN 663697a (LG Korneuburg), Waldweg 28/2, 2020 Hollabrunn, UID ATU82973212 — microenterprise (3 partners), WKO Fachgruppe UBIT NÖ
-- **Business type:** purely informational presentation of the operator's open-source MIT-licensed developer tool. No e-commerce, no forms, no newsletter, no accounts.
-- **Also audited:** the undeployed measurement branch `feat/privacy-safe-measurement` (worktree `../webmcpify.at-measurement`, PR #5 — GA4)
-- **Previous audit:** none found (no prior compliance plan in this repo) — no diff section.
+- **Business type:** informational presentation of the operator's open-source MIT-licensed developer tool, now with consent-gated first-party GA4 web measurement. Still no e-commerce, no forms, no newsletter, no accounts.
+- **Previous audit:** this same file, base commit `350f00c`, written earlier the same day (2026-07-24). Since then, two PRs merged and deployed: `bc77d86` (privacy policy, self-hosted fonts, consent-clean localStorage — closes P1.1/P1.2/P3.1/P4.1/P4.2/P4.3 from that audit) and `65e392c` (the GA4 measurement branch that audit reviewed pre-deploy as PR #5, now live). This document supersedes it; see **Previous Audit Diff** below.
 
 > **Disclaimer:** This is a technical audit, not legal advice. Draft legal texts below are
 > starting points and must be reviewed by a qualified attorney before publication.
@@ -15,525 +14,481 @@
 
 ## Executive summary
 
-The site is in **unusually good shape for its size** — the Imprint passes every mandatory
-WKO checklist item for an OG operating a "kleine Website", there are no cookies, no forms,
-no analytics, HSTS is on, and the correct decision was made to hold back GA4 until the
-consent work exists. **The absence of a cookie banner is correct today and must be
-preserved** (DSB: no banner where nothing non-essential is stored — a consent banner for
-nothing is itself a dark-pattern risk).
+Every Priority 1 and Priority 4 item, and one of two Priority 3 items, from this morning's
+audit are **done and verified live**: I ran the site's unit test suite (18/18 passing),
+then loaded production in a fresh, cookie-free browser profile and drove the actual consent
+flow end to end. First load makes **zero requests to any Google domain and sets no cookies**
+— every request is same-origin (self-hosted fonts, own JS). Clicking "Allow measurement"
+loads `gtag.js`, writes a timestamped consent record, and sets `_ga`/`_ga_45GCGY7SQN`
+(`Secure;SameSite=Lax`, 90-day expiry); reloading with a stored grant starts analytics
+silently; declining via the reopened "Cookie settings" control expires the Google cookies
+immediately. Accept and Decline are pixel-identical (`.btn`, no `.primary` modifier on
+either). The privacy policy is live, self-hosted fonts load with zero third-party
+connections, and the accessibility/wording polish items (P4.1–P4.3) all landed too.
 
-Exactly **one active legal breach** exists: **there is no Datenschutzerklärung**, although
-the site processes personal data (nginx access logs with full IPs; visitor IP/user-agent
-disclosed to Google via CDN-loaded fonts). The WKO is explicit that the IP address alone
-triggers the full GDPR Art. 13 information duty. Everything else is either preventive
-(GA4 launch gate), trivial hardening, or polish.
+Two things changed the picture from this morning, both only visible from a **live,
+post-deploy** vantage point that a pre-merge code review couldn't have caught:
 
-Priorities: **P1** create the privacy policy + self-host the fonts (removes the only
-third-country transfer and an entire policy section). **P2** the GA4/consent launch gate
-for PR #5 — including a structural fix: gating the gtag `<script>` alone is insufficient
-because `analytics.js` self-executes and queues events that would flush after consent-less
-load. **P3/P4** hardening and polish.
+1. **The consent action is not granular enough.** Accepting "Allow measurement" grants
+   `ad_storage` + `ad_user_data` alongside `analytics_storage` in one non-separable action
+   — confirmed live: it fires a `google.at/ads/ga-audiences` request (an Ads-linked
+   audience/remarketing-adjacent signal), not just the GA4 measurement hit. The banner and
+   privacy policy describe this only as "Google Analytics 4" web measurement. GDPR's
+   specificity requirement (Art. 4(11), 7(1) DSGVO; EDPB Guidelines 05/2020 §3.2) generally
+   requires separable consent per distinct purpose — and if consent for a bundle isn't
+   "specific," the doctrine treats it as **no valid consent at all** for the bundle, which
+   would mean the site's entire GA4 deployment currently rests on shaky footing, not just
+   the ads-signal slice. No DSB/EDPB decision was found ruling on this exact bundling
+   pattern, so this is a reasoned risk assessment, not a confirmed violation — but it's
+   sharpened by a **Google architecture change on 2026-06-15** that made `ad_storage` the
+   sole gate for GA4→Ads data flow (previously "Google Signals" was a second, independent
+   gate). See **P1.1**.
+2. **The site is now live, so two "verify before production traffic" items from this
+   morning's plan are live obligations, not launch-gate checklist items anymore.** My test
+   generated real `_ga`/`_ga_45GCGY7SQN` cookies against the production stream
+   (`G-45GCGY7SQN`) — real visitor data is already flowing to Google. The privacy policy
+   currently *asserts as fact* that a Google Ads Data Processing Terms agreement and a
+   netcup Art. 28 DPA are "in place." Whether that's actually true in the respective admin
+   consoles wasn't (and can't be, by me) confirmed — this needs a same-week check. See
+   **P2.1–P2.3**.
 
----
-
-## Priority 1 — CRITICAL (active legal risk)
-
-### 1.1 Create a Datenschutzerklärung (privacy policy) page and link it from every footer
-
-- **Status today:** No privacy policy exists anywhere. Footer links only the Imprint
-  (`index.html:555`, `de/index.html:555`, no footer at all on `imprint.html`).
-- **Why (plain language):** The server writes access logs containing full IP addresses
-  (verified on tuejon.at: default combined log format, `/var/log/nginx/access.log`,
-  rotated daily, kept 14 days), and every page load currently sends the visitor's IP and
-  user-agent to Google (fonts CDN). An IP address is personal data (CJEU C-582/14
-  *Breyer*), so GDPR Art. 13 information duties apply in full — "static site with no
-  forms" is not an exemption. All 14 items of the WKO Datenschutzerklärung checklist
-  currently FAIL.
-- **Legal basis:** Art. 12, 13 DSGVO; § 165 Abs 3 TKG 2021 (info duty covers the
-  localStorage key even though it needs no consent). Sanctions frame: Art. 83 DSGVO;
-  § 165 TKG up to €50,000 (Fernmeldebehörde).
-- **What to ADD:**
-  - New file `privacy.html` (same bilingual EN/DE pattern, layout and lang-toggle as
-    `imprint.html`; `noindex, follow` is fine, must not be Disallowed in robots.txt).
-    Full draft text below under **Draft legal text**.
-  - Footer link on `index.html` (after the Imprint link, `index.html:555`) —
-    `<a href="/privacy.html"><span lang="en">Privacy</span><span lang="de">Datenschutz</span></a>`
-    — then regenerate `de/index.html` via `python3 build-de.py` (bilingual spans need no
-    new REPLACEMENTS entry).
-  - A link on `imprint.html` (e.g. in the `.top` bar or below the content) so the two
-    legal pages cross-reference; and a back-link on `privacy.html`.
-- **Constraint from the official checklist:** the Datenschutzerklärung must be its **own
-  footer entry**, *not* folded into the Imprint page — WKO/EDSA explicitly reject
-  imprint-only publication ("Der Hinweis im Impressum alleine ist … nicht ausreichend").
-- **Abmahnrisiko:** limited in Austria (consumers lack standing; competitor UWG standing
-  for GDPR breaches is unsettled), but this is the defect the DSB itself flagged in its
-  Google-Fonts Prüfverfahren, and it is the one item a DSB complaint would win on today.
-- **Effort:** M (one new page + two footer edits + regenerate `/de/`).
-
-### 1.2 Self-host the two Google Fonts (remove the CDN embed)
-
-- **Files:** `index.html:47-50` (two `preconnect` + stylesheet + noscript fallback),
-  `imprint.html:10-12`, `de/index.html:47-50` (regenerated).
-- **What to REMOVE:** all four lines referencing `fonts.googleapis.com` /
-  `fonts.gstatic.com` on each page.
-- **What to ADD:** download Familjen Grotesk + Spline Sans Mono (both SIL OFL — self-
-  hosting is expressly permitted) as woff2, serve from `/fonts/`, and add `@font-face`
-  rules with `font-display: swap` to the existing inline `<style>` blocks. The nginx
-  vhost already long-caches `woff2` (7d) — no server change needed.
-- **Why (plain language, honest framing):** In **Austria** this is *not* the
-  catastrophic liability German blog posts suggest: the DSB's Prüfverfahren (Newsletter
-  4/2023) found **no unlawful processing** in CDN font loading (legitimate interest can
-  cover it, no consent needed), and the LG f. ZRS Wien has ruled the €100/€190 Abmahn
-  model **abusive** (test case + rulings through 30.12.2025). What the DSB *did* fault
-  was the **information duty** — exactly what this site currently breaches (see 1.1).
-  Meanwhile the German line (LG München I 3 O 17493/20) is now before the CJEU via BGH
-  VI ZR 258/24. Self-hosting removes the transfer, the recipient, the entire
-  privacy-policy section, a render-blocking cross-origin connection, and all residual
-  DE-visitor exposure — the WKO's own recommendation. Ten-minute fix, zero downside.
-- **Legal basis:** Art. 6(1)(f), Art. 13(1)(e)–(f), Art. 44 ff. DSGVO (transfer leg
-  currently covered by DPF adequacy (EU) 2023/1795 for Google LLC; appeal C-703/25 P
-  pending).
-- **Abmahnrisiko:** low in Austria (see above), residual for German visitors; drops to
-  zero after self-hosting.
-- **Effort:** M (asset download + 3 file edits + regenerate).
-- **Sequencing note:** do this **before or together with** 1.1 — then the privacy policy
-  never needs a Google Fonts section (a policy describing transfers that don't occur is
-  itself inaccurate).
+Priorities: **P1** split the consent categories (Statistics vs. Marketing) before the
+paused Ads campaign is ever unpaused. **P2** confirm the two Google account-level items and
+the netcup DPA now that real traffic flows, and put the "Cookie settings" control on every
+page, not just the homepage. **P3** the still-open items from this morning (security
+headers, Art. 30 register). **P4** watch-list additions (DPF under fresh political/judicial
+stress; Google's June 2026 architecture change).
 
 ---
 
-## Priority 2 — HIGH (must be fixed before the pending GA4 branch may deploy)
+## Priority 1 — CRITICAL
 
-### 2.1 GA4 launch gate for `feat/privacy-safe-measurement` (PR #5)
+### 1.1 Split the consent banner into separate Statistics / Marketing categories
 
-Not a live violation — the branch is correctly undeployed and its own `analytics.js`
-header says deployment "is gated on the consent/privacy work". This section is that
-gate's spec. **Deploying the branch as-is would be unlawful** (§ 165 Abs 3 TKG 2021:
-prior opt-in before the `_ga`/`_ga_*` cookies are written; Art. 6(1)(a) DSGVO). The DPF
-resolved the *transfer* question from DSB D155.027 (22.12.2021), **not** the consent
-question.
-
-**Decision to make first (product decision, not legal):**
-- **Option A — cookieless self-hosted analytics** (Plausible, Umami, Matomo in
-  consent-free config): counts install-copies and GitHub clicks **without any banner**,
-  keeping the site consent-surface-free. Loses Google Ads conversion import.
-- **Option B — GA4 as prepared**: keeps the Ads conversion pipeline (the reason this
-  branch exists — paused campaign `24069120625` imports `install_command_copy` as its
-  Primary conversion), at the price of a CMP and a banner meeting the strictest banner
-  case law in the EU. If the Ads campaign is the point, Option B is the coherent choice —
-  but make it deliberately.
-
-**If Option B, all of the following are required before merge/deploy:**
-
-1. **Structural consent gating (code fix in the branch).** Gating only the external
-   gtag `<script>` is **insufficient**: `analytics.js` self-executes on import
-   (`analytics.js:110-113`), immediately queues `js`/`config` (with the original page
-   URL) into `window.dataLayer`, and attaches the two event listeners — everything
-   queued would flush the moment gtag.js later loads. The consent gate must wrap
-   `installAnalytics()` itself: nothing pushed to `dataLayer`, no listeners, no script
-   injection until consent for the analytics category is granted. Implement Consent
-   Mode v2 in **basic** configuration (default `denied` set before any config; tag
-   fires nothing pre-consent). "Advanced" mode (cookieless pings pre-consent) is the
-   contested/weaker position — do not use it.
-2. **CMP/banner meeting the Austrian (orf.at) standard** — DSB 28.10.2024,
-   GZ D124.0507/24; BVwG 31.07.2024, W108 2284491-1; BVwG 23.04.2026, W171 2303402-1;
-   EDPB Cookie Banner Taskforce (18.01.2023):
-   - Accept and Reject on the **same first layer**, **identical visual weight** — same
-     background, text color, font size, padding, border. No color nudging (the DSB
-     ordered orf.at to redesign for exactly this).
-   - Rejection in **one click**, never more clicks than acceptance.
-   - No pre-ticked boxes, no confirm-shaming labels.
-   - Consent stored **with timestamp** (Art. 7(1) demonstrability); the consent-status
-     record itself may be stored without a unique identifier (DSB FAQ).
-   - **Persistent revocation path**: a "Cookie-Einstellungen"/"Cookie settings" footer
-     link on every page that reopens the banner; withdrawal as easy as giving consent
-     (Art. 7(3)).
-   - Banner must not block access to Imprint/Privacy pages.
-   - Banner accessibility: `role="dialog"`, `aria-modal`, focus trap, keyboard
-     operability.
-3. **Privacy-policy section for GA4** (building block in Draft legal text below) —
-   added in the same PR, plus the "no analytics" sentence removed.
-4. **Google Ads Data Processing Terms** (Art. 28) accepted for the property; record
-   the acceptance in the processor register below.
-5. **Cookie inventory correctness:** with the Google Ads link + auto-tagging, expect
-   `_gcl_au` (and possibly other `_gcl_*`) **advertising** cookies in addition to
-   `_ga`/`_ga_*` — advertising cookies are never "technically necessary" (DSB FAQ,
-   BVwG W214 2223400-1). Verify post-deploy which cookies actually appear and mirror
-   them in the banner categories and the inventory table.
-   Consider setting `cookie_domain` explicitly (default scopes `_ga` to the highest
-   available domain) and `cookie_flags: 'Secure;SameSite=Lax'`.
-6. **PII-in-URL hygiene:** `page_location` is sent as the **original** `location.href`
-   (`analytics.js:74-88`) — the URL "cleaning" only rewrites the visible address bar
-   afterwards. On this site query params are almost certainly UTM/gclid only, but
-   Google's PII policy puts the obligation on the operator; consider stripping
-   non-attribution params from `page_location` before sending, or accept and document
-   the residual risk.
-7. **Accurate policy wording (from Google's own docs):** the 2-month retention applies
-   to raw event/user-level data (explorations), not standard aggregated reports; GA4
-   automatically collects page URL/title/referrer and device/browser data plus the
-   pseudonymous `_ga` client ID even with Enhanced Measurement off. The draft below
-   already words this correctly — don't overstate the minimization.
-8. **Account-level data sharing:** the shared `TWB-Digital` GA account's data-sharing
-   toggles were deliberately left unchanged for other properties' sake. Check what they
-   are: if "Google products & services" sharing is ON, Google acts as an independent
-   controller for that slice and the policy must say so (or the setting must be off).
-9. **Re-run the relevant parts of this audit before the deploy** (banner button
-   equality, first-load network capture proving zero pre-consent requests/storage).
-
-- **Legal basis:** § 165 Abs 3 TKG 2021; Art. 4(11), 6(1)(a), 7 DSGVO; DSB FAQ
-  Cookies; orf.at decisions as cited.
-- **Abmahnrisiko:** enforcement is split — Fernmeldebehörde (up to €50k) for § 165 TKG,
-  DSB for the GDPR side. Banner dark patterns are the most actively enforced item in
-  Austria right now (three orf.at-line decisions in two years).
-- **Effort:** L (CMP + code restructure + policy + verification).
+- **Files:** `analytics.js:78-83` (`CONSENT_STATE`), `consent.js:79-102` (`grant`/`decline`),
+  `index.html:577-593` + `de/index.html` (banner markup), `privacy.html` (GA4 section).
+- **What's there today:** one banner, one pair of buttons, one stored boolean
+  (`{v:1, analytics: boolean, ts}`). Accepting pushes all four Consent Mode v2 signals
+  (`ad_storage: granted, ad_user_data: granted, ad_personalization: denied,
+  analytics_storage: granted`) as a single atomic default. Verified live: this causes a
+  request to `google.at/ads/ga-audiences` (an Ads-audience-signal endpoint; Google's own
+  Consent Mode docs gate *personalized* remarketing behind `ad_personalization`, which
+  stays denied here — but since 2026-06-15 `ad_storage` alone is the sole/exclusive gate
+  for the broader category of GA4→Google Ads data sharing, per Google's own migration
+  notes and independent commentary from the same window). The banner text and privacy
+  policy describe the single action only as GA4 "measurement," mentioning Ads only for the
+  `_gcl_au` conversion-attribution cookie — not for the audience-signal behavior.
+- **Why (plain language):** GDPR requires consent to be *specific* — a data subject must be
+  able to accept one purpose without accepting another bundled into the same click
+  (Art. 4(11), 7(1) DSGVO; EDPB Guidelines 05/2020 §3.2: "data subjects should be free to
+  choose which purpose they accept rather than having to consent to a bundle of processing
+  purposes"). Plain analytics measurement and Ads-linked signal sharing are the kind of
+  distinct purposes that reference CMPs (Cookiebot, Usercentrics) already split into
+  separate "Statistics" and "Marketing" categories for this exact GA4+Ads scenario — that
+  industry convention is itself evidence of where the purpose boundary sits. If a regulator
+  or court found this bundle insufficiently specific, the legal consequence isn't just "the
+  Ads part was unlawful" — non-specific consent is treated as **no valid consent for the
+  bundle**, so the GA4 analytics processing done under it would also lack a lawful basis.
+- **Confidence/uncertainty (be explicit with counsel):** no DSB, EDPB, or Austrian court
+  decision was found ruling on this precise "GA4 + Ads Consent Mode signals in one banner
+  category" pattern — this is a reasoned application of general granularity doctrine, not
+  a settled violation. The counter-argument (defensible today, not permanently): the single
+  most sensitive sub-behavior, personalized ad targeting, stays technically blocked via
+  `ad_personalization: denied`, and GA4's own audience-export-to-Ads feature additionally
+  requires Ads Personalization to be on before an audience becomes an active remarketing
+  list — so no personalized ad currently results from this. Whether that technical
+  safety net is enough to satisfy "specific consent" as a matter of law is exactly the open
+  question; recommend a lawyer weigh in, but the fix is cheap enough to do regardless.
+- **What to EDIT:** replace the single grant/decline action with two independently
+  toggleable categories, each sending its own `gtag('consent', 'update', …)`:
+  - **Statistics** → `{analytics_storage: 'granted'}` only.
+  - **Marketing** → `{ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted-or-denied per user choice}`
+    (a separate, explicit choice — don't silently grant `ad_personalization` just because
+    Marketing is on; that's a distinct, more sensitive purpose again).
+  - Consent Mode default (pre-interaction) stays fully denied for all four signals, as
+    today.
+  - Stored record becomes `{v:2, statistics: boolean, marketing: boolean, ts}` — bump the
+    version so `readStoredConsent` rejects the old `v:1` shape and re-prompts existing
+    visitors (correct behavior: their old consent wasn't for this granularity).
+  - Privacy-policy GA4 section: split into two paragraphs, "Statistics" (GA4 page/event
+    measurement) and "Marketing" (Ads conversion attribution + `_gcl_au` + audience
+    signals), each naming its own purpose and cookies.
+  - Banner copy: add a second sentence + toggle before the accept action, or a "Manage
+    choices" expansion — keep both category actions and the top-level accept-all/reject-all
+    actions at equal visual weight (same `.btn` styling, no color/size differentiation).
+  - Draft copy for both is in **Draft legal text** below.
+- **Legal basis:** Art. 4(11), 6(1)(a), 7(1) DSGVO; § 165 Abs 3 TKG 2021; EDPB Guidelines
+  05/2020 §3.2 (granularity).
+- **Abmahnrisiko:** moderate. Austrian cookie-banner enforcement is currently the most
+  active DSB/BVwG lane (three orf.at-line decisions in two years, most recently BVwG
+  ~2026-05-25 reaffirming strict scrutiny of banner design) — a granularity gap is exactly
+  the kind of design defect that lane targets, even though no case has yet named this
+  specific bundling pattern.
+- **Effort:** M (consent.js/analytics.js logic split + banner markup + privacy-policy
+  rewrite of one section + regenerate `/de/`). Do this before the paused Google Ads
+  campaign is ever activated — an active campaign with a non-granular consent basis is a
+  materially worse position than a paused one.
+- **IMPLEMENTED same day** (branch `fix/consent-granularity`), with two deliberate
+  topology decisions after an independent technical critique:
+  - **Marketing is additive, not free-standing**: every Ads signal on this site rides on
+    the GA4 tag (no standalone `AW-` tag), so a marketing-only grant would either force
+    the contested cookieless "advanced mode" (tag loaded with `analytics_storage`
+    denied) or silently do nothing — collecting a consent that is never acted on. The
+    banner therefore enables the Marketing checkbox only once Statistics is selected,
+    labels it "requires Statistics", and rejects a stored marketing-without-statistics
+    record. If genuinely independent Marketing consent is ever needed, the clean
+    architecture is a separately gated Ads conversion tag — documented here, not built.
+  - **Ads click IDs follow the Marketing category**: `page_location` sent to GA now
+    carries `utm_*` always but `gclid`/`gbraid`/`wbraid`/`dclid` & co. only when
+    Marketing is granted (previously they were sent on any grant — which would have
+    contradicted the split policy text). `ads_data_redaction` is additionally enabled
+    whenever Marketing is denied, and the tag uses Google's documented denied-default →
+    chosen-update Consent Mode sequence.
+  - Hardening in the same pass: v1-record migration expires the old cookies; a
+    `storage` listener mirrors withdrawal across open tabs; consent updates target only
+    the site's own tag instance; cookie expiry matchers tightened to `_ga`/`_gcl`
+    name families.
 
 ---
 
-## Priority 3 — MEDIUM (hardening with legal relevance)
+## Priority 2 — HIGH (confirm now that real traffic is live)
 
-### 3.1 Write `wmcp-lang` only on explicit toggle interaction
+### 2.1 Confirm the Google Ads Data Processing Terms are actually accepted
 
-- **Files:** `index.html:563-575` (and regenerated `de/index.html`),
-  `imprint.html:83-95`. The `setLang()` helper persists to localStorage on **every**
-  call — including the automatic first-load call
-  `setLang(saved || (navigator.language?.startsWith("de") ? "de" : "en"))`
-  (`index.html:575`), which writes to the visitor's device before any user action.
-- **Why:** § 165 Abs 3 TKG 2021 covers *all* storage on terminal equipment (DSB FAQ —
-  not just cookies). A language preference is the textbook "strictly necessary"
-  exemption (WKO Rechtsfrage #19 names Spracheinstellungen), **but** WP29 Opinion
-  04/2012 ties the exemption to an *explicit user request* and calls out automatic
-  language detection as not being one. Contested, never litigated in Austria, and the
-  fix is free: resolve the initial language in memory only; persist solely in the
-  toggle click handler (the WebMCP `set_language` tool call is also an explicit request
-  — keep persisting there).
-- **What to EDIT:** split persistence out of `setLang()` (e.g. `setLang(l)` renders;
-  the click handler and the WebMCP tool additionally store). Identical UX for every
-  visitor.
-- **Abmahnrisiko:** effectively none; defensive correctness.
+- `privacy.html:76` (and the EN mirror) states as fact: *"A data processing agreement with
+  Google (Google Ads Data Processing Terms) is in place."* `ANALYTICS.md:156` (this
+  morning's audit, item 4) listed accepting this as a **pre-deploy** requirement. The
+  branch is now deployed and my test generated real `_ga`/`_ga_45GCGY7SQN` cookies against
+  the live production property (`G-45GCGY7SQN`) — real personal data (pseudonymous client
+  IDs, IP-derived geo, device/browser data) is already flowing to Google.
+- **Why:** Art. 28 DSGVO requires the processor agreement to be concluded before
+  processing begins, not after. If this wasn't actually accepted in the Google Ads/Analytics
+  admin console before the merge, the site is currently both processing without a
+  concluded Art. 28 agreement *and* publishing an inaccurate statement of fact on a legal
+  page.
+- **Action:** log into the Google Ads / Analytics admin console, confirm or accept the Data
+  Processing Terms for the linked property/account, note the acceptance date, and record it
+  in the **Auftragsverarbeiter register** below. Not verifiable by this audit (no account
+  access) — treat as unconfirmed until checked.
+- **Effort:** S (minutes in the admin console, not a code change).
+
+### 2.2 Check the "Google products & services" account-level data-sharing toggle
+
+- `ANALYTICS.md:39-45` flags this as unchecked: the shared `TWB-Digital` GA account's
+  data-sharing settings were deliberately left unchanged (they affect other properties
+  too). If "Google products & services" sharing is **on**, Google acts as an independent
+  controller for that data slice, and the privacy policy must disclose that (or the toggle
+  must be off for this account).
+- Same urgency as 2.1 — this was a pre-launch checklist item and the launch has happened.
+- **Added in the re-audit's technical critique:** in the same console session, also review
+  the Google tag's **"Restrict advertising data transmission"** setting (Google's
+  tag-level control, stronger than plain `ad_storage: denied`) and the tag's **connected
+  destinations / GA4→Ads import configuration**. Since Google's 2026-06-15 change, Ads
+  settings and Consent Mode are the controlling layer for linked-Ads data flow — the
+  in-page consent signals alone don't guarantee zero Ads-domain requests, so the
+  account-side restriction is the second half of the P1.1 category separation.
 - **Effort:** S.
 
-### 3.2 Add missing security headers on the vhost
+### 2.3 Confirm/conclude the netcup hosting DPA
+
+- Carried over unchanged from this morning's processor register ("Check/conclude").
+  `privacy.html:67` now live asserts *"Mit der netcup GmbH besteht ein
+  Auftragsverarbeitungsvertrag gemäß Art. 28 DSGVO"* — the same "is this actually true"
+  question as 2.1, but lower urgency since server hosting (and therefore this processing)
+  predates today and isn't new exposure from this deploy.
+- **Effort:** S — netcup offers a standard AVV in its customer panel; confirm it's
+  concluded for this account and record the date.
+
+### 2.4 Add the consent-withdrawal control to every page, not just the homepage
+
+- **Files:** `imprint.html`, `privacy.html` — neither loads `consent.js` nor renders a
+  "Cookie settings" button; only `index.html`/`de/index.html` do. `privacy.html:77`
+  honestly discloses this ("via 'Cookie settings' **in the footer of the start page**"), so
+  there's no misleading claim — but this morning's own P2.1 gate spec (item 2) called for
+  the control "on every page," and withdrawal being "as easy as giving consent" (Art. 7(3)
+  DSGVO) is a little harder to satisfy when two of the site's four pages require navigating
+  back to the homepage first via the "← webmcpify.at" link.
+- **What to ADD:** `<script type="module" src="/consent.js"></script>` plus the
+  `data-consent-open` footer button (and, if the visitor hasn't decided yet, the same
+  banner markup) on `imprint.html` and `privacy.html`. `consent.js` already handles a
+  missing `#consent` element gracefully (`initConsent` returns `null` if `getElementById`
+  finds nothing) — but for the settings button to work on these pages the banner element
+  needs to exist there too.
+- **Abmahnrisiko:** low — the one-click-away path already exists and is honestly
+  disclosed. Effort: S. Bundle with 1.1's markup changes to avoid touching the banner
+  twice.
+
+---
+
+## Priority 3 — MEDIUM (carried over from this morning, still open)
+
+### 3.1 Add missing security headers on the vhost
 
 - **File (server, not repo):** `/etc/nginx/sites-available/25-webmcpify.conf` on
-  tuejon.at. Present: HSTS (correctly repeated per `add_header` location — the gotcha
-  is already documented in the vhost comment). Missing: `X-Content-Type-Options:
-  nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options:
-  DENY` (or CSP `frame-ancestors 'none'`).
-- A full CSP is **feasible after font self-hosting** (site becomes fully
-  self-contained) but the inline `<script>`/`<style>` blocks need `'unsafe-inline'` or
-  hashes; treat CSP as optional polish. If GA4 ships, CSP must allow
-  `www.googletagmanager.com` + region1 collection endpoints.
-- **Legal basis:** Art. 32 DSGVO ("appropriate technical measures") — thin for a static
-  site, but these are zero-risk one-liners. Remember the documented nginx behavior:
-  repeat every header in each location block that sets any header.
-- **Effort:** S.
+  tuejon.at. Confirmed still missing via live header check today:
+  `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`/CSP `frame-ancestors`.
+  HSTS is present and correct (`strict-transport-security: max-age=31536000`).
+- **New since this morning:** if a CSP is added, it now needs to allowlist
+  `www.googletagmanager.com` (script-src), plus GA4/Ads collection endpoints observed live
+  today — `region1.analytics.google.com`, `stats.g.doubleclick.net`,
+  `www.google.at`/`www.google.com` (connect-src/img-src as applicable) — since GA4 is no
+  longer hypothetical, it's the live default gtag.js load path.
+- **Legal basis:** Art. 32 DSGVO. **Effort:** S.
 
-### 3.3 Create the Art. 30 Verzeichnis von Verarbeitungstätigkeiten (company-wide)
+### 3.2 Create the Art. 30 Verzeichnis von Verarbeitungstätigkeiten (company-wide)
 
-- The Art. 30(5) small-company exemption **does not apply**: continuous website
-  operation is "not occasional" processing (practitioner consensus: the exemption
-  practically never applies to an ongoing business). TWB-Digital OG should maintain an
-  **internal** (never published) records document covering: website/server logs
-  (this site and the other TWB sites), planned GA4, plus the ordinary business
-  processing that exists anyway (customers, suppliers, payroll).
-- The **Cookie & Storage Inventory** and **Processor register** below are ready-made
-  entries for it.
-- **Effort:** M (hours, company-wide — not a webmcpify.at file change).
+- Unchanged from this morning — still not created. The GA4 launch makes this slightly more
+  concrete to write (the processor register below is a ready-made set of entries) but it's
+  still a company-wide document, not a webmcpify.at file change. **Effort:** M.
 
 ---
 
-## Priority 4 — LOW (minor/cosmetic; several are optional)
+## Priority 4 — LOW / watch list
 
-### 4.1 Label the seat as "Sitz" in the imprint
-`imprint.html:59` shows the address as "Address/Anschrift"; § 14 UGB requires the
-**Sitz**. The WKO checklist passed it (the seat *is* shown), so this is belt-and-braces:
-either relabel the row or add `Sitz: Hollabrunn`. Effort: S.
+### 4.1 Watch: EU-US Data Privacy Framework under fresh political/judicial stress
 
-### 4.2 Soften absolute marketing claims (UWG § 2 hygiene)
-Flagged by the technical sweep as theoretical misleading-claims exposure (§ 2 UWG covers
-deceptive claims about essential product characteristics; competitor standing required,
-risk low):
-- "You lose nothing by being early" / "Früh dran zu sein kostet nichts"
-  (`index.html:466-471`) — absolute; integration/maintenance cost exists.
-- "byte-identical for browsers without WebMCP" (`llms.txt:9`) — literally inaccurate
-  (the JS ships and executes; only *visible behavior* is unchanged). Suggest
-  "behaves identically in browsers without WebMCP".
-- "verifies every tool … audits that no unrelated code changed" (`README.md:5`,
-  `index.html` FAQ) — fine as long as the product actually escalates/flags as
-  described; keep the wording aligned with actual behavior.
-Optional wording edits; do not change product claims without Jonas's sign-off. Effort: S.
+New since this morning. On **2026-06-29** the US Supreme Court ruled 6-3 in *Trump v.
+Slaughter* (No. 25-332) that statutory limits on presidential removal of FTC commissioners
+are unconstitutional, overturning *Humphrey's Executor* (1935). Because the European
+Commission's DPF adequacy decision ((EU) 2023/1795) relies on FTC independence as an
+enforcement safeguard, this triggered immediate scrutiny; noyb/Max Schrems sent the
+Commission a letter on **2026-06-30** arguing no other US authority can remedy the gap.
+**The adequacy decision has not been suspended** as of this audit — GA4's US transfer leg
+remains lawful today — but commentators flag possible suspension within 6–18 months or
+CJEU annulment on a multi-year horizon (the Schrems I/II pattern), compounding the
+already-pending *Latombe* appeal (C-703/25 P). No action needed now; re-check this section
+before any significant new US-transfer commitment and periodically thereafter.
 
-### 4.3 Accessibility polish (BaFG does NOT apply — quality only)
-BaFG is inapplicable on two independent grounds (no e-commerce service toward a consumer
-contract; microenterprise services exemption — <10 heads, ≤€2m). These are
-quality/WCAG items, not legal duties:
-- German mode keeps English accessible names: `aria-label="Language"`
-  (`de/index.html:254`), figure title text (`de/index.html:291`).
-- Copy toast `role="status"` toggles only opacity — content never changes, so screen
-  readers may not announce it (`index.html:559`, `595`). Insert the text on show (or
-  toggle `hidden`) for a real announcement.
-- No `og:image:alt`/`twitter:image:alt`; DE pages share the EN og-image.
-Effort: S each.
+### 4.2 Watch: Google's 2026-06-15 GA4 ↔ Google Ads architecture change
 
-### 4.4 Notes — no action required
-- **Git history exposure** (technical sweep): a private Gmail address in commit
-  `e1a864c` author metadata and an obsolete phone number at `b53f671:imprint.html:67`.
-  Rewriting public history is not warranted; noted for awareness.
-- **README documents SSH user/host/docroot** (`README.md:19`) — mild opsec surface in a
-  public repo; acceptable, noted.
-- **AI crawlers welcomed** by robots.txt to all pages incl. the imprint — the imprint
-  data is *legally required to be public*; nothing to fix, just an informed stance.
-- **`webmcpify.js` event bridge** (`dispatchAndWait`, `webmcpify.js:189`) broadcasts
-  tool-call detail as page-wide CustomEvents — currently **unused** by the site's
-  tools; latent integration consideration only.
-- **Trip-wire:** adding a blog/news/opinion section would flip the site to a "große
-  Website" under § 25 MedienG → Blattlinie + ownership disclosure become mandatory.
-  Re-check this plan if that happens.
-- **Watch list:** CJEU C-703/25 P (*Latombe*, DPF validity — would reopen every
-  US-transfer basis); CJEU reference from BGH VI ZR 258/24 (Art. 82 damages for
-  provoked breaches — Abmahn-model revival risk). Neither expected before 2027.
-  EU "Digital Omnibus" (draft Art. 88a/88b GDPR — browser-level consent signals,
-  6-month re-ask cool-down) — draft only; do not build for it yet.
-- **Company-wide side findings** (out of this site's scope): § 14 UGB details are
-  required in business **emails** too (Firma, Rechtsform, Sitz, FN, Gericht — check
-  signatures of `@twb-digital.at` senders and automated mailers, Zwangsstrafe up to
-  €3,600); the EU **ODR platform is abolished** (data deleted 20.07.2025) and leftover
-  `ec.europa.eu/consumers/odr` links are now themselves a defect — this site correctly
-  has none, but grep the other TWB sites.
+New since this morning, and the direct trigger for the P1.1 finding: Google collapsed the
+"Google Signals" admin toggle to reporting-only and made `ad_storage` the sole/exclusive
+consent gate for GA4→Ads data flow. This is exactly the kind of unilateral platform change
+that can silently widen what a previously-reviewed consent setup actually authorizes —
+worth a standing note to re-verify data flows if Google announces further Consent Mode
+changes, rather than assuming a past audit stays valid indefinitely.
+
+### 4.3 Everything else from the morning audit's Priority 4 — done, no further action
+
+`imprint.html` "Sitz" label, the two softened marketing claims (`index.html`/`de/index.html`
+"costs almost nothing" / "kostet fast nichts", `llms.txt` "behaves identically"), and the
+three accessibility items (dynamic DE `aria-label`, translated SVG `<title>`, toast text
+inserted on show, `og:image:alt`/`twitter:image:alt`) were all fixed in `bc77d86`/`65e392c`
+— verified in this audit (see **Previous Audit Diff**). BaFG remains inapplicable
+(unchanged, two independent grounds). Git-history exposure and the README SSH-detail note
+remain unchanged, low-severity, no action needed.
 
 ---
 
 ## Draft legal text (lawyer review required)
 
-Marked **[DRAFT]**. Written to match the imprint's tone (neutral, terse) and its
-bilingual `<span lang>` pattern. German is the primary legal text; English mirrors it.
-Assumes fonts are **already self-hosted** (P1.2) — if the CDN remains, a Google Fonts
-recipient/transfer section must be added instead of the "Schriftarten" section.
+Marked **[DRAFT]**. Only the *new* P1.1 split-consent building block is drafted below —
+everything else in the live pages (Impressum, the rest of the privacy policy) was already
+reviewed this morning and is unchanged in substance.
 
-### privacy.html — German content [DRAFT]
+### Consent banner — two-category version [DRAFT, EN]
 
-> **Datenschutzerklärung**
+> With your consent we process data in two ways. **Statistics**: we measure how this page
+> is used with Google Analytics 4 (cookies `_ga`, `_ga_*`). **Marketing**: if additionally
+> enabled, Google Analytics shares usage signals with our linked Google Ads account for
+> conversion attribution and audience measurement (cookie `_gcl_au` and related Ads
+> signals). Nothing is loaded and no cookies are set for a category unless you enable it.
+> Details in the [privacy policy].
 >
-> Stand: [DATUM]. Information gemäß Art. 13 DSGVO über die Verarbeitung
-> personenbezogener Daten beim Besuch von webmcpify.at.
->
-> **Verantwortlicher**
-> TWB-Digital OG, Waldweg 28/2, 2020 Hollabrunn, Österreich
-> E-Mail: mail@jonastuechler.at · Telefon: +43 650 7939867
-> (Weitere Angaben im Impressum. Ein Datenschutzbeauftragter ist nicht bestellt und
-> gesetzlich nicht erforderlich.)
->
-> **Hosting und Server-Logs**
-> Diese Website läuft auf einem von uns verwalteten Server der netcup GmbH,
-> Daimlerstraße 25, 76185 Karlsruhe, Deutschland (Serverstandort EU). Beim Aufruf
-> verarbeitet der Webserver automatisch: IP-Adresse, Datum und Uhrzeit des Zugriffs,
-> aufgerufene URL, HTTP-Status und übertragene Datenmenge, Referrer-URL sowie
-> User-Agent (Browser/Betriebssystem). Rechtsgrundlage ist unser berechtigtes
-> Interesse am sicheren und stabilen Betrieb der Website, insbesondere zur
-> Fehleranalyse und Abwehr von Angriffen (Art. 6 Abs. 1 lit. f DSGVO). Die
-> Logdateien werden nach 14 Tagen automatisch gelöscht, nicht mit anderen Daten
-> zusammengeführt und nicht an Dritte weitergegeben. Mit der netcup GmbH besteht
-> ein Auftragsverarbeitungsvertrag gemäß Art. 28 DSGVO.
->
-> **Lokale Speicherung (localStorage)**
-> Die Website speichert einen einzigen Eintrag im localStorage Ihres Browsers:
-> `wmcp-lang` (gewählte Sprache, „en“ oder „de“). Er wird gesetzt, wenn Sie die
-> Sprache über den EN/DE-Schalter wählen — oder, sofern Sie einen Browser-Agent
-> nutzen, über das WebMCP-Tool `set_language` dieser Seite. Der Eintrag enthält
-> keine personenbezogenen Daten, verbleibt ausschließlich in Ihrem Browser und
-> wird nicht an uns oder Dritte übertragen (§ 165 Abs. 3 TKG 2021 — unbedingt
-> erforderliche Speicherung für den von Ihnen gewünschten Dienst). Er bleibt
-> gespeichert, bis Sie die Website-Daten in Ihrem Browser löschen. Cookies setzt
-> diese Website nicht.
->
-> **Schriftarten**
-> Alle Schriftarten werden lokal von unserem Server geladen (Self-Hosting). Beim
-> Laden der Seite wird keine Verbindung zu Servern Dritter aufgebaut.
->
-> **Keine Analyse- und Trackingdienste**
-> Diese Website verwendet keine Analyse-, Tracking- oder Werbedienste und bindet
-> keine Inhalte von Drittservern ein.
->
-> **Ihre Rechte**
-> Ihnen stehen die Rechte auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16),
-> Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18),
-> Datenübertragbarkeit (Art. 20) sowie Widerspruch gegen Verarbeitungen auf
-> Grundlage berechtigter Interessen (Art. 21 DSGVO) zu. Anfragen richten Sie an
-> mail@jonastuechler.at. Sie haben außerdem das Recht auf Beschwerde bei der
-> Aufsichtsbehörde: Österreichische Datenschutzbehörde, Barichgasse 40–42,
-> 1030 Wien, Telefon +43 1 52 152-0, E-Mail dsb@dsb.gv.at, www.dsb.gv.at
-> (Art. 77 DSGVO).
->
-> Eine automatisierte Entscheidungsfindung einschließlich Profiling findet nicht
-> statt. Die Bereitstellung personenbezogener Daten ist weder gesetzlich noch
-> vertraglich vorgeschrieben; ohne die oben genannten technischen Daten kann die
-> Website jedoch nicht ausgeliefert werden.
+> [ Reject all ] [ Statistics ⚪ ] [ Marketing ⚪ ] [ Allow selected ] [ Allow all ]
 
-### privacy.html — English content [DRAFT]
+### Consent banner — two-category version [DRAFT, DE]
 
-> **Privacy Policy**
+> Mit Ihrer Einwilligung verarbeiten wir Daten auf zwei Wegen. **Statistik**: Wir messen die
+> Nutzung dieser Seite mit Google Analytics 4 (Cookies `_ga`, `_ga_*`). **Marketing**: Wenn
+> zusätzlich aktiviert, teilt Google Analytics Nutzungssignale mit unserem verknüpften
+> Google-Ads-Konto zur Conversion-Zuordnung und Zielgruppenmessung (Cookie `_gcl_au` und
+> verwandte Ads-Signale). Ohne Ihre Aktivierung wird für die jeweilige Kategorie nichts
+> geladen und kein Cookie gesetzt. Details in der [Datenschutzerklärung].
 >
-> Effective: [DATE]. Information per Art. 13 GDPR about the processing of personal
-> data when visiting webmcpify.at.
->
-> **Controller** — TWB-Digital OG, Waldweg 28/2, 2020 Hollabrunn, Austria.
-> mail@jonastuechler.at · +43 650 7939867 (details in the Imprint; no data
-> protection officer is appointed or legally required).
->
-> **Hosting and server logs** — This site runs on a server we manage at netcup
-> GmbH, Daimlerstraße 25, 76185 Karlsruhe, Germany (EU location). The web server
-> automatically processes: IP address, date and time of access, requested URL,
-> HTTP status and bytes transferred, referrer URL, and user agent. Legal basis:
-> our legitimate interest in operating the site securely and reliably, in
-> particular troubleshooting and abuse defence (Art. 6(1)(f) GDPR). Log files are
-> deleted automatically after 14 days, are not merged with other data, and are not
-> shared. A data processing agreement per Art. 28 GDPR is in place with netcup GmbH.
->
-> **Local storage** — The site stores a single localStorage entry, `wmcp-lang`
-> (chosen language, "en"/"de"), written when you pick a language via the EN/DE
-> toggle — or, if you browse with an AI agent, via this page's WebMCP
-> `set_language` tool. It contains no personal data, never leaves your browser,
-> and only serves to deliver the language you asked for (§ 165(3) TKG 2021 —
-> strictly necessary storage). It persists until you clear site data. This site
-> sets no cookies.
->
-> **Fonts** — All fonts are served from our own server (self-hosted); loading the
-> page makes no connection to third-party servers.
->
-> **No analytics or tracking** — This site uses no analytics, tracking, or
-> advertising services and embeds no third-party content.
->
-> **Your rights** — Access (Art. 15 GDPR), rectification (Art. 16), erasure
-> (Art. 17), restriction (Art. 18), portability (Art. 20), and objection to
-> legitimate-interest processing (Art. 21): write to mail@jonastuechler.at. You
-> may also lodge a complaint with the Austrian supervisory authority:
-> Österreichische Datenschutzbehörde, Barichgasse 40–42, 1030 Vienna,
-> +43 1 52 152-0, dsb@dsb.gv.at, www.dsb.gv.at (Art. 77 GDPR).
->
-> No automated decision-making, including profiling, takes place. Providing
-> personal data is neither legally nor contractually required; without the
-> technical data above, however, the site cannot be delivered.
+> [ Alle ablehnen ] [ Statistik ⚪ ] [ Marketing ⚪ ] [ Auswahl erlauben ] [ Alle erlauben ]
 
-### GA4 building block [DRAFT — only if/when Option B ships; replaces the "no analytics" section; EN mirror needed]
+*(All actions same `.btn` styling, equal visual weight, single first layer — no
+color/size/position nudging toward any option, per DSB D124.0507/24.)*
 
-> **Webanalyse (Google Analytics 4) — nur mit Ihrer Einwilligung**
-> Nur wenn Sie über den Einwilligungs-Banner zustimmen (Art. 6 Abs. 1 lit. a
-> DSGVO, § 165 Abs. 3 TKG 2021), verwenden wir Google Analytics 4 der Google
-> Ireland Ltd., Gordon House, Barrow Street, Dublin 4, Irland. Google Analytics
-> setzt Cookies (`_ga`, `_ga_*`; Laufzeit bei uns auf 90 Tage begrenzt[, sowie
-> `_gcl_au` der Google-Ads-Verknüpfung — VERIFIZIEREN]) und verarbeitet die
-> aufgerufene Seite (URL, Titel, Referrer), Geräte- und Browserinformationen,
-> eine pseudonyme Client-ID sowie zwei Interaktionsereignisse (Kopieren des
-> Install-Befehls, Klick auf GitHub-Links). Google Signals und personalisierte
-> Werbesignale sind deaktiviert; die Aufbewahrung der Rohdaten auf Nutzerebene
-> in Google Analytics beträgt 2 Monate (aggregierte Berichte bleiben darüber
-> hinaus bestehen). Empfänger: Google Ireland Ltd.; Übermittlungen an die Google
-> LLC (USA) erfolgen auf Grundlage des Angemessenheitsbeschlusses zum EU-US Data
-> Privacy Framework (Art. 45 DSGVO). Mit Google besteht ein
-> Auftragsverarbeitungsvertrag (Google Ads Data Processing Terms). Die Website
-> ist mit Google Ads verknüpft (Conversion-Messung; Verarbeitung der Klick-ID
-> `gclid`). Sie können Ihre Einwilligung jederzeit über „Cookie-Einstellungen“
-> im Footer mit Wirkung für die Zukunft widerrufen (Art. 7 Abs. 3 DSGVO). Ohne
-> Einwilligung wird Google Analytics nicht geladen und es werden keine Cookies
-> gesetzt.
+### privacy.html — GA4 section replacement, split by category [DRAFT, EN excerpt]
+
+> **Statistics** — with your consent (Art. 6(1)(a) GDPR, § 165(3) TKG 2021), we use Google
+> Analytics 4 (Google Ireland Ltd., Dublin) to measure page views and two interaction
+> events (copying the install command, clicking GitHub links). This sets `_ga`/`_ga_*`
+> cookies, limited to 90 days.
+>
+> **Marketing** — if you additionally consent, usage data is shared with our linked Google
+> Ads account for conversion attribution and audience measurement, setting `_gcl_au` and
+> related cookies. Personalized advertising remains disabled regardless of this choice.
+>
+> You can change either choice at any time via "Cookie settings," available on every page
+> of this site.
+
+*(DE mirror: same structure/tone as the existing privacy.html German text.)*
 
 ---
 
-## Cookie & storage inventory
+## Cookie & storage inventory (updated — reflects live verification)
 
 | Key/Cookie | Type | Set by | Purpose | Personal data? | Duration | Consent required? | Category |
 |---|---|---|---|---|---|---|---|
-| `wmcp-lang` | localStorage | `index.html:567` / `de/index.html` / `imprint.html:87` / WebMCP tool `set_language` (`site-tools.js:71`) | Language preference ("en"/"de") | No (not linkable — no accounts) | Until site data cleared | **No** (§ 165(3) TKG strictly-necessary; disclose only). P3.1 makes the exemption airtight | Essential/Functional |
-| — | Cookies | — | **The deployed site sets no cookies** (verified live 2026-07-24) | — | — | — | — |
-| `_ga` *(planned)* | Cookie | gtag.js (GA4, branch only) | GA4 client ID | Yes (pseudonymous online identifier) | 90 days as configured (`cookie_expires`) | **Yes — prior opt-in** | Statistics |
-| `_ga_45GCGY7SQN` *(planned)* | Cookie | gtag.js (GA4, branch only) | Session state | Yes | 90 days as configured | **Yes** | Statistics |
-| `_gcl_au` *(possible via Ads link)* | Cookie | gtag.js w/ Google Ads linking | Ads conversion attribution | Yes | ~90 days (Google default) | **Yes** — advertising cookies are never "necessary" (DSB) | Marketing |
-| `dataLayer` | JS global (no storage) | analytics.js (branch) | Event queue | Contains page URL pre-consent if not gated → see P2.1 item 1 | Page lifetime | Gate behind consent | — |
+| `wmcp-lang` | localStorage | toggle click / WebMCP `set_language` | Language preference | No | Until site data cleared | No (§165(3) TKG) | Essential/Functional |
+| `wmcp-consent` | localStorage | `consent.js` | Stores `{v:1, analytics, ts}` — **becomes `{v:2, statistics, marketing, ts}` under P1.1** | No (no identifier) | Until site data cleared | No (consent-state storage is itself exempt, DSB FAQ) | Essential |
+| `_ga` | Cookie | gtag.js, post-consent only | GA4 client ID | Yes (pseudonymous) | 90 days (`cookie_expires` set explicitly) | **Yes** | Statistics |
+| `_ga_45GCGY7SQN` | Cookie | gtag.js, post-consent only | GA4 session state | Yes | 90 days | **Yes** | Statistics |
+| `_gcl_au` | Cookie | gtag.js w/ Google Ads link | Ads conversion attribution | Yes | ~90 days (Google default) | **Yes** | Marketing (not observed in this session — no `gclid` present; disclosed regardless) |
+| — (network only, no cookie) | Request | `google.at/ads/ga-audiences` | Ads-linked audience/measurement signal, fires on Statistics-style consent today — **should require Marketing consent under P1.1** | Likely yes (tied to client ID) | N/A | Currently bundled into the single consent action — **gap, see P1.1** | Should be Marketing |
 
-sessionStorage, IndexedDB, Cache API, service workers: **none** (confirmed by the
-independent technical sweep; a `sessionStorage` implementation existed only in
-historical commit `222b21c` and is deleted).
+Verified live 2026-07-24: first load sets **zero** cookies and makes **zero** requests to
+any Google domain (only same-origin: `/`, `/fonts/fonts.css`, `/consent.js`,
+`/analytics.js`, `/webmcp/*`, two self-hosted `.woff2`, `/favicon.ico`). sessionStorage,
+IndexedDB, Cache API, service workers: still none.
 
 ## Auftragsverarbeiter (processor) register
 
 | Service | Provider | Country | Data processed | DPA required? | DPA status | Transfer mechanism |
 |---|---|---|---|---|---|---|
-| Hosting (tuejon.at server) | netcup GmbH, Karlsruhe | DE (EU) | Access logs (IP, UA, timestamps) on rented infrastructure | Yes (Art. 28) | **Check/conclude** — netcup offers a standard AVV in the customer panel; verify it is concluded for this account | EU only |
-| Google Fonts CDN | Google Ireland Ltd / Google LLC | IE / US | Visitor IP, UA, referrer on font fetch | No (Google acts for own purposes; no AVV offered for Fonts) | N/A — **remove via self-hosting (P1.2)** | DPF (until removed) |
-| Google Analytics 4 *(planned)* | Google Ireland Ltd | IE (US sub-processing) | Pseudonymous usage data, see building block | Yes | Google Ads Data Processing Terms — **accept & record before deploy** | EU→US: DPF adequacy (EU) 2023/1795; watch C-703/25 P |
+| Hosting (tuejon.at server) | netcup GmbH, Karlsruhe | DE (EU) | Access logs (IP, UA, timestamps) | Yes (Art. 28) | **Unconfirmed — check/conclude (P2.3)** | EU only |
+| Google Analytics 4 (now live) | Google Ireland Ltd | IE (US sub-processing) | Pseudonymous usage data (see inventory above) | Yes | **Unconfirmed — privacy.html asserts "in place," not verified against the admin console (P2.1)** | EU→US: DPF adequacy (EU) 2023/1795 — **watch: under fresh scrutiny since 2026-06-29, see P4.1** |
+| Google Ads (linked, conversion + audience signals) | Google Ireland Ltd / Google LLC | IE / US | `gclid`, `_gcl_au`, audience/remarketing signal (`ga-audiences`) | Yes | Same as above — bundled with the GA4 DPT | Same as above |
 | Let's Encrypt (TLS) | ISRG | US | No visitor personal data (cert issuance only) | No | N/A | N/A |
-
-*(These rows double as Verzeichnis-von-Verarbeitungstätigkeiten entries — see P3.3.)*
 
 ---
 
 ## Files confirmed compliant (reviewed, no changes needed)
 
-- `imprint.html` **content** — passes every mandatory item: § 14 UGB (Firma, Rechtsform,
-  Sitz shown, FN, Gericht), § 5 ECG all seven (address, 2 contact channels, WKO
-  membership, Aufsichtsbehörde BH Hollabrunn, GewO + RIS access link, UID), § 25 Abs 5
-  MedienG kleine-Website triple (Firma, Unternehmensgegenstand, Sitz). Correctly cites
-  § 25 (not § 24) MedienG. **Explicit negative findings:** Blattlinie, GISA-Zahl and GLN
-  are NOT required for an OG with a kleine Website — do not add them. (Only cosmetic
-  P4.1 "Sitz" label remains.)
-- **Correct absences:** no cookie banner (right and required to stay absent today), no
-  ODR link (platform abolished 2025 — a link would now be the defect), no DPO section
-  needed (Art. 37 — no Austrian headcount trigger, unlike Germany's § 38 BDSG).
-- `robots.txt` (legal pages not disallowed), `sitemap.xml`, `llms.txt` (content fine;
-  one wording nit in P4.2), `build-de.py`, `webmcp/webmcpify.js` + `webmcp/site-tools.js`
-  (no external requests, no data collection; `set_language` = explicit user request via
-  agent), favicons/og assets, HSTS + TLS + redirect setup on the vhost, `lang`
-  attributes (`en`/`de` correct per variant), external links `rel="noopener"`.
-- **BaFG:** inapplicable (two independent grounds) — documented in P4.3.
+Everything confirmed compliant this morning remains so (imprint.html core content, robots.txt,
+sitemap.xml, HSTS/TLS, `rel="noopener"` links, BaFG inapplicability). Newly verified in this
+re-audit:
+
+- **`consent.js` / `analytics.js` logic** — structural gating confirmed live: no dataLayer
+  command, no script injection, no cookie before consent; module has no import side
+  effects; `installAnalytics()` only ever called post-grant. All 18 unit tests pass
+  (`tests/analytics.test.mjs`, `tests/consent.test.mjs`).
+- **Button equality** — `data-consent-accept`/`data-consent-decline` share one `.btn` class
+  with no `.primary`/color/size modifier on either — confirmed via CSS read, not just
+  visual inspection.
+- **Withdrawal flow** — live-tested: "Cookie settings" reopens the banner (focus lands on
+  the triggering button — keyboard-operable), declining after a prior grant clears
+  `_ga`/`_ga_45GCGY7SQN` immediately and updates the stored record with a fresh timestamp.
+- **PII-safe `page_location`** — live-verified: sent value was the clean origin+path with
+  no fragment or non-attribution query params.
+- **Font self-hosting** — zero requests to `fonts.googleapis.com`/`fonts.gstatic.com`
+  anywhere in the repo or on the live first load.
+- **`de/index.html` regeneration** — diffed against `build-de.py`'s `REPLACEMENTS` list;
+  confirmed machine-generated, not hand-edited, including the three new entries (image alt
+  text, `aria-label`, SVG `<title>`) added to the script itself.
+- **No forms, no API calls anywhere** in `index.html`, `de/index.html`, `imprint.html`,
+  `privacy.html` — CORS/CSRF/rate-limiting remain not applicable.
+- **Non-modal consent banner (`role="region"`, not `role="dialog"`/`aria-modal`)** — a
+  deliberate deviation from this morning's suggested pattern that, on reflection, better
+  satisfies the underlying constraint ("must not block Impressum/Datenschutz access") than
+  a focus-trapped modal would; treated as compliant, not a defect.
 
 ## Implementation order
 
-1. **P1.2 Self-host fonts** (removes the transfer before the policy is written).
-2. **P1.1 privacy.html + footer links** on all pages, regenerate `/de/` (`build-de.py`).
-3. **P3.1 `wmcp-lang` write-on-toggle** (same regenerate run as step 2).
-4. **P3.2 security headers** on the vhost (server-side; independent).
-5. **P4.1/4.2/4.3 polish** (imprint "Sitz" label, wording, a11y) — batch with step 2's
-   regenerate to avoid double `build-de.py` churn.
-6. **P3.3 Art. 30 records** (company-level, parallel to everything).
-7. **P2.1 GA4 gate** — only when the campaign decision is made; separate PR on the
-   measurement branch; re-verify with a first-load network capture before deploy.
-
-Steps 1–3 and 5 fit in one small PR; nothing depends on P2.1.
+1. **P1.1** split consent categories (code: `consent.js`, `analytics.js`, banner markup,
+   privacy-policy section) — do this first since P2.4's markup changes touch the same
+   banner element.
+2. **P2.4** add the banner + `consent.js` include to `imprint.html`/`privacy.html` in the
+   same pass.
+3. **P2.1 / P2.2 / P2.3** — admin-console confirmations, parallel to the above, no code
+   dependency. Do this week given real traffic is already flowing.
+4. **P3.1** security headers (server-side, independent; update CSP domain allowlist to
+   match whatever P1.1 lands on).
+5. **P3.2** Art. 30 records (company-level, parallel to everything).
+6. **P4.1/P4.2** — no action, re-check periodically.
 
 ## Validation sources (official checklists used)
 
+Carried over from this morning (imprint/privacy/cookie WKO checklists, DSB FAQ, DSB
+Google-Fonts Prüfverfahren, DSB EU-US DPF page — all still current, retrieved
+2026-07-24) plus new sources consulted in this re-audit:
+
 | Source | URL | Result |
 |---|---|---|
-| WKO — Website-Impressum OG (PDF, Stand 08/2025) | wko.at/oe/internetrecht/das-korrekte-website-impressum-og.pdf | **PASS** — all §14 UGB (5/5), §5 ECG (7/7 + 1 N/A), §25 Abs 5 MedienG (3/3); große-Website items N/A; §63 GewO/GISA/GLN N/A by the checklist's own scoping; ODR correctly absent |
-| WKO — Datenschutzerklärung Checkliste (Stand 01.01.2025) | wko.at/internetrecht/datenschutzerklaerung-checkliste-infopflichten-dsgvo-tkg-we | **FAIL 0/14 applicable items** (no policy exists) — items 2, 9, 11, 12 N/A today; the FAIL list is the build spec for P1.1 |
-| WKO — Cookies/Webanalyse Checkliste + Rechtsfrage #19 | wko.at/internetrecht/checkliste-cookies-webanalyse-webshop · wko.at/noe/e-commerce/faq-19-cookies | Mixed: no-consent-needed storage PASS (language key named as necessary); TKG info duty FAIL (undisclosed); analytics-requires-consent binding on P2.1 |
-| DSB — FAQ Datenschutz & Cookies | dsb.gv.at/faqs/datenschutz-cookies | PASS on no-banner state ("kein Cookie-Banner notwendig" without non-essential storage); localStorage in scope of § 165(3); 8 banner criteria bind P2.1 |
-| DSB — Google-Fonts Prüfverfahren (Newsletter 4/2023) | dsb.gv.at/sites/site0344/media/downloads/newsletter_dsb_4_2023.pdf | No unlawful processing found; **info-duty defect flagged** = this site's gap; self-hosting eliminates the transfer |
-| DSB — EU-US DPF page | dsb.gv.at/europa-internationales/eu-us-data-privacy-framework | Adequacy valid for DPF-certified importers; does not touch § 165 TKG consent |
+| Google — Consent Mode signal reference | developers.google.com/tag-platform/security/concepts/consent-mode | Confirms `ad_personalization` denied blocks personalized remarketing; does not by itself confirm `ad_storage`+`ad_user_data` alone are purpose-neutral |
+| Google — GA4 audience sharing with linked Ads | support.google.com/analytics/answer/12800258 | Confirms Ads Personalization is a prerequisite for *exporting* a GA4 audience as an active remarketing list |
+| EDPB Guidelines 05/2020 on consent, §3.2 | edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052020-consent-under-regulation-2016679_en | Granularity/specificity standard underlying P1.1 |
+| BVwG ORF.at cookie-banner ruling | dataprotect.at/2026/05/25/… | Reaffirms strict scrutiny of banner design in Austria; revision admitted to VwGH, not yet final |
+| DPF / *Trump v. Slaughter* analysis | hunton.com …, activemind.legal/guides/dpf-supreme-court | Basis for the P4.1 watch item; DPF not suspended as of this audit |
+| Independent commentary, GA4↔Ads June 2026 change | piwik.pro/blog/…, digitalapplied.com/blog/ga4-consent-split-june-15-2026-… | Basis for the P1.1/P4.2 finding; third-party analysis, not official Google or DPA guidance |
 
-(Retrieval date for all: 2026-07-24. Known-broken official URLs: everything under
-`www.dsb.gv.at/download-links/*`; the DSB newsletter archive link to 4/2023 points at
-`/#` — the PDF above was recovered via naming pattern.)
+(Retrieval date for the new sources: 2026-07-24, via a dedicated research pass in this
+audit. Same caveat as this morning applies: no independent packet-level verification of
+what Google's servers actually do with the `ga-audiences` request payload was possible.)
 
 ## Legal references
 
-**Statutes (AT):** § 5 ECG; § 3 Z 1 ECG; § 14 UGB; § 25 (esp. Abs 5) MedienG; § 165
-Abs 3 TKG 2021; §§ 1, 2 UWG; § 63 GewO (inapplicable — Firmenbuch-registered); BaFG
-BGBl I 2023/76 (inapplicable); VRUN BGBl I 2024/85 / §§ 619–635 ZPO; DSG (no DPO
-threshold). **EU:** DSGVO Art. 6, 7, 12–21, 28, 30, 32, 37, 44 ff., 77, 82, 83;
-adequacy decision (EU) 2023/1795 (DPF); Reg. (EU) 2024/3228 (ODR repeal); Dir. (EU)
-2019/882 (EAA); Dir. (EU) 2020/1828 (Verbandsklagen).
-**Decisions:** CJEU C-582/14 *Breyer*; EuG T-553/23 *Latombe* (03.09.2025, appeal
-C-703/25 P pending); DSB 22.12.2021 D155.027 (GA, superseded on the transfer leg by
-DPF); DSB 28.10.2024 D124.0507/24 (orf.at banner button equality); BVwG 31.07.2024
-W108 2284491-1 (one-extra-click reject unlawful); BVwG 23.04.2026 W171 2303402-1
-(nudging; VwGH revision pending); BVwG W214 2223400-1 (ad cookies never necessary);
-LG München I 20.01.2022, 3 O 17493/20 (fonts, DE); BGH 28.08.2025 VI ZR 258/24
-(CJEU referral); LG f. ZRS Wien font-Abmahn rulings (WKO test case; 14.04.2025;
-30.12.2025 — abuse of rights). **Guidance:** WP29 Opinion 04/2012 (WP194); EDPB
-Cookie Banner Taskforce Report 18.01.2023; DSB FAQs as cited above.
+Carried over in full from this morning's audit (§ 5 ECG; § 3 Z 1 ECG; § 14 UGB; § 25
+MedienG; § 165 Abs 3 TKG 2021; §§ 1, 2 UWG; DSGVO Art. 6, 7, 12–21, 28, 30, 32, 37, 44 ff.,
+77, 82, 83; adequacy decision (EU) 2023/1795; CJEU C-582/14 *Breyer*; EuG T-553/23
+*Latombe*/C-703/25 P; DSB D155.027; DSB D124.0507/24; BVwG W108 2284491-1; WP29 Opinion
+04/2012; EDPB Cookie Banner Taskforce Report). **New in this audit:**
 
-Full source URLs are preserved in the audit working notes (research agent reports,
-2026-07-24). Confidence caveats from research: BaFG § numbering unverified against RIS
-(503 at retrieval time); WP194 quotes via secondary sources; DSB/BVwG banner decisions
-read via DSB press page + specialist reporting (GDPRhub inaccessible).
+- EDPB Guidelines 05/2020 on consent under GDPR (edpb.europa.eu) — granularity standard,
+  §3.2, underlying P1.1.
+- BVwG ORF.at ruling, ~2026-05-25 (dataprotect.at, cybernews.com/de) — reaffirms Austrian
+  banner-design scrutiny; revision admitted to VwGH.
+- *Trump v. Slaughter*, No. 25-332, US Supreme Court, 2026-06-29 (overturning
+  *Humphrey's Executor*) — basis for the DPF watch item (P4.1).
+- noyb/Schrems letter to the European Commission, 2026-06-30, re DPF adequacy following
+  the FTC ruling.
+- Google Ads/GA4 Consent Mode architecture change, effective 2026-06-15 (Google's own
+  migration documentation plus independent commentary) — basis for P1.1/P4.2.
+
+---
+
+## Previous Audit Diff
+
+Comparing this document to this morning's version (base commit `350f00c`) after the
+`bc77d86`/`65e392c` merges:
+
+### Fixed (verified live in this audit)
+- **P1.1** Privacy policy created and live at `/privacy.html`, linked from every footer and
+  from the Imprint.
+- **P1.2** Google Fonts self-hosted; zero third-party font requests on live first load.
+- **P3.1** `wmcp-lang` now persists only on explicit toggle click, not on automatic
+  first-load language detection.
+- **P4.1** Imprint address row relabeled "Seat & address"/"Sitz & Anschrift."
+- **P4.2** Absolute marketing claims softened ("costs almost nothing"/"kostet fast nichts";
+  llms.txt "behaves identically" instead of "byte-identical").
+- **P4.3** Accessibility polish: German `aria-label` now set dynamically instead of staying
+  English; SVG figure `<title>` translated in the German variant; copy-toast text is
+  inserted on show (real screen-reader announcement, not just an opacity toggle);
+  `og:image:alt`/`twitter:image:alt` added and localized.
+- **P2.1 (mostly)** The GA4 launch gate's structural/technical requirements are met and
+  verified live: consent-gated script injection, equal-weight one-click accept/decline,
+  timestamped storage, working withdrawal, Consent Mode v2 basic configuration, PII-safe
+  `page_location`, accurate retention wording, expanded cookie inventory. This item is not
+  fully closed — see **Still open** and **New** below for what remains.
+
+### Still open (unchanged since this morning)
+- **P3.2** Security headers on the nginx vhost (`X-Content-Type-Options`,
+  `Referrer-Policy`, `X-Frame-Options`/CSP) — confirmed still absent via live header check.
+- **P3.3** Art. 30 Verzeichnis von Verarbeitungstätigkeiten — not yet created
+  (company-wide, not a repo change).
+- **netcup DPA** — processor register still says "check/conclude," now re-flagged as P2.3
+  given real production traffic.
+- **Watch list** — CJEU *Latombe*/C-703/25 P and the BGH VI ZR 258/24 referral remain
+  pending, unchanged.
+
+### New (found only in this re-audit — required live, post-deploy testing to surface)
+- **P1.1** Consent-category granularity gap: `ad_storage`/`ad_user_data` bundled with
+  `analytics_storage` under one non-granular "Allow measurement" action; live-verified
+  `ads/ga-audiences` request on consent grant. Not detectable from the pre-merge code
+  review alone — it only became observable by actually granting consent against production
+  and watching the network panel.
+- **P2.1/P2.2** Google Ads Data Processing Terms acceptance and the account-level
+  "Google products & services" data-sharing toggle — were pre-deploy checklist items this
+  morning; now live obligations since real visitor data is flowing and I generated real
+  production cookies during this audit's verification.
+- **P2.4** The "Cookie settings" withdrawal control exists only on the homepage, not on
+  `imprint.html`/`privacy.html` — a gap against this morning's own P2.1 gate spec (item 2:
+  "on every page"), though honestly disclosed in the current privacy-policy text.
+- **P4.1** DPF watch-list update: *Trump v. Slaughter* (2026-06-29) and the resulting
+  noyb/Schrems letter (2026-06-30) — new developments since this morning, not yet actionable
+  but worth tracking.
+- **P4.2** Google's 2026-06-15 GA4↔Ads architecture change, the direct technical trigger
+  for the P1.1 finding.

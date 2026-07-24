@@ -229,15 +229,22 @@
   .toast.show { opacity: 1; }
 
   /* Consent banner: non-modal (page, imprint, and privacy stay reachable),
-     both actions identical .btn styling — equal visual weight by design. */
+     all actions identical .btn styling — equal visual weight by design. */
   .consent {
     position: fixed; inset: auto 0 0 0; z-index: var(--z-consent);
     background: var(--bg); border-top: 2px solid var(--ink);
   }
-  .consent-inner { display: flex; flex-wrap: wrap; gap: 0.9rem 2rem; align-items: center; padding-block: 1rem; }
+  .consent-inner { display: flex; flex-wrap: wrap; gap: 0.9rem 2rem; align-items: center; padding-block: 1rem; max-height: calc(100dvh - 2rem); overflow-y: auto; }
   .consent-text { font-size: 0.92rem; max-width: 62ch; flex: 1 1 34ch; }
   .consent-text a { color: var(--primary-ink); }
+  .consent-controls { display: flex; flex-direction: column; gap: 0.7rem; }
+  .consent-cats { display: flex; gap: 1.2rem; flex-wrap: wrap; border: 0; padding: 0; margin: 0; }
+  .consent-cat { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 600; font-size: 0.92rem; cursor: pointer; }
+  .consent-cat:has(input:disabled) { color: var(--muted); cursor: not-allowed; }
+  .consent-cat input { width: 1.05rem; height: 1.05rem; accent-color: var(--primary); margin: 0; }
   .consent-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+  .consent-actions .btn { flex: 1 0 auto; justify-content: center; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .foot-btn {
     font: inherit; color: var(--muted); background: none; border: 0; padding: 0;
     cursor: pointer; text-decoration: underline;
@@ -577,19 +584,45 @@
 <div class="consent" id="consent" role="region" aria-label="Cookie consent" hidden>
   <div class="wrap consent-inner">
     <p class="consent-text">
-      <span lang="en">With your consent we measure how this page is used with Google
-      Analytics 4 (cookies <code>_ga</code>, <code>_ga_*</code>, and <code>_gcl_au</code>
-      for Google Ads conversion attribution). Nothing is loaded and no cookies are set
-      unless you agree. Details in the <a href="/privacy.html">privacy policy</a>.</span>
-      <span lang="de">Mit Ihrer Einwilligung messen wir die Nutzung dieser Seite mit
-      Google Analytics 4 (Cookies <code>_ga</code>, <code>_ga_*</code> und
-      <code>_gcl_au</code> für die Google-Ads-Conversion-Zuordnung). Ohne Zustimmung
-      wird nichts geladen und kein Cookie gesetzt. Details in der
+      <span lang="en">With your consent we process usage data in two separate ways.
+      <b>Statistics</b>: Google Analytics 4 measures how this page is used (cookies
+      <code>_ga</code>, <code>_ga_*</code>). <b>Marketing</b>: usage signals are
+      additionally shared with our linked Google Ads account for conversion attribution
+      and audience measurement (cookie <code>_gcl_au</code> and related Ads signals).
+      Personalized advertising stays off in every case. TWB-Digital OG is the
+      controller; you can change or withdraw your choice at any time via "Cookie
+      settings" at the bottom of each page. Nothing is loaded and no cookies
+      are set for a category unless you enable it. Details in the
+      <a href="/privacy.html">privacy policy</a>.</span>
+      <span lang="de">Mit Ihrer Einwilligung verarbeiten wir Nutzungsdaten auf zwei
+      getrennten Wegen. <b>Statistik</b>: Google Analytics 4 misst die Nutzung dieser
+      Seite (Cookies <code>_ga</code>, <code>_ga_*</code>). <b>Marketing</b>:
+      Nutzungssignale werden zusätzlich mit unserem verknüpften Google-Ads-Konto zur
+      Conversion-Zuordnung und Zielgruppenmessung geteilt (Cookie <code>_gcl_au</code>
+      und verwandte Ads-Signale). Personalisierte Werbung bleibt in jedem Fall
+      deaktiviert. Verantwortlicher ist die TWB-Digital OG; Sie können Ihre Wahl
+      jederzeit über „Cookie-Einstellungen“ am Ende jeder Seite ändern oder widerrufen.
+      Ohne Aktivierung wird für die jeweilige Kategorie nichts geladen und
+      kein Cookie gesetzt. Details in der
       <a href="/privacy.html">Datenschutzerklärung</a>.</span>
     </p>
-    <div class="consent-actions">
-      <button type="button" class="btn" data-consent-accept><span lang="en">Allow measurement</span><span lang="de">Messung erlauben</span></button>
-      <button type="button" class="btn" data-consent-decline><span lang="en">Decline</span><span lang="de">Ablehnen</span></button>
+    <div class="consent-controls">
+      <fieldset class="consent-cats">
+        <legend class="sr-only"><span lang="en">Consent categories</span><span lang="de">Einwilligungskategorien</span></legend>
+        <label class="consent-cat">
+          <input type="checkbox" data-consent-cat="statistics">
+          <span lang="en">Statistics</span><span lang="de">Statistik</span>
+        </label>
+        <label class="consent-cat">
+          <input type="checkbox" data-consent-cat="marketing" disabled>
+          <span lang="en">Marketing (requires Statistics)</span><span lang="de">Marketing (setzt Statistik voraus)</span>
+        </label>
+      </fieldset>
+      <div class="consent-actions">
+        <button type="button" class="btn" data-consent-decline><span lang="en">Reject all</span><span lang="de">Alle ablehnen</span></button>
+        <button type="button" class="btn" data-consent-save><span lang="en">Save choices</span><span lang="de">Auswahl speichern</span></button>
+        <button type="button" class="btn" data-consent-accept><span lang="en">Allow all</span><span lang="de">Alle erlauben</span></button>
+      </div>
     </div>
   </div>
 </div>

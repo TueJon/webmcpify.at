@@ -13,11 +13,11 @@ and commit both files (hreflang pairs live in both pages and `sitemap.xml`).
 Production: https://webmcpify.at
 
 Google Analytics 4 measurement is documented in
-[`ANALYTICS.md`](ANALYTICS.md). The integration is proposed in PR #5 but is not
-deployed. A separate legal/privacy audit and the documented consent gate must be
-completed before merge and production activation.
+[`ANALYTICS.md`](ANALYTICS.md). It is live behind a two-category consent
+banner (Statistics / Marketing); the compliance record lives in
+[`docs/LEGAL_COMPLIANCE_PLAN.md`](docs/LEGAL_COMPLIANCE_PLAN.md).
 
-Run its dependency-free contract tests with `node --test tests/analytics.test.mjs tests/consent.test.mjs`.
+Run its dependency-free contract tests with `node --test tests/analytics.test.mjs tests/consent.test.mjs tests/pages.test.mjs`.
 
 ## Deploy
 

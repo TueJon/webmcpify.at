@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   ANALYTICS_EVENTS,
-  CONSENT_STATE,
   GA_MEASUREMENT_ID,
   analyticsConfig,
   cleanedBrowserPath,
+  consentStateFor,
   installAnalytics,
   isGaMeasurementId,
   queueAnalyticsEvent,
@@ -39,14 +39,24 @@ test('sends only attribution parameters to GA, never arbitrary query data or fra
   assert.equal(
     sentPageLocation(
       'https://webmcpify.at/?utm_source=google&email=a%40b.c&token=xyz#install',
+      { marketing: true },
     ),
     'https://webmcpify.at/?utm_source=google',
   );
-  assert.equal(
-    sentPageLocation('https://webmcpify.at/de/?gclid=abc'),
-    'https://webmcpify.at/de/?gclid=abc',
-  );
   assert.equal(sentPageLocation('https://webmcpify.at/'), 'https://webmcpify.at/');
+});
+
+test('Ads click identifiers reach GA only when Marketing is granted', () => {
+  const landing = 'https://webmcpify.at/de/?gclid=abc&utm_campaign=launch&gbraid=x';
+  assert.equal(
+    sentPageLocation(landing, { statistics: true, marketing: true }),
+    'https://webmcpify.at/de/?gclid=abc&utm_campaign=launch&gbraid=x',
+  );
+  assert.equal(
+    sentPageLocation(landing, { statistics: true, marketing: false }),
+    'https://webmcpify.at/de/?utm_campaign=launch',
+  );
+  assert.equal(sentPageLocation(landing), 'https://webmcpify.at/de/?utm_campaign=launch');
 });
 
 test('uses minimized GA4 configuration with explicit cookie scoping', () => {
@@ -61,12 +71,30 @@ test('uses minimized GA4 configuration with explicit cookie scoping', () => {
   });
 });
 
-test('consent mode state grants measurement and denies personalization', () => {
-  assert.deepEqual(CONSENT_STATE, {
+test('consent state maps each category independently and never grants personalization', () => {
+  assert.deepEqual(consentStateFor({ statistics: true, marketing: true }), {
     ad_storage: 'granted',
     ad_user_data: 'granted',
     ad_personalization: 'denied',
     analytics_storage: 'granted',
+  });
+  assert.deepEqual(consentStateFor({ statistics: true, marketing: false }), {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'granted',
+  });
+  assert.deepEqual(consentStateFor({ statistics: false, marketing: true }), {
+    ad_storage: 'granted',
+    ad_user_data: 'granted',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
+  });
+  assert.deepEqual(consentStateFor({}), {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
   });
 });
 
@@ -102,7 +130,7 @@ function fakeEnvironment() {
   return { win, doc, loc, browserHistory, appended, replacements };
 }
 
-test('installs one Google tag with consent defaults first and a PII-safe page location', () => {
+test('installs one Google tag: denied defaults, the chosen update, then a PII-safe config', () => {
   const { win, doc, loc, browserHistory, appended, replacements } = fakeEnvironment();
 
   const analytics = installAnalytics({
@@ -111,6 +139,7 @@ test('installs one Google tag with consent defaults first and a PII-safe page lo
     loc,
     browserHistory,
     measurementId: 'G-ABC1234567',
+    consent: { statistics: true, marketing: true },
   });
 
   assert.equal(analytics.measurementId, 'G-ABC1234567');
@@ -125,11 +154,16 @@ test('installs one Google tag with consent defaults first and a PII-safe page lo
     assert.equal(Array.isArray(entry), false);
     return [...entry];
   });
-  assert.equal(commands.length, 3);
-  assert.deepEqual(commands[0], ['consent', 'default', CONSENT_STATE]);
-  assert.equal(commands[1][0], 'js');
-  assert.ok(commands[1][1] instanceof Date);
-  assert.deepEqual(commands[2], [
+  assert.equal(commands.length, 4);
+  assert.deepEqual(commands[0], ['consent', 'default', consentStateFor({})]);
+  assert.deepEqual(commands[1], [
+    'consent',
+    'update',
+    consentStateFor({ statistics: true, marketing: true }),
+  ]);
+  assert.equal(commands[2][0], 'js');
+  assert.ok(commands[2][1] instanceof Date);
+  assert.deepEqual(commands[3], [
     'config',
     'G-ABC1234567',
     analyticsConfig('https://webmcpify.at/?utm_source=google&utm_medium=cpc'),
@@ -139,7 +173,67 @@ test('installs one Google tag with consent defaults first and a PII-safe page lo
   ]);
 
   win.dispatchEvent(new Event('webmcpify:install-copy'));
-  assert.deepEqual([...win.dataLayer[3]], ['event', 'install_command_copy']);
+  assert.deepEqual([...win.dataLayer[4]], ['event', 'install_command_copy']);
+});
+
+test('a Statistics-only grant redacts ads data and strips click IDs from a gclid landing', () => {
+  const { win, doc, browserHistory, appended } = fakeEnvironment();
+  const loc = {
+    href: 'https://webmcpify.at/?gclid=secret&utm_source=google',
+    pathname: '/',
+    search: '?gclid=secret&utm_source=google',
+    hash: '',
+  };
+
+  const analytics = installAnalytics({
+    win,
+    doc,
+    loc,
+    browserHistory,
+    measurementId: 'G-ABC1234567',
+    consent: { statistics: true, marketing: false },
+  });
+
+  assert.ok(analytics);
+  assert.equal(appended.length, 1);
+  const commands = win.dataLayer.map((entry) => [...entry]);
+  assert.equal(commands.length, 5);
+  assert.deepEqual(commands[0], ['consent', 'default', consentStateFor({})]);
+  assert.deepEqual(commands[1], ['set', 'ads_data_redaction', true]);
+  assert.deepEqual(commands[2], [
+    'consent',
+    'update',
+    consentStateFor({ statistics: true, marketing: false }),
+  ]);
+  assert.equal(commands[3][0], 'js');
+  assert.deepEqual(commands[4], [
+    'config',
+    'G-ABC1234567',
+    analyticsConfig('https://webmcpify.at/?utm_source=google'),
+  ]);
+});
+
+test('never installs without the Statistics grant, even with Marketing granted', () => {
+  const { win, doc, loc, browserHistory, appended } = fakeEnvironment();
+
+  assert.equal(
+    installAnalytics({
+      win,
+      doc,
+      loc,
+      browserHistory,
+      measurementId: 'G-ABC1234567',
+      consent: { statistics: false, marketing: true },
+    }),
+    null,
+  );
+  assert.equal(
+    installAnalytics({ win, doc, loc, browserHistory, measurementId: 'G-ABC1234567' }),
+    null,
+  );
+  assert.equal(appended.length, 0);
+  assert.equal(win.dataLayer, undefined);
+  assert.equal(win.gtag, undefined);
 });
 
 test('returns the existing installation instead of injecting twice', () => {
