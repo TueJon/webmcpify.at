@@ -12,6 +12,13 @@ and commit both files (hreflang pairs live in both pages and `sitemap.xml`).
 
 Production: https://webmcpify.at
 
+Google Analytics 4 measurement is documented in
+[`ANALYTICS.md`](ANALYTICS.md). The integration is proposed in PR #5 but is not
+deployed. A separate legal/privacy audit and the documented consent gate must be
+completed before merge and production activation.
+
+Run its dependency-free contract tests with `node --test tests/analytics.test.mjs tests/consent.test.mjs`.
+
 ## Deploy
 
 The site is served directly from a git clone on the host — no build, no pipeline:

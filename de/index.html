@@ -58,6 +58,7 @@
     --tint: oklch(0.965 0.015 290);
     --z-nav: 10;
     --z-toast: 40;
+    --z-consent: 50;
     --font-sans: "Familjen Grotesk", "Segoe UI", system-ui, sans-serif;
     --font-mono: "Spline Sans Mono", ui-monospace, monospace;
   }
@@ -227,6 +228,22 @@
   }
   .toast.show { opacity: 1; }
 
+  /* Consent banner: non-modal (page, imprint, and privacy stay reachable),
+     both actions identical .btn styling — equal visual weight by design. */
+  .consent {
+    position: fixed; inset: auto 0 0 0; z-index: var(--z-consent);
+    background: var(--bg); border-top: 2px solid var(--ink);
+  }
+  .consent-inner { display: flex; flex-wrap: wrap; gap: 0.9rem 2rem; align-items: center; padding-block: 1rem; }
+  .consent-text { font-size: 0.92rem; max-width: 62ch; flex: 1 1 34ch; }
+  .consent-text a { color: var(--primary-ink); }
+  .consent-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+  .foot-btn {
+    font: inherit; color: var(--muted); background: none; border: 0; padding: 0;
+    cursor: pointer; text-decoration: underline;
+  }
+  .foot-btn:hover { color: var(--ink); }
+
   /* Diagram stroke-draw: decorative enhancement, fully drawn by default */
   @supports ((animation-timeline: scroll()) and (animation-range: 0% 100%)) {
     @media not (prefers-reduced-motion: reduce) {
@@ -254,7 +271,7 @@
       <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
       <button type="button" data-set-lang="de" aria-pressed="true">DE</button>
     </div>
-    <a class="btn" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">GitHub ↗</a>
+    <a class="btn" data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">GitHub ↗</a>
   </div>
 </header>
 
@@ -277,7 +294,7 @@
         </p>
         <div class="hero-ctas">
           <a class="btn primary" href="#install"><span lang="en">Install the skill</span><span lang="de">Skill installieren</span></a>
-          <a class="btn" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener"><span lang="en">Read the source</span><span lang="de">Quellcode lesen</span></a>
+          <a class="btn" data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener"><span lang="en">Read the source</span><span lang="de">Quellcode lesen</span></a>
         </div>
         <p class="hero-fine">
           <span lang="en">Open source · MIT · zero dependencies · Chrome origin trial · works with Claude Code</span>
@@ -547,14 +564,35 @@
 <footer>
   <div class="wrap foot">
     <span>webmcpify.at</span>
-    <a href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">GitHub</a>
+    <a data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">GitHub</a>
     <a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP <span lang="en">proposal</span><span lang="de">Proposal</span></a>
     <span class="fill"></span>
     <span>MIT License</span>
     <a href="/imprint.html"><span lang="en">Imprint</span><span lang="de">Impressum</span></a>
     <a href="/privacy.html"><span lang="en">Privacy</span><span lang="de">Datenschutz</span></a>
+    <button type="button" class="foot-btn" data-consent-open hidden><span lang="en">Cookie settings</span><span lang="de">Cookie-Einstellungen</span></button>
   </div>
 </footer>
+
+<div class="consent" id="consent" role="region" aria-label="Cookie consent" hidden>
+  <div class="wrap consent-inner">
+    <p class="consent-text">
+      <span lang="en">With your consent we measure how this page is used with Google
+      Analytics 4 (cookies <code>_ga</code>, <code>_ga_*</code>, and <code>_gcl_au</code>
+      for Google Ads conversion attribution). Nothing is loaded and no cookies are set
+      unless you agree. Details in the <a href="/privacy.html">privacy policy</a>.</span>
+      <span lang="de">Mit Ihrer Einwilligung messen wir die Nutzung dieser Seite mit
+      Google Analytics 4 (Cookies <code>_ga</code>, <code>_ga_*</code> und
+      <code>_gcl_au</code> für die Google-Ads-Conversion-Zuordnung). Ohne Zustimmung
+      wird nichts geladen und kein Cookie gesetzt. Details in der
+      <a href="/privacy.html">Datenschutzerklärung</a>.</span>
+    </p>
+    <div class="consent-actions">
+      <button type="button" class="btn" data-consent-accept><span lang="en">Allow measurement</span><span lang="de">Messung erlauben</span></button>
+      <button type="button" class="btn" data-consent-decline><span lang="en">Decline</span><span lang="de">Ablehnen</span></button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast" role="status"></div>
 
@@ -600,6 +638,7 @@
         }
       }
       if (ok) {
+        window.dispatchEvent(new CustomEvent("webmcpify:install-copy"));
         // Text is inserted on show so role="status" actually announces it.
         toast.textContent = document.documentElement.lang === "de" ? "Kopiert ✓" : "Copied ✓";
         toast.classList.add("show");
@@ -608,6 +647,7 @@
     });
   });
 </script>
+<script type="module" src="/consent.js"></script>
 <script type="module" src="/webmcp/site-tools.js"></script>
 </body>
 </html>
