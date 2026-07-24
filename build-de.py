@@ -41,6 +41,13 @@ REPLACEMENTS = [
      '<button type="button" data-set-lang="en" aria-pressed="false">EN</button>'),
     ('<button type="button" data-set-lang="de" aria-pressed="false">DE</button>',
      '<button type="button" data-set-lang="de" aria-pressed="true">DE</button>'),
+    ('<meta property="og:image:alt" content="webmcpify — make your web app agent-ready with WebMCP">',
+     '<meta property="og:image:alt" content="webmcpify — mach deine Web-App agent-ready mit WebMCP">'),
+    ('<meta name="twitter:image:alt" content="webmcpify — make your web app agent-ready with WebMCP">',
+     '<meta name="twitter:image:alt" content="webmcpify — mach deine Web-App agent-ready mit WebMCP">'),
+    ('aria-label="Language"', 'aria-label="Sprache"'),
+    ('<title id="fig1-title">Diagram: a browser app exposing typed tools to an AI agent</title>',
+     '<title id="fig1-title">Diagramm: eine Browser-App stellt einem KI-Agent typisierte Tools bereit</title>'),
 ]
 
 
