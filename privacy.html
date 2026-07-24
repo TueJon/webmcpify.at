@@ -35,6 +35,38 @@
   .lang-toggle button { font: 600 0.8rem var(--font-mono); background: var(--bg); border: 0; color: var(--muted); padding: 0.45rem 0.75rem; cursor: pointer; }
   .lang-toggle button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
   :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+  /* Consent banner (shared with the start page): non-modal, all actions
+     identical .btn styling — equal visual weight by design. */
+  .btn {
+    display: inline-flex; align-items: center; background: var(--ink); color: var(--bg);
+    font-family: var(--font-sans); font-weight: 700; font-size: 0.9rem;
+    padding: 0.6rem 1rem; border: 0; cursor: pointer;
+  }
+  .btn:hover { background: var(--primary); }
+  .foot-btn {
+    font: inherit; font-size: 0.9rem; color: var(--muted); background: none; border: 0;
+    padding: 0; cursor: pointer; text-decoration: underline;
+  }
+  .foot-btn:hover { color: var(--ink); }
+  .consent { position: fixed; inset: auto 0 0 0; z-index: 50; background: var(--bg); border-top: 2px solid var(--ink); }
+  .consent-inner {
+    max-width: 760px; margin-inline: auto; padding: 1rem clamp(1.25rem, 4vw, 3rem);
+    display: flex; flex-wrap: wrap; gap: 0.9rem 2rem; align-items: center;
+    max-height: calc(100dvh - 2rem); overflow-y: auto;
+  }
+  .consent-text { font-size: 0.88rem; max-width: 62ch; flex: 1 1 34ch; margin: 0; }
+  .consent-controls { display: flex; flex-direction: column; gap: 0.7rem; }
+  .consent-cats { display: flex; gap: 1.2rem; flex-wrap: wrap; border: 0; padding: 0; margin: 0; }
+  .consent-cat { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 600; font-size: 0.92rem; cursor: pointer; }
+  .consent-cat:has(input:disabled) { color: var(--muted); cursor: not-allowed; }
+  .consent-cat input { width: 1.05rem; height: 1.05rem; accent-color: var(--primary); margin: 0; }
+  /* Grid, not wrapping flex: a wrapped flex line distributes free space on
+     its own, so a lone "Allow all" would stretch across a full row and read
+     as the prominent option. Equal columns, or equal full-width rows. */
+  .consent-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8rem; }
+  .consent-actions .btn { justify-content: center; }
+  @media (max-width: 560px) { .consent-actions { grid-template-columns: minmax(0, 1fr); } }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -67,21 +99,76 @@
   <p><span lang="en">The legal basis is our legitimate interest in operating the website securely and reliably, in particular troubleshooting and defending against attacks (Art. 6(1)(f) GDPR). Log files are deleted automatically after 14 days, are not merged with other data, and are not shared with third parties. A data processing agreement per Art. 28 GDPR is in place with netcup GmbH.</span><span lang="de">Rechtsgrundlage ist unser berechtigtes Interesse am sicheren und stabilen Betrieb der Website, insbesondere zur Fehleranalyse und Abwehr von Angriffen (Art. 6 Abs. 1 lit. f DSGVO). Die Logdateien werden nach 14 Tagen automatisch gelöscht, nicht mit anderen Daten zusammengeführt und nicht an Dritte weitergegeben. Mit der netcup GmbH besteht ein Auftragsverarbeitungsvertrag gemäß Art. 28 DSGVO.</span></p>
 
   <h2><span lang="en">Local storage</span><span lang="de">Lokale Speicherung (localStorage)</span></h2>
-  <p><span lang="en">The site stores up to two entries in your browser's localStorage: <code>wmcp-lang</code> (chosen language, "en" or "de") and <code>wmcp-consent</code> (your consent decision, see the analytics section). It is written when you pick a language via the EN/DE toggle, or, if you browse with an AI agent, via this page's WebMCP <code>set_language</code> tool. The entry contains no personal data, never leaves your browser, and only serves to deliver the language you asked for (§ 165(3) TKG 2021: strictly necessary storage for a service you explicitly requested). It persists until you clear this site's data in your browser. Cookies are set only by the analytics service described below, and only after your consent.</span><span lang="de">Die Website speichert bis zu zwei Einträge im localStorage Ihres Browsers: <code>wmcp-lang</code> (gewählte Sprache, „en“ oder „de“) und <code>wmcp-consent</code> (Ihre Einwilligungsentscheidung, siehe Abschnitt Webanalyse). Er wird gesetzt, wenn Sie die Sprache über den EN/DE-Schalter wählen, oder, sofern Sie einen Browser-Agent nutzen, über das WebMCP-Tool <code>set_language</code> dieser Seite. Der Eintrag enthält keine personenbezogenen Daten, verbleibt ausschließlich in Ihrem Browser und dient allein der Bereitstellung der gewünschten Sprachversion (§ 165 Abs. 3 TKG 2021: unbedingt erforderliche Speicherung für den von Ihnen gewünschten Dienst). Er bleibt gespeichert, bis Sie die Website-Daten in Ihrem Browser löschen. Cookies setzt ausschließlich der unten beschriebene Analysedienst, und nur nach Ihrer Einwilligung.</span></p>
+  <p><span lang="en">The site stores up to two entries in your browser's localStorage, each written only by an action you take:</span><span lang="de">Die Website speichert bis zu zwei Einträge im localStorage Ihres Browsers, die jeweils nur durch eine Aktion von Ihnen geschrieben werden:</span></p>
+  <ul>
+    <li><span lang="en"><code>wmcp-lang</code> holds the chosen language ("en" or "de"). It is written when you pick a language via the EN/DE toggle or, if you browse with an AI agent, via this page's WebMCP <code>set_language</code> tool, and it serves only to deliver the language version you asked for.</span><span lang="de"><code>wmcp-lang</code> enthält die gewählte Sprache („en“ oder „de“). Der Eintrag wird geschrieben, wenn Sie die Sprache über den EN/DE-Schalter wählen oder, sofern Sie einen Browser-Agent nutzen, über das WebMCP-Tool <code>set_language</code> dieser Seite, und dient allein der Bereitstellung der gewünschten Sprachversion.</span></li>
+    <li><span lang="en"><code>wmcp-consent</code> holds your decision on the two consent categories described below, together with the time you made it (Art. 7(1) GDPR). It is written when you use the consent banner, and it serves only to remember and honour that decision.</span><span lang="de"><code>wmcp-consent</code> enthält Ihre Entscheidung zu den beiden unten beschriebenen Einwilligungskategorien samt Zeitpunkt der Entscheidung (Art. 7 Abs. 1 DSGVO). Der Eintrag wird geschrieben, wenn Sie den Einwilligungs-Banner verwenden, und dient allein dazu, diese Entscheidung zu speichern und zu beachten.</span></li>
+  </ul>
+  <p><span lang="en">Neither entry contains personal data or an identifier, neither is transmitted to us or to third parties, and both are strictly necessary for services you explicitly requested (§ 165(3) TKG 2021). They persist until you clear this site's data in your browser. Cookies are set only by the analytics service described below, and only after your consent.</span><span lang="de">Beide Einträge enthalten keine personenbezogenen Daten und keine Kennung, werden weder an uns noch an Dritte übertragen und sind für die von Ihnen ausdrücklich gewünschten Dienste unbedingt erforderlich (§ 165 Abs. 3 TKG 2021). Sie bleiben gespeichert, bis Sie die Website-Daten in Ihrem Browser löschen. Cookies setzt ausschließlich der unten beschriebene Analysedienst, und nur nach Ihrer Einwilligung.</span></p>
 
   <h2><span lang="en">Fonts</span><span lang="de">Schriftarten</span></h2>
   <p><span lang="en">All fonts are served from our own server (self-hosted). Loading this site makes no connection to third-party servers.</span><span lang="de">Alle Schriftarten werden lokal von unserem Server geladen (Self-Hosting). Beim Laden der Seite wird keine Verbindung zu Servern Dritter aufgebaut.</span></p>
 
-  <h2><span lang="en">Web analytics (Google Analytics 4) — only with your consent</span><span lang="de">Webanalyse (Google Analytics 4) — nur mit Ihrer Einwilligung</span></h2>
-  <p><span lang="en">Only if you agree via the consent banner (Art. 6(1)(a) GDPR, § 165(3) TKG 2021) do we use Google Analytics 4 by Google Ireland Ltd., Gordon House, Barrow Street, Dublin 4, Ireland. Google Analytics sets cookies (<code>_ga</code>, <code>_ga_*</code>, limited to 90 days here, and <code>_gcl_au</code> from the Google Ads link) and processes the visited page (URL with campaign parameters, title, referrer), device and browser information, a pseudonymous client ID, and two interaction events (copying the install command, clicking GitHub links). Google Signals and personalized advertising signals are disabled; raw user-level data retention in Google Analytics is 2 months (aggregated reports persist beyond that). Recipient: Google Ireland Ltd.; transfers to Google LLC (USA) rest on the adequacy decision for the EU-US Data Privacy Framework (Art. 45 GDPR). A data processing agreement with Google (Google Ads Data Processing Terms) is in place. The site is linked to Google Ads for conversion measurement, which processes the click ID (<code>gclid</code>).</span><span lang="de">Nur wenn Sie über den Einwilligungs-Banner zustimmen (Art. 6 Abs. 1 lit. a DSGVO, § 165 Abs. 3 TKG 2021), verwenden wir Google Analytics 4 der Google Ireland Ltd., Gordon House, Barrow Street, Dublin 4, Irland. Google Analytics setzt Cookies (<code>_ga</code>, <code>_ga_*</code>, bei uns auf 90 Tage begrenzt, sowie <code>_gcl_au</code> aus der Google-Ads-Verknüpfung) und verarbeitet die aufgerufene Seite (URL mit Kampagnenparametern, Titel, Referrer), Geräte- und Browserinformationen, eine pseudonyme Client-ID sowie zwei Interaktionsereignisse (Kopieren des Install-Befehls, Klick auf GitHub-Links). Google Signals und personalisierte Werbesignale sind deaktiviert; die Aufbewahrung der Rohdaten auf Nutzerebene in Google Analytics beträgt 2 Monate (aggregierte Berichte bleiben darüber hinaus bestehen). Empfänger: Google Ireland Ltd.; Übermittlungen an die Google LLC (USA) erfolgen auf Grundlage des Angemessenheitsbeschlusses zum EU-US Data Privacy Framework (Art. 45 DSGVO). Mit Google besteht ein Auftragsverarbeitungsvertrag (Google Ads Data Processing Terms). Die Website ist mit Google Ads verknüpft (Conversion-Messung; Verarbeitung der Klick-ID <code>gclid</code>).</span></p>
-  <p><span lang="en">Without consent, Google Analytics is not loaded and no cookies are set. You can withdraw or change your decision at any time with effect for the future via "Cookie settings" in the footer of the start page (Art. 7(3) GDPR); your consent decision (choice and timestamp, no identifier) is stored in your browser's localStorage under <code>wmcp-consent</code>.</span><span lang="de">Ohne Einwilligung wird Google Analytics nicht geladen und es werden keine Cookies gesetzt. Sie können Ihre Entscheidung jederzeit mit Wirkung für die Zukunft über „Cookie-Einstellungen“ im Footer der Startseite ändern oder widerrufen (Art. 7 Abs. 3 DSGVO); Ihre Einwilligungsentscheidung (Auswahl und Zeitstempel, ohne Kennung) wird im localStorage Ihres Browsers unter <code>wmcp-consent</code> gespeichert.</span></p>
+  <h2><span lang="en">Web analytics and advertising measurement — only with your consent</span><span lang="de">Webanalyse und Werbemessung — nur mit Ihrer Einwilligung</span></h2>
+  <p><span lang="en">Via the consent banner you can enable two separate categories (Art. 6(1)(a) GDPR, § 165(3) TKG 2021): Statistics alone, or Statistics together with Marketing. Because the advertising signals are transmitted by the analytics service itself, Marketing builds on Statistics and cannot be enabled on its own. Personalized advertising remains disabled in every configuration. Without your consent, nothing is loaded and no cookies are set.</span><span lang="de">Über den Einwilligungs-Banner können Sie zwei getrennte Kategorien aktivieren (Art. 6 Abs. 1 lit. a DSGVO, § 165 Abs. 3 TKG 2021): entweder nur Statistik oder Statistik zusammen mit Marketing. Da die Werbesignale vom Analysedienst selbst übertragen werden, baut Marketing auf der Statistik-Kategorie auf und kann nicht allein aktiviert werden. Personalisierte Werbung bleibt in jeder Konfiguration deaktiviert. Ohne Ihre Einwilligung wird nichts geladen und es werden keine Cookies gesetzt.</span></p>
+  <p><span lang="en"><b>Statistics</b>: Google Analytics 4 by Google Ireland Ltd., Gordon House, Barrow Street, Dublin 4, Ireland, measures page views and two interaction events (copying the install command, clicking GitHub links). It sets cookies (<code>_ga</code>, <code>_ga_*</code>, limited to 90 days here) and processes the visited page (URL with campaign parameters, title, referrer), device and browser information, and a pseudonymous client ID. Google Signals is disabled; raw user-level data retention in Google Analytics is 2 months (aggregated reports persist beyond that).</span><span lang="de"><b>Statistik</b>: Google Analytics 4 der Google Ireland Ltd., Gordon House, Barrow Street, Dublin 4, Irland, misst Seitenaufrufe und zwei Interaktionsereignisse (Kopieren des Install-Befehls, Klick auf GitHub-Links). Dabei werden Cookies gesetzt (<code>_ga</code>, <code>_ga_*</code>, bei uns auf 90 Tage begrenzt) und die aufgerufene Seite (URL mit Kampagnenparametern, Titel, Referrer), Geräte- und Browserinformationen sowie eine pseudonyme Client-ID verarbeitet. Google Signals ist deaktiviert; die Aufbewahrung der Rohdaten auf Nutzerebene in Google Analytics beträgt 2 Monate (aggregierte Berichte bleiben darüber hinaus bestehen).</span></p>
+  <p><span lang="en"><b>Marketing</b>: only if you additionally enable this category (it works on top of Statistics), Google Analytics shares usage signals with our linked Google Ads account for conversion measurement and audience measurement. This sets the cookies <code>_gcl_au</code> and, when you arrive via an ad, <code>_gac_*</code>, and processes the click ID (<code>gclid</code>). Without this category, the advertising consent signals remain denied, no advertising cookies are set, and advertising click IDs such as <code>gclid</code> are excluded from what the tag transmits.</span><span lang="de"><b>Marketing</b>: nur wenn Sie diese Kategorie zusätzlich aktivieren (sie wirkt aufbauend auf der Statistik-Kategorie), teilt Google Analytics Nutzungssignale mit unserem verknüpften Google-Ads-Konto zur Conversion-Messung und Zielgruppenmessung. Dabei werden die Cookies <code>_gcl_au</code> und, wenn Sie über eine Anzeige kommen, <code>_gac_*</code> gesetzt und die Klick-ID (<code>gclid</code>) verarbeitet. Ohne diese Kategorie bleiben die Werbe-Einwilligungssignale verweigert, es werden keine Werbe-Cookies gesetzt und Werbe-Klick-IDs wie <code>gclid</code> sind von der Übertragung ausgeschlossen.</span></p>
+  <p><span lang="en">Recipient: Google Ireland Ltd.; transfers to Google LLC (USA) rest on the adequacy decision for the EU-US Data Privacy Framework (Art. 45 GDPR). A data processing agreement with Google (Google Ads Data Processing Terms) is in place.</span><span lang="de">Empfänger: Google Ireland Ltd.; Übermittlungen an die Google LLC (USA) erfolgen auf Grundlage des Angemessenheitsbeschlusses zum EU-US Data Privacy Framework (Art. 45 DSGVO). Mit Google besteht ein Auftragsverarbeitungsvertrag (Google Ads Data Processing Terms).</span></p>
+  <p><span lang="en">You can change or withdraw each choice at any time with effect for the future via "Cookie settings", available on every page of this site (Art. 7(3) GDPR); your consent decision (both choices and a timestamp, no identifier) is stored in your browser's localStorage under <code>wmcp-consent</code>.</span><span lang="de">Sie können jede der beiden Entscheidungen jederzeit mit Wirkung für die Zukunft über „Cookie-Einstellungen“ ändern oder widerrufen (verfügbar auf jeder Seite dieser Website, Art. 7 Abs. 3 DSGVO); Ihre Einwilligungsentscheidung (beide Auswahlen und ein Zeitstempel, ohne Kennung) wird im localStorage Ihres Browsers unter <code>wmcp-consent</code> gespeichert.</span></p>
 
   <h2><span lang="en">Your rights</span><span lang="de">Ihre Rechte</span></h2>
   <p><span lang="en">You have the rights to access (Art. 15 GDPR), rectification (Art. 16), erasure (Art. 17), restriction of processing (Art. 18), data portability (Art. 20), and objection to processing based on legitimate interests (Art. 21 GDPR). Send requests to <a href="mailto:mail@jonastuechler.at">mail@jonastuechler.at</a>.</span><span lang="de">Ihnen stehen die Rechte auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) sowie Widerspruch gegen Verarbeitungen auf Grundlage berechtigter Interessen (Art. 21 DSGVO) zu. Anfragen richten Sie an <a href="mailto:mail@jonastuechler.at">mail@jonastuechler.at</a>.</span></p>
   <p><span lang="en">You also have the right to lodge a complaint with the supervisory authority (Art. 77 GDPR): Österreichische Datenschutzbehörde, Barichgasse 40–42, 1030 Vienna, phone +43 1 52 152-0, e-mail <a href="mailto:dsb@dsb.gv.at">dsb@dsb.gv.at</a>, <a href="https://www.dsb.gv.at" target="_blank" rel="noopener">www.dsb.gv.at</a>.</span><span lang="de">Sie haben außerdem das Recht auf Beschwerde bei der Aufsichtsbehörde (Art. 77 DSGVO): Österreichische Datenschutzbehörde, Barichgasse 40–42, 1030 Wien, Telefon +43 1 52 152-0, E-Mail <a href="mailto:dsb@dsb.gv.at">dsb@dsb.gv.at</a>, <a href="https://www.dsb.gv.at" target="_blank" rel="noopener">www.dsb.gv.at</a>.</span></p>
 
   <h2><span lang="en">Final notes</span><span lang="de">Abschließende Hinweise</span></h2>
-  <p><span lang="en">No automated decision-making, including profiling, takes place. Providing personal data is neither legally nor contractually required; without the technical data listed above, however, the website cannot be delivered.</span><span lang="de">Eine automatisierte Entscheidungsfindung einschließlich Profiling findet nicht statt. Die Bereitstellung personenbezogener Daten ist weder gesetzlich noch vertraglich vorgeschrieben; ohne die oben genannten technischen Daten kann die Website jedoch nicht ausgeliefert werden.</span></p>
+  <p><span lang="en">No decision based solely on automated processing that produces legal effects concerning you or similarly significantly affects you (Art. 22 GDPR) takes place. Providing personal data is neither legally nor contractually required; without the technical data listed above, however, the website cannot be delivered.</span><span lang="de">Eine ausschließlich auf automatisierter Verarbeitung beruhende Entscheidung, die Ihnen gegenüber rechtliche Wirkung entfaltet oder Sie in ähnlicher Weise erheblich beeinträchtigt (Art. 22 DSGVO), findet nicht statt. Die Bereitstellung personenbezogener Daten ist weder gesetzlich noch vertraglich vorgeschrieben; ohne die oben genannten technischen Daten kann die Website jedoch nicht ausgeliefert werden.</span></p>
+  <p><button type="button" class="foot-btn" data-consent-open hidden><span lang="en">Cookie settings</span><span lang="de">Cookie-Einstellungen</span></button></p>
+</div>
+
+<div class="consent" id="consent" role="region" aria-label="Cookie consent" hidden>
+  <div class="consent-inner">
+    <p class="consent-text">
+      <span lang="en">With your consent we process usage data in two separate ways.
+      <b>Statistics</b>: Google Analytics 4 measures how this page is used (cookies
+      <code>_ga</code>, <code>_ga_*</code>). <b>Marketing</b>: usage signals are
+      additionally shared with our linked Google Ads account for conversion attribution
+      and audience measurement (cookie <code>_gcl_au</code> and related Ads signals).
+      Personalized advertising stays off in every case. TWB-Digital OG is the
+      controller; you can change or withdraw your choice at any time via "Cookie
+      settings" at the bottom of each page. Nothing is loaded and no cookies
+      are set for a category unless you enable it. Details in the
+      <a href="/privacy.html">privacy policy</a>.</span>
+      <span lang="de">Mit Ihrer Einwilligung verarbeiten wir Nutzungsdaten auf zwei
+      getrennten Wegen. <b>Statistik</b>: Google Analytics 4 misst die Nutzung dieser
+      Seite (Cookies <code>_ga</code>, <code>_ga_*</code>). <b>Marketing</b>:
+      Nutzungssignale werden zusätzlich mit unserem verknüpften Google-Ads-Konto zur
+      Conversion-Zuordnung und Zielgruppenmessung geteilt (Cookie <code>_gcl_au</code>
+      und verwandte Ads-Signale). Personalisierte Werbung bleibt in jedem Fall
+      deaktiviert. Verantwortlicher ist die TWB-Digital OG; Sie können Ihre Wahl
+      jederzeit über „Cookie-Einstellungen“ am Ende jeder Seite ändern oder widerrufen.
+      Ohne Aktivierung wird für die jeweilige Kategorie nichts geladen und
+      kein Cookie gesetzt. Details in der
+      <a href="/privacy.html">Datenschutzerklärung</a>.</span>
+    </p>
+    <div class="consent-controls">
+      <fieldset class="consent-cats">
+        <legend class="sr-only"><span lang="en">Consent categories</span><span lang="de">Einwilligungskategorien</span></legend>
+        <label class="consent-cat">
+          <input type="checkbox" data-consent-cat="statistics">
+          <span lang="en">Statistics</span><span lang="de">Statistik</span>
+        </label>
+        <label class="consent-cat">
+          <input type="checkbox" data-consent-cat="marketing" disabled>
+          <span lang="en">Marketing (requires Statistics)</span><span lang="de">Marketing (setzt Statistik voraus)</span>
+        </label>
+      </fieldset>
+      <div class="consent-actions">
+        <button type="button" class="btn" data-consent-decline><span lang="en">Reject all</span><span lang="de">Alle ablehnen</span></button>
+        <button type="button" class="btn" data-consent-save><span lang="en">Save choices</span><span lang="de">Auswahl speichern</span></button>
+        <button type="button" class="btn" data-consent-accept><span lang="en">Allow all</span><span lang="de">Alle erlauben</span></button>
+      </div>
+    </div>
+  </div>
 </div>
 <script>
   // Persistence only on explicit request (toggle click), never on the
@@ -101,5 +188,6 @@
   try { saved = localStorage.getItem("wmcp-lang"); } catch {}
   setLang(saved || (navigator.language?.startsWith("de") ? "de" : "en"));
 </script>
+<script type="module" src="/consent.js"></script>
 </body>
 </html>

@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   ANALYTICS_EVENTS,
-  CONSENT_STATE,
   GA_MEASUREMENT_ID,
   analyticsConfig,
   cleanedBrowserPath,
+  consentStateFor,
   installAnalytics,
   isGaMeasurementId,
   queueAnalyticsEvent,
@@ -39,14 +39,24 @@ test('sends only attribution parameters to GA, never arbitrary query data or fra
   assert.equal(
     sentPageLocation(
       'https://webmcpify.at/?utm_source=google&email=a%40b.c&token=xyz#install',
+      { marketing: true },
     ),
     'https://webmcpify.at/?utm_source=google',
   );
-  assert.equal(
-    sentPageLocation('https://webmcpify.at/de/?gclid=abc'),
-    'https://webmcpify.at/de/?gclid=abc',
-  );
   assert.equal(sentPageLocation('https://webmcpify.at/'), 'https://webmcpify.at/');
+});
+
+test('Ads click identifiers reach GA only when Marketing is granted', () => {
+  const landing = 'https://webmcpify.at/de/?gclid=abc&utm_campaign=launch&gbraid=x';
+  assert.equal(
+    sentPageLocation(landing, { statistics: true, marketing: true }),
+    'https://webmcpify.at/de/?gclid=abc&utm_campaign=launch&gbraid=x',
+  );
+  assert.equal(
+    sentPageLocation(landing, { statistics: true, marketing: false }),
+    'https://webmcpify.at/de/?utm_campaign=launch',
+  );
+  assert.equal(sentPageLocation(landing), 'https://webmcpify.at/de/?utm_campaign=launch');
 });
 
 test('uses minimized GA4 configuration with explicit cookie scoping', () => {
@@ -61,12 +71,30 @@ test('uses minimized GA4 configuration with explicit cookie scoping', () => {
   });
 });
 
-test('consent mode state grants measurement and denies personalization', () => {
-  assert.deepEqual(CONSENT_STATE, {
+test('consent state maps each category independently and never grants personalization', () => {
+  assert.deepEqual(consentStateFor({ statistics: true, marketing: true }), {
     ad_storage: 'granted',
     ad_user_data: 'granted',
     ad_personalization: 'denied',
     analytics_storage: 'granted',
+  });
+  assert.deepEqual(consentStateFor({ statistics: true, marketing: false }), {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'granted',
+  });
+  assert.deepEqual(consentStateFor({ statistics: false, marketing: true }), {
+    ad_storage: 'granted',
+    ad_user_data: 'granted',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
+  });
+  assert.deepEqual(consentStateFor({}), {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
   });
 });
 
@@ -87,22 +115,28 @@ function fakeEnvironment() {
   const doc = new EventTarget();
   const appended = [];
   const replacements = [];
-  doc.createElement = () => ({ async: false, src: '' });
-  doc.head = { append: (node) => appended.push(node) };
+  // Records the address-bar state at the moment the tag request starts: the
+  // Referer that request carries is the document URL of that moment.
+  doc.createElement = () => ({ async: false, src: '', referrerPolicy: '' });
+  doc.head = { append: (node) => appended.push({ ...node, urlWhenAppended: doc.currentUrl }) };
   const loc = {
     href: 'https://webmcpify.at/?utm_source=google&utm_medium=cpc&language=de#install',
     pathname: '/',
     search: '?utm_source=google&utm_medium=cpc&language=de',
     hash: '#install',
   };
+  doc.currentUrl = loc.href;
   const browserHistory = {
     state: { existing: true },
-    replaceState: (...args) => replacements.push(args),
+    replaceState: (...args) => {
+      replacements.push(args);
+      doc.currentUrl = args[2];
+    },
   };
   return { win, doc, loc, browserHistory, appended, replacements };
 }
 
-test('installs one Google tag with consent defaults first and a PII-safe page location', () => {
+test('installs one Google tag: denied defaults, the chosen update, then a PII-safe config', () => {
   const { win, doc, loc, browserHistory, appended, replacements } = fakeEnvironment();
 
   const analytics = installAnalytics({
@@ -111,25 +145,31 @@ test('installs one Google tag with consent defaults first and a PII-safe page lo
     loc,
     browserHistory,
     measurementId: 'G-ABC1234567',
+    consent: { statistics: true, marketing: true },
   });
 
   assert.equal(analytics.measurementId, 'G-ABC1234567');
   assert.equal(appended.length, 1);
-  assert.deepEqual(appended[0], {
-    async: true,
-    src: 'https://www.googletagmanager.com/gtag/js?id=G-ABC1234567',
-  });
+  assert.equal(appended[0].async, true);
+  assert.equal(appended[0].src, 'https://www.googletagmanager.com/gtag/js?id=G-ABC1234567');
+  assert.equal(appended[0].referrerPolicy, 'origin');
 
   // gtag.js requires `arguments` objects on the dataLayer, not plain arrays.
   const commands = win.dataLayer.map((entry) => {
     assert.equal(Array.isArray(entry), false);
     return [...entry];
   });
-  assert.equal(commands.length, 3);
-  assert.deepEqual(commands[0], ['consent', 'default', CONSENT_STATE]);
-  assert.equal(commands[1][0], 'js');
-  assert.ok(commands[1][1] instanceof Date);
+  assert.equal(commands.length, 5);
+  assert.deepEqual(commands[0], ['consent', 'default', consentStateFor({})]);
+  assert.deepEqual(commands[1], ['set', 'ads_data_redaction', false]);
   assert.deepEqual(commands[2], [
+    'consent',
+    'update',
+    consentStateFor({ statistics: true, marketing: true }),
+  ]);
+  assert.equal(commands[3][0], 'js');
+  assert.ok(commands[3][1] instanceof Date);
+  assert.deepEqual(commands[4], [
     'config',
     'G-ABC1234567',
     analyticsConfig('https://webmcpify.at/?utm_source=google&utm_medium=cpc'),
@@ -139,7 +179,116 @@ test('installs one Google tag with consent defaults first and a PII-safe page lo
   ]);
 
   win.dispatchEvent(new Event('webmcpify:install-copy'));
-  assert.deepEqual([...win.dataLayer[3]], ['event', 'install_command_copy']);
+  assert.deepEqual([...win.dataLayer[5]], ['event', 'install_command_copy']);
+});
+
+test('a Statistics-only grant redacts ads data and strips click IDs from a gclid landing', () => {
+  const { win, doc, browserHistory, appended } = fakeEnvironment();
+  const loc = {
+    href: 'https://webmcpify.at/?gclid=secret&utm_source=google',
+    pathname: '/',
+    search: '?gclid=secret&utm_source=google',
+    hash: '',
+  };
+
+  const analytics = installAnalytics({
+    win,
+    doc,
+    loc,
+    browserHistory,
+    measurementId: 'G-ABC1234567',
+    consent: { statistics: true, marketing: false },
+  });
+
+  assert.ok(analytics);
+  assert.equal(appended.length, 1);
+  const commands = win.dataLayer.map((entry) => [...entry]);
+  assert.equal(commands.length, 5);
+  assert.deepEqual(commands[0], ['consent', 'default', consentStateFor({})]);
+  assert.deepEqual(commands[1], ['set', 'ads_data_redaction', true]);
+  assert.deepEqual(commands[2], [
+    'consent',
+    'update',
+    consentStateFor({ statistics: true, marketing: false }),
+  ]);
+  assert.equal(commands[3][0], 'js');
+  assert.deepEqual(commands[4], [
+    'config',
+    'G-ABC1234567',
+    analyticsConfig('https://webmcpify.at/?utm_source=google'),
+  ]);
+  // The click ID must also be gone from the address bar before the
+  // cross-origin tag request starts, since that request carries the document
+  // URL as Referer (the visible URL drops every tracking parameter).
+  assert.equal(appended[0].urlWhenAppended, '/');
+  assert.equal(appended[0].referrerPolicy, 'origin');
+});
+
+test('a consent change during tag download rewrites the queue instead of appending', () => {
+  const { win, doc, browserHistory } = fakeEnvironment();
+  const loc = {
+    href: 'https://webmcpify.at/?gclid=secret',
+    pathname: '/',
+    search: '?gclid=secret',
+    hash: '',
+  };
+
+  const analytics = installAnalytics({
+    win,
+    doc,
+    loc,
+    browserHistory,
+    measurementId: 'G-ABC1234567',
+    consent: { statistics: true, marketing: true },
+  });
+
+  // gtag.js has not executed yet: the queue is still ours.
+  assert.equal(analytics.reviseQueued({ statistics: true, marketing: false }), true);
+  const commands = win.dataLayer.map((entry) => [...entry]);
+  assert.equal(commands.length, 5); // rewritten in place, nothing appended
+  assert.deepEqual(commands[1], ['set', 'ads_data_redaction', true]);
+  assert.deepEqual(commands[2], [
+    'consent',
+    'update',
+    consentStateFor({ statistics: true, marketing: false }),
+  ]);
+  // Crucially the queued config no longer carries the click ID, so gtag
+  // cannot process the wider grant's page location once it loads.
+  assert.deepEqual(commands[4], [
+    'config',
+    'G-ABC1234567',
+    analyticsConfig('https://webmcpify.at/'),
+  ]);
+
+  // Once gtag.js takes the queue over (it replaces dataLayer.push), the
+  // caller must send a normal consent update instead.
+  win.dataLayer.push = function push(...args) {
+    return Array.prototype.push.apply(this, args);
+  };
+  assert.equal(analytics.reviseQueued({ statistics: true, marketing: true }), false);
+});
+
+test('never installs without the Statistics grant, even with Marketing granted', () => {
+  const { win, doc, loc, browserHistory, appended } = fakeEnvironment();
+
+  assert.equal(
+    installAnalytics({
+      win,
+      doc,
+      loc,
+      browserHistory,
+      measurementId: 'G-ABC1234567',
+      consent: { statistics: false, marketing: true },
+    }),
+    null,
+  );
+  assert.equal(
+    installAnalytics({ win, doc, loc, browserHistory, measurementId: 'G-ABC1234567' }),
+    null,
+  );
+  assert.equal(appended.length, 0);
+  assert.equal(win.dataLayer, undefined);
+  assert.equal(win.gtag, undefined);
 });
 
 test('returns the existing installation instead of injecting twice', () => {
