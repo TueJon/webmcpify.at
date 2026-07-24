@@ -17,7 +17,7 @@ Google Analytics 4 measurement is documented in
 deployed. A separate legal/privacy audit and the documented consent gate must be
 completed before merge and production activation.
 
-Run its dependency-free contract tests with `node --test tests/analytics.test.mjs`.
+Run its dependency-free contract tests with `node --test tests/analytics.test.mjs tests/consent.test.mjs`.
 
 ## Deploy
 

@@ -12,6 +12,7 @@
 <meta property="og:title" content="webmcpify — mach deine Web-App agent-ready mit WebMCP">
 <meta property="og:description" content="webmcpify verbindet deine bestehende Web-App mit WebMCP: Inventar, Freigabe, Integration, Verifikation im echten Browser. Open Source, MIT.">
 <meta property="og:image" content="https://webmcpify.at/og.png">
+<meta property="og:image:alt" content="webmcpify — mach deine Web-App agent-ready mit WebMCP">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_AT">
@@ -20,6 +21,7 @@
 <meta name="twitter:title" content="webmcpify — mach deine Web-App agent-ready mit WebMCP">
 <meta name="twitter:description" content="webmcpify verbindet deine bestehende Web-App mit WebMCP: Inventar, Freigabe, Integration, Verifikation im echten Browser. Open Source, MIT.">
 <meta name="twitter:image" content="https://webmcpify.at/og.png">
+<meta name="twitter:image:alt" content="webmcpify — mach deine Web-App agent-ready mit WebMCP">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
@@ -44,10 +46,7 @@
 }
 </script>
 <script type="application/ld+json" id="faq-schema">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Was ist WebMCP?", "acceptedAnswer": {"@type": "Answer", "text": "Ein vorgeschlagener Webstandard (W3C Web Machine Learning CG), mit dem eine Seite typisierte Tools registriert, die Browser-KI-Agents aufrufen können, statt das DOM zu scrapen. Läuft aktuell als Chrome Origin Trial."}}, {"@type": "Question", "name": "Fasst webmcpify Code an, den ich nicht freigegeben habe?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Jeder Diff-Hunk muss einem freigegebenen Tool oder dokumentiertem Setup zuordenbar sein; alles andere flaggt die Audit-Phase im Report. Dateien, die vor dem Run dirty waren, werden nie angefasst."}}, {"@type": "Question", "name": "Ist das ein Sicherheitsrisiko für meine App?", "acceptedAnswer": {"@type": "Answer", "text": "Tools dürfen nur Code-Pfade aufrufen, die deine UI ohnehin nutzt: gleiche Endpoints, gleiche Validierung, gleiche Auth. Dein Server bleibt die einzige Trust Boundary, und mutierende Tools brauchen explizite Freigabe pro Tool."}}, {"@type": "Question", "name": "Welche Agents können webmcpify ausführen, und welche das Ergebnis nutzen?", "acceptedAnswer": {"@type": "Answer", "text": "Die Pipeline läuft als Claude-Code-Skill. Das Ergebnis ist reine, dependency-freie WebMCP-Integration: jeder Browser-Agent, der WebMCP spricht, kann deine Tools aufrufen."}}]}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="/fonts/fonts.css">
 <style>
   :root {
     --bg: oklch(1 0 0);
@@ -59,6 +58,7 @@
     --tint: oklch(0.965 0.015 290);
     --z-nav: 10;
     --z-toast: 40;
+    --z-consent: 50;
     --font-sans: "Familjen Grotesk", "Segoe UI", system-ui, sans-serif;
     --font-mono: "Spline Sans Mono", ui-monospace, monospace;
   }
@@ -228,6 +228,22 @@
   }
   .toast.show { opacity: 1; }
 
+  /* Consent banner: non-modal (page, imprint, and privacy stay reachable),
+     both actions identical .btn styling — equal visual weight by design. */
+  .consent {
+    position: fixed; inset: auto 0 0 0; z-index: var(--z-consent);
+    background: var(--bg); border-top: 2px solid var(--ink);
+  }
+  .consent-inner { display: flex; flex-wrap: wrap; gap: 0.9rem 2rem; align-items: center; padding-block: 1rem; }
+  .consent-text { font-size: 0.92rem; max-width: 62ch; flex: 1 1 34ch; }
+  .consent-text a { color: var(--primary-ink); }
+  .consent-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+  .foot-btn {
+    font: inherit; color: var(--muted); background: none; border: 0; padding: 0;
+    cursor: pointer; text-decoration: underline;
+  }
+  .foot-btn:hover { color: var(--ink); }
+
   /* Diagram stroke-draw: decorative enhancement, fully drawn by default */
   @supports ((animation-timeline: scroll()) and (animation-range: 0% 100%)) {
     @media not (prefers-reduced-motion: reduce) {
@@ -251,7 +267,7 @@
     <span class="nav-spacer"></span>
     <a class="ghost" href="#procedure"><span lang="en">Procedure</span><span lang="de">Ablauf</span></a>
     <a class="ghost" href="#faq">FAQ</a>
-    <div class="lang-toggle" role="group" aria-label="Language">
+    <div class="lang-toggle" role="group" aria-label="Sprache">
       <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
       <button type="button" data-set-lang="de" aria-pressed="true">DE</button>
     </div>
@@ -288,7 +304,7 @@
 
       <figure class="fig">
         <svg viewBox="0 0 560 400" role="img" aria-labelledby="fig1-title">
-          <title id="fig1-title">Diagram: a browser app exposing typed tools to an AI agent</title>
+          <title id="fig1-title">Diagramm: eine Browser-App stellt einem KI-Agent typisierte Tools bereit</title>
           <!-- browser window -->
           <g fill="none" stroke="oklch(0.19 0.02 290)" stroke-width="1.5">
             <rect x="30" y="40" width="300" height="320" rx="6"/>
@@ -463,12 +479,12 @@
           standard, currently available as a Chrome origin trial. webmcpify integrates it
           fully feature-detected: browsers without WebMCP see your app behave exactly as
           before, and the whole integration stays a small, auditable, revertable set of
-          diffs. You lose nothing by being early. You gain being ready when agents arrive.</span>
+          diffs. Being early costs almost nothing. You gain being ready when agents arrive.</span>
           <span lang="de">WebMCP (<code>document.modelContext</code>) ist ein
           vorgeschlagener W3C-Standard, derzeit als Chrome Origin Trial verfügbar.
           webmcpify integriert ihn vollständig feature-detected: Browser ohne WebMCP sehen
           deine App exakt wie bisher, und die gesamte Integration bleibt ein kleines,
-          auditierbares, revertierbares Set an Diffs. Früh dran zu sein kostet nichts. Bereit
+          auditierbares, revertierbares Set an Diffs. Früh dran zu sein kostet fast nichts. Bereit
           zu sein, wenn die Agents kommen, ist der Gewinn.</span>
         </p>
       </div>
@@ -553,23 +569,52 @@
     <span class="fill"></span>
     <span>MIT License</span>
     <a href="/imprint.html"><span lang="en">Imprint</span><span lang="de">Impressum</span></a>
+    <a href="/privacy.html"><span lang="en">Privacy</span><span lang="de">Datenschutz</span></a>
+    <button type="button" class="foot-btn" data-consent-open hidden><span lang="en">Cookie settings</span><span lang="de">Cookie-Einstellungen</span></button>
   </div>
 </footer>
 
-<div class="toast" id="toast" role="status">
-  <span lang="en">Copied ✓</span><span lang="de">Kopiert ✓</span>
+<div class="consent" id="consent" role="region" aria-label="Cookie consent" hidden>
+  <div class="wrap consent-inner">
+    <p class="consent-text">
+      <span lang="en">With your consent we measure how this page is used with Google
+      Analytics 4 (cookies <code>_ga</code>, <code>_ga_*</code>, and <code>_gcl_au</code>
+      for Google Ads conversion attribution). Nothing is loaded and no cookies are set
+      unless you agree. Details in the <a href="/privacy.html">privacy policy</a>.</span>
+      <span lang="de">Mit Ihrer Einwilligung messen wir die Nutzung dieser Seite mit
+      Google Analytics 4 (Cookies <code>_ga</code>, <code>_ga_*</code> und
+      <code>_gcl_au</code> für die Google-Ads-Conversion-Zuordnung). Ohne Zustimmung
+      wird nichts geladen und kein Cookie gesetzt. Details in der
+      <a href="/privacy.html">Datenschutzerklärung</a>.</span>
+    </p>
+    <div class="consent-actions">
+      <button type="button" class="btn" data-consent-accept><span lang="en">Allow measurement</span><span lang="de">Messung erlauben</span></button>
+      <button type="button" class="btn" data-consent-decline><span lang="en">Decline</span><span lang="de">Ablehnen</span></button>
+    </div>
+  </div>
 </div>
 
+<div class="toast" id="toast" role="status"></div>
+
 <script>
+  // Renders the language. Persistence is separate and only ever runs on an
+  // explicit request (toggle click, WebMCP set_language) — never on the
+  // automatic first-load detection (§165(3) TKG strictly-necessary storage).
   const setLang = (l) => {
     document.documentElement.dataset.lang = l;
     document.documentElement.lang = l;
-    try { localStorage.setItem("wmcp-lang", l); } catch {}
     document.querySelectorAll("[data-set-lang]").forEach(b =>
       b.setAttribute("aria-pressed", String(b.dataset.setLang === l)));
+    document.querySelectorAll(".lang-toggle").forEach(g =>
+      g.setAttribute("aria-label", l === "de" ? "Sprache" : "Language"));
+    const figTitle = document.getElementById("fig1-title");
+    if (figTitle) figTitle.textContent = l === "de"
+      ? "Diagramm: eine Browser-App stellt einem KI-Agent typisierte Tools bereit"
+      : "Diagram: a browser app exposing typed tools to an AI agent";
   };
+  const persistLang = (l) => { try { localStorage.setItem("wmcp-lang", l); } catch {} };
   document.querySelectorAll("[data-set-lang]").forEach(b =>
-    b.addEventListener("click", () => setLang(b.dataset.setLang)));
+    b.addEventListener("click", () => { setLang(b.dataset.setLang); persistLang(b.dataset.setLang); }));
   let saved = null;
   try { saved = localStorage.getItem("wmcp-lang"); } catch {}
   setLang(saved || (navigator.language?.startsWith("de") ? "de" : "en"));
@@ -594,13 +639,15 @@
       }
       if (ok) {
         window.dispatchEvent(new CustomEvent("webmcpify:install-copy"));
+        // Text is inserted on show so role="status" actually announces it.
+        toast.textContent = document.documentElement.lang === "de" ? "Kopiert ✓" : "Copied ✓";
         toast.classList.add("show");
-        setTimeout(() => toast.classList.remove("show"), 1800);
+        setTimeout(() => { toast.classList.remove("show"); toast.textContent = ""; }, 1800);
       }
     });
   });
 </script>
-<script type="module" src="/analytics.js"></script>
+<script type="module" src="/consent.js"></script>
 <script type="module" src="/webmcp/site-tools.js"></script>
 </body>
 </html>

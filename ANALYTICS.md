@@ -1,6 +1,8 @@
 # Google Analytics 4
 
-Status: implemented in PR #5, not deployed. Legal/privacy audit pending.
+Status: implemented in PR #5 with consent gating, not deployed. Legal audit
+completed 2026-07-24 — see `docs/LEGAL_COMPLIANCE_PLAN.md` (P2.1) for the
+launch-gate requirements this implementation satisfies.
 
 The site uses one direct Google tag for page measurement plus two explicit
 product-intent events:
@@ -28,11 +30,19 @@ the two events above cover the launch actions we actually need.
 Enhanced Measurement, Google Signals, user-provided data collection, and
 granular location/device data collection are off. Ads personalization is
 disabled in all 307 regions. Event and user data retention are both two months,
-and retention is not reset on new user activity.
+and retention is not reset on new user activity. Note the two months apply to
+raw event/user-level data (explorations); standard aggregated reports persist
+beyond that. Even with Enhanced Measurement off, GA4 automatically collects
+page URL/title/referrer, device and browser data, and the pseudonymous `_ga`
+client ID.
 
 The existing `TWB-Digital` Analytics account is shared by other properties, so
 its account-level data-sharing switches were deliberately left unchanged.
-Changing them here would affect unrelated properties.
+Changing them here would affect unrelated properties. Before first production
+traffic, check whether "Google products & services" sharing is enabled at
+account level — if it is, Google acts as an independent controller for that
+shared slice and the privacy notice must say so (or the setting must be off
+for this account).
 
 ## Google Ads
 
@@ -49,61 +59,61 @@ GitHub. `Engagement` is the campaign's account-default goal; the legacy
 their first production events. The campaign remains paused, so these settings
 do not activate ads or spend.
 
+## Consent architecture
+
+`consent.js` is the only entry point (`<script type="module" src="/consent.js">`
+in both pages). Basic Consent Mode: before opt-in, nothing runs — no gtag.js
+request, no `dataLayer` command, no cookie, no listener. `analytics.js` has no
+import side effects; `installAnalytics()` is called exclusively by `consent.js`
+after a stored or fresh grant.
+
+- **Banner** (`#consent`): non-modal bottom region, so the page, imprint, and
+  privacy policy stay reachable. "Allow measurement" and "Decline" sit on the
+  same first layer with identical `.btn` styling — equal visual weight and
+  one-click rejection per DSB D124.0507/24 / BVwG W108 2284491-1 (orf.at line).
+- **Storage**: the decision is stored as `wmcp-consent` in localStorage
+  (`{v: 1, analytics: boolean, ts: ISO-8601}`) — timestamped for Art. 7(1)
+  demonstrability, no identifier (DSB FAQ: consent status without a unique ID
+  is itself exempt storage).
+- **Withdrawal**: a "Cookie settings" footer button (revealed by JS) reopens
+  the banner. Declining after a grant sets `ga-disable-<id>`, pushes a
+  Consent Mode `denied` update, and expires `_ga*`/`_gcl*` cookies.
+- **Consent Mode v2**: `installAnalytics()` pushes
+  `consent default {ad_storage/ad_user_data/analytics_storage: granted,
+  ad_personalization: denied}` as the first dataLayer command. The granted
+  values are correct because the command itself only ever runs post-opt-in.
+
 ## Tag behavior
 
-`analytics.js`:
+`analytics.js` (post-consent only):
 
 - loads `gtag.js` directly from `www.googletagmanager.com`;
-- sends the initial page URL to GA4 so UTM and Google Ads click attribution work;
-- then removes known tracking parameters from the visible browser URL;
+- reports a PII-safe `page_location`: origin + path + known attribution
+  parameters only (utm_*, gclid & co.) — arbitrary query parameters and
+  fragments never reach Google;
+- removes known tracking parameters from the visible browser URL;
 - explicitly disables Google Signals and ad-personalization signals;
+- pins `cookie_domain` to `webmcpify.at` and sets `Secure;SameSite=Lax`;
 - limits the Analytics cookie to 90 days from first creation rather than the
   default rolling two-year lifetime;
 - sends no user ID, custom user properties, form values, or arbitrary event
-  parameters.
-
-## Required before production
-
-This implementation intentionally does **not** claim DSGVO/GDPR compliance.
-Loading GA4 and setting Analytics cookies before consent is not appropriate for
-EEA production traffic without a valid legal basis. Before deploying, add an
-appropriate privacy notice and either:
-
-1. integrate a CMP using basic Consent Mode so the Google tag is blocked until
-   opt-in; or
-2. document and validate another legal basis with the responsible privacy
-   owner.
-
-After that work, verify consent withdrawal, tag blocking before opt-in, and the
-four Consent Mode v2 signals (`analytics_storage`, `ad_storage`,
-`ad_user_data`, and `ad_personalization`) in Tag Assistant.
-
-## Legal-audit handoff
-
-PR #5 must remain unmerged until the separate legal/privacy audit records its
-decision and updates the implementation and notices as needed. At minimum, that
-session should:
-
-1. confirm the legal basis, controller/processor wording, international-transfer
-   disclosures, retention disclosure, and withdrawal route;
-2. update the privacy notice and cookie/CMP copy in both language variants;
-3. implement the selected consent design so no GA request or Analytics cookie is
-   created before the required opt-in;
-4. prove that refusal and withdrawal stop subsequent collection;
-5. verify the four Consent Mode v2 signals and both explicit events without
-   enabling Ads personalization, Google Signals, or Enhanced Measurement.
-
-Record the audit outcome in this file and the PR before approving merge or
-deploy. The Google Ads campaign must remain paused throughout.
+  parameters. The Google Ads link additionally sets `_gcl_au` (disclosed in
+  the banner and privacy policy).
 
 ## Verification
 
 Run:
 
 ```sh
-node --test tests/analytics.test.mjs
+node --test tests/analytics.test.mjs tests/consent.test.mjs
 python3 build-de.py
 ```
+
+Before production activation, verify in a real browser (network tab + Tag
+Assistant): zero requests to google domains and zero cookies before any banner
+interaction; the four Consent Mode v2 signals after accepting; refusal and
+withdrawal stopping collection. The Google Ads campaign must remain paused
+throughout; conversions await their first production events.
 
 After an approved deployment, use GA4 Realtime/DebugView and trigger exactly
 one copy and one GitHub click. Confirm `page_view`, `install_command_copy`, and
