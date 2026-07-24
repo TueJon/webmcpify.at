@@ -7,9 +7,7 @@
 <meta name="robots" content="noindex, follow">
 <link rel="canonical" href="https://webmcpify.at/imprint.html">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%235f3dc4'/%3E%3Ctext x='32' y='44' font-family='monospace' font-size='36' font-weight='700' fill='white' text-anchor='middle'%3Ew%3C/text%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/fonts/fonts.css">
 <style>
   :root {
     --bg: oklch(1 0 0); --ink: oklch(0.19 0.02 290); --muted: oklch(0.45 0.03 290);
@@ -56,7 +54,7 @@
     <dt><span lang="en">Legal form</span><span lang="de">Rechtsform</span></dt><dd><span lang="en">General partnership (OG)</span><span lang="de">Offene Gesellschaft</span></dd>
     <dt>FN</dt><dd>663697a</dd>
     <dt><span lang="en">Register court</span><span lang="de">Firmenbuch</span></dt><dd>Landesgericht Korneuburg</dd>
-    <dt><span lang="en">Address</span><span lang="de">Anschrift</span></dt><dd>Waldweg 28/2, 2020 Hollabrunn, <span lang="en">Austria</span><span lang="de">Österreich</span></dd>
+    <dt><span lang="en">Seat &amp; address</span><span lang="de">Sitz &amp; Anschrift</span></dt><dd>Waldweg 28/2, 2020 Hollabrunn, <span lang="en">Austria</span><span lang="de">Österreich</span></dd>
     <dt>UID</dt><dd>ATU82973212</dd>
     <dt><span lang="en">Partners</span><span lang="de">Gesellschafter</span></dt><dd>Jonas Tüchler, Benjamin Winter, Thomas Baumeister</dd>
     <dt><span lang="en">Business purpose</span><span lang="de">Gegenstand</span></dt><dd><span lang="en">IT services, web development, and digital agency services</span><span lang="de">IT-Dienstleistungen, Webentwicklung und digitale Agenturdienstleistungen</span></dd>
@@ -79,17 +77,24 @@
   <h2><span lang="en">About this site</span><span lang="de">Über diese Seite</span></h2>
   <p><span lang="en">webmcpify.at presents the open-source webmcpify project (MIT license) by Jonas Tüchler. The software itself is provided "as is" under its license terms; see the</span><span lang="de">webmcpify.at präsentiert das Open-Source-Projekt webmcpify (MIT-Lizenz) von Jonas Tüchler. Die Software selbst wird ohne Gewähr („as is“ im Sinne der MIT-Lizenz) unter ihren Lizenzbedingungen bereitgestellt; siehe das</span> <a href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">GitHub-Repository</a>.</p>
   <p><span lang="en">Despite careful control we assume no liability for the content of external links; responsibility lies solely with their operators.</span><span lang="de">Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.</span></p>
+
+  <h2><span lang="en">Privacy</span><span lang="de">Datenschutz</span></h2>
+  <p><span lang="en">Information on the processing of personal data on this website is provided in the</span><span lang="de">Informationen zur Verarbeitung personenbezogener Daten auf dieser Website finden Sie in der</span> <a href="/privacy.html"><span lang="en">privacy policy</span><span lang="de">Datenschutzerklärung</span></a>.</p>
 </div>
 <script>
+  // Persistence only on explicit request (toggle click), never on the
+  // automatic first-load detection (§165(3) TKG strictly-necessary storage).
   const setLang = (l) => {
     document.documentElement.dataset.lang = l;
     document.documentElement.lang = l;
-    try { localStorage.setItem("wmcp-lang", l); } catch {}
     document.querySelectorAll("[data-set-lang]").forEach(b =>
       b.setAttribute("aria-pressed", String(b.dataset.setLang === l)));
+    document.querySelectorAll(".lang-toggle").forEach(g =>
+      g.setAttribute("aria-label", l === "de" ? "Sprache" : "Language"));
   };
+  const persistLang = (l) => { try { localStorage.setItem("wmcp-lang", l); } catch {} };
   document.querySelectorAll("[data-set-lang]").forEach(b =>
-    b.addEventListener("click", () => setLang(b.dataset.setLang)));
+    b.addEventListener("click", () => { setLang(b.dataset.setLang); persistLang(b.dataset.setLang); }));
   let saved = null;
   try { saved = localStorage.getItem("wmcp-lang"); } catch {}
   setLang(saved || (navigator.language?.startsWith("de") ? "de" : "en"));

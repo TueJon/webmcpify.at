@@ -74,6 +74,9 @@ const TOOLS = [
         document.documentElement.dataset.lang = language;
         document.documentElement.lang = language;
       }
+      // A tool call is an explicit request, so persisting is the §165(3) TKG
+      // exempt case — page setLang() itself deliberately no longer stores.
+      try { localStorage.setItem('wmcp-lang', language); } catch {}
       return `Page language switched to ${language === 'de' ? 'German' : 'English'}.`;
     },
   },
