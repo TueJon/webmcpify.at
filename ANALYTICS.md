@@ -107,10 +107,17 @@ Mechanics:
 - **Withdrawal**: a "Cookie settings" button on every page reopens the banner
   with the stored selection (focus moves to the first control; it returns to
   the opener on save). Revoking Statistics sets `ga-disable-<id>` and expires
-  `_ga*`; revoking Marketing expires `_gcl*`; either pushes a Consent Mode
+  `_ga`/`_ga_*`; revoking Marketing expires `_gcl_*` and `_gac_*`/`_gac_gb_*`
+  (the Ads attribution family an ad click sets); either pushes a Consent Mode
   `update` — only to the tag this site installed (own sentinel, not any
   `window.gtag`). A `storage` listener mirrors grant/withdrawal into other
   open tabs without writing back.
+- **Withdrawal during the tag download**: gtag.js loads asynchronously, so a
+  consent change can land while the queued commands are still unprocessed.
+  Appending a denial there would let gtag process the wider grant (and its
+  click-ID page location) first, so `reviseQueued()` instead rewrites the
+  pending redaction/update/config commands in place; once gtag.js owns the
+  queue (it replaces `dataLayer.push`), the normal append path takes over.
 - **Consent Mode v2**: `installAnalytics()` queues Google's documented
   basic-mode sequence before injecting the script — fully denied
   `consent default`, `ads_data_redaction` when Marketing is denied, then the
@@ -122,7 +129,9 @@ Mechanics:
 
 `analytics.js` (post-consent only):
 
-- loads `gtag.js` directly from `www.googletagmanager.com`;
+- loads `gtag.js` directly from `www.googletagmanager.com`, with
+  `referrerpolicy="origin"` and only after the address bar has been cleaned,
+  so the request itself cannot carry a click ID as `Referer`;
 - reports a PII-safe `page_location`: origin + path + known attribution
   parameters only — `utm_*` always, Ads click IDs (`gclid` & co.) only with
   Marketing granted; arbitrary query parameters and fragments never reach

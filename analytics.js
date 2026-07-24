@@ -128,36 +128,85 @@ export function installAnalytics(options = {}) {
 
   const dataLayer = win.dataLayer ?? [];
   win.dataLayer = dataLayer;
+  const initialPush = dataLayer.push;
   // gtag.js only processes `arguments` objects pushed to dataLayer — plain
   // arrays are silently ignored. Keep the canonical function form.
   function gtag() {
     dataLayer.push(arguments);
   }
   win.gtag = gtag;
+  // Same shape, but returned instead of pushed, so a queued command can be
+  // swapped out again while it is still ours (see reviseQueued below).
+  function command() {
+    return arguments;
+  }
 
   // Google's documented basic-mode sequence: fully denied defaults first,
   // then the visitor's actual choice as an update — all queued before the
-  // script is injected, so nothing fires pre-consent.
+  // script is injected, so nothing fires pre-consent. The redaction command
+  // is always queued (not only when denied) so a later consent change can
+  // rewrite it in place.
+  let redactionEntry = command('set', 'ads_data_redaction', consent.marketing !== true);
+  let consentEntry = command('consent', 'update', consentStateFor(consent));
+  let configEntry = command(
+    'config',
+    measurementId,
+    analyticsConfig(sentPageLocation(loc.href, consent)),
+  );
   gtag('consent', 'default', consentStateFor({}));
-  if (consent.marketing !== true) {
-    // Defense in depth: redact Ads click identifiers in whatever the tag
-    // sends while the Marketing signals are denied.
-    gtag('set', 'ads_data_redaction', true);
-  }
-  gtag('consent', 'update', consentStateFor(consent));
+  dataLayer.push(redactionEntry);
+  dataLayer.push(consentEntry);
   gtag('js', new Date());
-  gtag('config', measurementId, analyticsConfig(sentPageLocation(loc.href, consent)));
+  dataLayer.push(configEntry);
 
-  const tag = doc.createElement('script');
-  tag.async = true;
-  tag.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
-  doc.head.append(tag);
+  let tagLoaded = false;
+  // gtag.js takes the queue over on execution (it replaces dataLayer.push).
+  // Until then every queued command is still ours to rewrite.
+  const queuePending = () => !tagLoaded && dataLayer.push === initialPush;
+  /**
+   * Applies a consent change that arrives while gtag.js is still downloading
+   * by rewriting the pending commands. Appending a denial instead would let
+   * gtag process the wider grant (and its click-ID page location) first.
+   * Returns false once the queue belongs to gtag.js — the caller then sends
+   * a normal consent update.
+   */
+  const reviseQueued = (next) => {
+    if (!queuePending()) return false;
+    const swap = (entry, replacement) => {
+      const index = dataLayer.indexOf(entry);
+      if (index !== -1) dataLayer[index] = replacement;
+      return replacement;
+    };
+    redactionEntry = swap(
+      redactionEntry,
+      command('set', 'ads_data_redaction', next.marketing !== true),
+    );
+    consentEntry = swap(consentEntry, command('consent', 'update', consentStateFor(next)));
+    configEntry = swap(
+      configEntry,
+      command('config', measurementId, analyticsConfig(sentPageLocation(loc.href, next))),
+    );
+    return true;
+  };
 
   const cleanedPath = cleanedBrowserPath(loc.href);
   const currentPath = `${loc.pathname}${loc.search}${loc.hash}`;
   if (cleanedPath !== currentPath && browserHistory.replaceState) {
     browserHistory.replaceState(browserHistory.state ?? null, '', cleanedPath);
   }
+
+  // Only start the cross-origin request once the address bar is clean: the
+  // Referer this request carries is the document URL, which would otherwise
+  // still hold the click ID under a Statistics-only grant. The element's own
+  // referrer policy trims it to the bare origin either way.
+  const tag = doc.createElement('script');
+  tag.async = true;
+  tag.referrerPolicy = 'origin';
+  tag.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
+  tag.addEventListener?.('load', () => {
+    tagLoaded = true;
+  });
+  doc.head.append(tag);
 
   const track = (eventName) => queueAnalyticsEvent(gtag, eventName);
   win.addEventListener('webmcpify:install-copy', () => {
@@ -169,6 +218,6 @@ export function installAnalytics(options = {}) {
     }
   }, { capture: true });
 
-  win.__webmcpifyAnalytics = Object.freeze({ measurementId, track });
+  win.__webmcpifyAnalytics = Object.freeze({ measurementId, track, reviseQueued });
   return win.__webmcpifyAnalytics;
 }

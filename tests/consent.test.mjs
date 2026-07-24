@@ -333,7 +333,56 @@ test('transitions on one page: reject → statistics → all → statistics → 
   assert.equal(installs.length, 1);
 });
 
-test('revoking Marketing keeps analytics running and expires only _gcl cookies', () => {
+test('a withdrawal mid-download revises the pending queue, never appending a late denial', () => {
+  const { doc, win, statisticsBox, save } = fakeDom();
+  const storage = fakeStorage();
+  const revisions = [];
+  const gtagCalls = [];
+  let queueOwnedByGtag = false;
+  const api = initConsent({
+    win,
+    doc,
+    storage,
+    now: () => 'ts',
+    install: () => {
+      win.gtag = (...args) => gtagCalls.push(args);
+      win.__webmcpifyAnalytics = {
+        measurementId: 'G-45GCGY7SQN',
+        reviseQueued: (next) => {
+          if (queueOwnedByGtag) return false;
+          revisions.push({ statistics: next.statistics, marketing: next.marketing });
+          return true;
+        },
+      };
+    },
+  });
+
+  // Grant everything, then drop Marketing while gtag.js is still downloading:
+  // the change must rewrite the queue, not append after the wider grant.
+  api.grantAll();
+  assert.deepEqual(gtagCalls, []);
+  assert.equal(revisions.length, 0);
+
+  checkStatistics(statisticsBox, true); // marketing unchecked
+  save.dispatchEvent(new Event('click'));
+  assert.deepEqual(revisions, [{ statistics: true, marketing: false }]);
+  assert.deepEqual(gtagCalls, []); // nothing appended while the queue is ours
+
+  // Once gtag.js owns the queue, the same change appends a normal update.
+  queueOwnedByGtag = true;
+  api.declineAll();
+  assert.deepEqual(gtagCalls, [
+    ['set', 'ads_data_redaction', true],
+    ['consent', 'update', {
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      analytics_storage: 'denied',
+    }],
+  ]);
+});
+
+test('revoking Marketing keeps analytics running and expires only ads cookies', () => {
   const { doc, win, save, statisticsBox } = fakeDom();
   const storage = fakeStorage({
     [CONSENT_KEY]: JSON.stringify({
@@ -475,7 +524,8 @@ test('the settings button reopens with a localized label, stored selection, and 
 });
 
 test('expireAnalyticsCookies matches only real Google cookie families', () => {
-  const cookieString = '_ga=1; _ga_45GCGY7SQN=1; _gcl_au=1; _garden=keep; _gallery=keep; wmcp_other=keep';
+  const cookieString =
+    '_ga=1; _ga_45GCGY7SQN=1; _gcl_au=1; _gac_UA-1=1; _gac_gb_1=1; _garden=keep; _gallery=keep; wmcp_other=keep';
   const makeDoc = () => {
     const writes = [];
     const doc = {};
@@ -488,16 +538,24 @@ test('expireAnalyticsCookies matches only real Google cookie families', () => {
 
   const all = makeDoc();
   assert.deepEqual(expireAnalyticsCookies(all.doc, 'webmcpify.at'), [
-    '_ga', '_ga_45GCGY7SQN', '_gcl_au',
+    '_ga', '_ga_45GCGY7SQN', '_gcl_au', '_gac_UA-1', '_gac_gb_1',
   ]);
-  assert.equal(all.writes.length, 9); // 3 cookies x 3 domain scopes (host == GA domain)
+  assert.equal(all.writes.length, 15); // 5 cookies x 3 domain scopes (host == GA domain)
   assert.ok(all.writes.every((w) => w.includes('expires=Thu, 01 Jan 1970')));
   assert.ok(!all.writes.some((w) => w.startsWith('_garden') || w.startsWith('_gallery')));
 
+  // The statistics matcher must not swallow the _gac_* ads family, and the
+  // ads matcher must cover it — _gac starts with _ga but is a Google Ads
+  // attribution cookie, so it follows the Marketing category.
   const gaOnly = makeDoc();
   assert.deepEqual(expireAnalyticsCookies(gaOnly.doc, 'webmcpify.at', /^_ga(?:_|$)/), [
     '_ga', '_ga_45GCGY7SQN',
   ]);
+  const adsOnly = makeDoc();
+  assert.deepEqual(
+    expireAnalyticsCookies(adsOnly.doc, 'webmcpify.at', /^_(?:gcl|gac)(?:_|$)/),
+    ['_gcl_au', '_gac_UA-1', '_gac_gb_1'],
+  );
 
   // A www host still clears the apex-scoped GA cookie domain.
   const www = makeDoc();

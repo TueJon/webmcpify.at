@@ -146,8 +146,29 @@ stress; Google's June 2026 architecture change).
     chosen-update Consent Mode sequence.
   - Hardening in the same pass: v1-record migration expires the old cookies; a
     `storage` listener mirrors withdrawal across open tabs; consent updates target only
-    the site's own tag instance; cookie expiry matchers tightened to `_ga`/`_gcl`
-    name families.
+    the site's own tag instance; cookie expiry matchers anchored to the `_ga`, `_gcl`
+    and `_gac` name families (so `_garden`-style names survive while the Ads
+    attribution cookies an ad click sets are actually cleared).
+  - A second adversarial review pass then closed four more gaps, two of which could
+    have let a visitor's data reach Google beyond their choice:
+    - **Withdrawal during the tag download.** `gtag.js` loads asynchronously; a consent
+      change in that window used to append a denial *after* the already-queued wider
+      grant, so gtag would process the marketing-granted config (with its click-ID page
+      location) first. The queue is still ours until gtag takes it over, so a change
+      now rewrites the pending commands in place instead of appending.
+    - **Referrer leak.** The tag request was started before the address bar was
+      cleaned, so the `Referer` on that cross-origin request could still carry `gclid`
+      under a Statistics-only grant. The URL is now cleaned first and the script
+      element carries `referrerpolicy="origin"`.
+    - **Equal-weight buttons on wrap.** A wrapping flex row distributes free space per
+      line, so a lone "Allow all" could stretch across a full row and read as the
+      prominent option; the actions are now an equal-column grid that becomes equal
+      full-width rows on narrow screens (verified: 133px × 3 at 1280px, 324px × 3 at
+      500px).
+    - **Policy/behavior mismatches.** The privacy policy claimed each category was
+      independently choosable (it is not — Marketing is additive) and described both
+      localStorage entries with one language-only sentence; both are corrected, and
+      `_gac_*` is now disclosed alongside `_gcl_au`.
 
 ---
 

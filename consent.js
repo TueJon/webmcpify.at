@@ -38,8 +38,12 @@ import {
 
 export const CONSENT_KEY = 'wmcp-consent';
 
+// Statistics writes _ga/_ga_<stream>; the Ads link writes _gcl_* and, on an
+// Ads click landing, the _gac_*/_gac_gb_* attribution cookies. Anchored to
+// the name families so unrelated cookies (_garden, _gallery, …) survive.
 const GA_COOKIES = /^_ga(?:_|$)/;
-const GCL_COOKIES = /^_gcl(?:_|$)/;
+const ADS_COOKIES = /^_(?:gcl|gac)(?:_|$)/;
+const GOOGLE_COOKIES = /^_(?:ga|gcl|gac)(?:_|$)/;
 
 export function readStoredConsent(storage) {
   try {
@@ -75,7 +79,7 @@ export function writeStoredConsent(storage, choice, ts) {
 }
 
 /** Best-effort removal of Google cookies (matcher narrows to one category). */
-export function expireAnalyticsCookies(doc, host, matcher = /^_g(?:a|cl)(?:_|$)/) {
+export function expireAnalyticsCookies(doc, host, matcher = GOOGLE_COOKIES) {
   const names = (doc.cookie || '')
     .split(';')
     .map((part) => part.split('=')[0].trim())
@@ -151,14 +155,20 @@ export function initConsent(options = {}) {
   // unrelated tag), redaction, install, and category cookie cleanup.
   const enforce = (choice) => {
     win[disableFlag] = choice.statistics !== true;
-    if (win.__webmcpifyAnalytics) {
-      win.gtag('set', 'ads_data_redaction', choice.marketing !== true);
-      win.gtag('consent', 'update', consentStateFor(choice));
+    const analytics = win.__webmcpifyAnalytics;
+    if (analytics) {
+      // While gtag.js is still downloading, rewrite the pending queue instead
+      // of appending: an appended denial would arrive after gtag processed the
+      // wider grant it is replacing.
+      if (!analytics.reviseQueued?.(choice)) {
+        win.gtag('set', 'ads_data_redaction', choice.marketing !== true);
+        win.gtag('consent', 'update', consentStateFor(choice));
+      }
     } else if (choice.statistics === true) {
       install({ consent: { statistics: true, marketing: choice.marketing === true } });
     }
     if (choice.statistics !== true) expireAnalyticsCookies(doc, host(), GA_COOKIES);
-    if (choice.marketing !== true) expireAnalyticsCookies(doc, host(), GCL_COOKIES);
+    if (choice.marketing !== true) expireAnalyticsCookies(doc, host(), ADS_COOKIES);
   };
 
   const apply = (choice) => {
