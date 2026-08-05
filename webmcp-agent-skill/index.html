@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebMCP agent skill — webmcpify for Claude Code, Codex, Cursor &amp; Copilot</title>
+<meta name="description" content="webmcpify is a WebMCP agent skill: one command installs it into Claude Code, Codex, Cursor, opencode or Copilot. It inventories your web app, you approve the tool manifest, it integrates document.modelContext tools and verifies each one in real Chrome.">
+<link rel="canonical" href="https://webmcpify.at/webmcp-agent-skill/">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://webmcpify.at/webmcp-agent-skill/">
+<meta property="og:site_name" content="webmcpify">
+<meta property="og:title" content="WebMCP agent skill — webmcpify for Claude Code, Codex, Cursor &amp; Copilot">
+<meta property="og:description" content="One command installs the WebMCP agent skill into your coding agent: inventory, manifest approval, integration, real-browser verification.">
+<meta property="og:image" content="https://webmcpify.at/og.png">
+<meta property="og:image:alt" content="webmcpify — make your web app agent-ready with WebMCP">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="WebMCP agent skill — webmcpify for Claude Code, Codex, Cursor &amp; Copilot">
+<meta name="twitter:description" content="One command installs the WebMCP agent skill into your coding agent: inventory, manifest approval, integration, real-browser verification.">
+<meta name="twitter:image" content="https://webmcpify.at/og.png">
+<meta name="twitter:image:alt" content="webmcpify — make your web app agent-ready with WebMCP">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "webmcpify",
+  "alternateName": "WebMCP agent skill",
+  "url": "https://webmcpify.at/webmcp-agent-skill/",
+  "description": "An agent skill that integrates WebMCP (document.modelContext) into an existing web application: inventory, human manifest approval, integration, real-browser verification, healing.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any (agent skill for Claude Code, Codex, Cursor, opencode, GitHub Copilot and other skill-loading agents)",
+  "license": "https://opensource.org/license/MIT",
+  "softwareRequirements": "A coding agent that loads skills; Chrome 149+ for WebMCP verification",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+  "author": { "@type": "Person", "name": "Jonas Tüchler", "url": "https://jonastuechler.at" },
+  "publisher": { "@type": "Organization", "name": "TWB-Digital OG", "url": "https://twb-digital.at" },
+  "sameAs": ["https://github.com/TueJon/webmcpify"]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "webmcpify", "item": "https://webmcpify.at/" },
+    { "@type": "ListItem", "position": 2, "name": "WebMCP agent skill", "item": "https://webmcpify.at/webmcp-agent-skill/" }
+  ]
+}
+</script>
+<script type="application/ld+json" id="faq-schema">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Which agents can run this skill?", "acceptedAnswer": {"@type": "Answer", "text": "Any coding agent that loads skills: Claude Code, Codex, Cursor, opencode, GitHub Copilot and 70+ more through the skills CLI. The result is vendor-neutral — the integration is plain WebMCP, so any browser agent that speaks the standard can call your tools."}}, {"@type": "Question", "name": "Do I need the Chrome origin trial?", "acceptedAnswer": {"@type": "Answer", "text": "For local development you enable chrome://flags/#enable-webmcp-testing; exposing tools on a production origin needs an origin-trial token. The vendored runtime is feature-detected, so your app behaves identically in browsers without WebMCP."}}, {"@type": "Question", "name": "Will it change code I did not approve?", "acceptedAnswer": {"@type": "Answer", "text": "No. You approve the tool manifest before anything is integrated, every diff hunk must trace back to an approved entry, and a final audit against the baseline commit flags anything else. Files that were already dirty when the run started are never modified."}}, {"@type": "Question", "name": "How is each tool verified?", "acceptedAnswer": {"@type": "Answer", "text": "Every tool is enumerated and executed in real Chrome from the examples recorded in the manifest, asserting both the tool result and the resulting UI state — including the real submit interaction Chrome requires before a mutating declarative form completes."}}]}</script>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+  :root {
+    --bg: oklch(1 0 0); --ink: oklch(0.19 0.02 290); --muted: oklch(0.45 0.03 290);
+    --hairline: oklch(0.9 0.01 290); --primary: oklch(0.49 0.2 290); --primary-ink: oklch(0.4 0.18 290);
+    --tint: oklch(0.965 0.015 290);
+    --font-sans: "Familjen Grotesk", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "Spline Sans Mono", ui-monospace, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font-sans); font-size: 1.0625rem; line-height: 1.62; -webkit-font-smoothing: antialiased; }
+  :where([data-lang="en"]) :where([lang="de"]) { display: none !important; }
+  :where([data-lang="de"]) :where([lang="en"]) { display: none !important; }
+  .wrap { max-width: 760px; margin-inline: auto; padding: clamp(2rem, 6vh, 4rem) clamp(1.25rem, 4vw, 3rem) 4rem; }
+  a { color: var(--primary-ink); }
+  h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+  .sub { color: var(--muted); font: 400 0.85rem var(--font-mono); margin-bottom: 2.2rem; }
+  h2 { font-size: 1.15rem; font-weight: 700; margin: 1.8rem 0 0.6rem; padding-top: 1.4rem; border-top: 1px solid var(--hairline); }
+  h3 { font: 700 0.78rem var(--font-mono); color: var(--muted); letter-spacing: 0.04em; margin: 1.2rem 0 0.4rem; }
+  p { color: var(--ink); max-width: 68ch; margin-bottom: 0.6rem; }
+  .lede { font-size: 1.15rem; }
+  ul, ol { margin: 0.4rem 0 0.8rem 1.3rem; }
+  li { margin-bottom: 0.35rem; max-width: 66ch; }
+  code { font-family: var(--font-mono); font-size: 0.92em; background: var(--tint); padding: 0.1em 0.3em; }
+  .top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 2rem; }
+  .top a.back { text-decoration: none; font-weight: 600; color: var(--ink); }
+  .top a.back:hover { color: var(--primary-ink); }
+  .lang-toggle { display: flex; border: 1px solid var(--ink); overflow: hidden; }
+  .lang-toggle button { font: 600 0.8rem var(--font-mono); background: var(--bg); border: 0; color: var(--muted); padding: 0.45rem 0.75rem; cursor: pointer; }
+  .lang-toggle button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+  /* Command block (same shape as the start page's install block, so the
+     measured copy button behaves identically here). */
+  .cmd { border: 1px solid var(--ink); margin: 0.7rem 0 1.2rem; }
+  .cmd-label {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 0.55rem 0.95rem; border-bottom: 1px solid var(--ink);
+    font: 700 0.75rem var(--font-mono); letter-spacing: 0.05em; color: var(--muted);
+  }
+  .cmd pre { padding: 1rem 0.95rem; font-size: 0.86rem; line-height: 1.65; overflow-x: auto; background: var(--tint); }
+  .cmd .c { color: var(--muted); }
+  .cmd .p { color: var(--primary-ink); font-weight: 700; }
+  .copy-btn {
+    font: 700 0.8rem var(--font-mono); color: var(--ink); background: var(--bg);
+    border: 1px solid var(--ink); padding: 0.4rem 0.75rem; cursor: pointer;
+  }
+  .copy-btn:hover { background: var(--ink); color: var(--bg); }
+  .pipeline { font: 400 0.8rem var(--font-mono); background: var(--tint); padding: 0.9rem; overflow-x: auto; margin: 0.6rem 0 1rem; }
+  .faq details { border-top: 1px solid var(--hairline); padding: 0.8rem 0; }
+  .faq summary { font-weight: 700; cursor: pointer; }
+  .faq p { color: var(--muted); margin-top: 0.4rem; }
+  .toast {
+    position: fixed; inset-block-end: 5.5rem; inset-inline: 0; margin-inline: auto; width: max-content;
+    background: var(--ink); color: var(--bg); font: 700 0.85rem var(--font-mono);
+    padding: 0.6rem 1rem; opacity: 0; transition: opacity 0.18s; pointer-events: none; z-index: 40;
+  }
+  .toast.show { opacity: 1; }
+  /* Consent banner (shared with the start page): non-modal, all actions
+     identical .btn styling — equal visual weight by design. */
+  .btn {
+    display: inline-flex; align-items: center; background: var(--ink); color: var(--bg);
+    font-family: var(--font-sans); font-weight: 700; font-size: 0.9rem;
+    padding: 0.6rem 1rem; border: 0; cursor: pointer; text-decoration: none;
+  }
+  .btn:hover { background: var(--primary); }
+  .foot-btn {
+    font: inherit; font-size: 0.9rem; color: var(--muted); background: none; border: 0;
+    padding: 0; cursor: pointer; text-decoration: underline;
+  }
+  .foot-btn:hover { color: var(--ink); }
+  .consent { position: fixed; inset: auto 0 0 0; z-index: 50; background: var(--bg); border-top: 2px solid var(--ink); }
+  .consent-inner {
+    max-width: 760px; margin-inline: auto; padding: 1rem clamp(1.25rem, 4vw, 3rem);
+    display: flex; flex-wrap: wrap; gap: 0.9rem 2rem; align-items: center;
+    max-height: calc(100dvh - 2rem); overflow-y: auto;
+  }
+  .consent-text { font-size: 0.88rem; max-width: 62ch; flex: 1 1 34ch; margin: 0; }
+  .consent-controls { display: flex; flex-direction: column; gap: 0.7rem; }
+  .consent-cats { display: flex; gap: 1.2rem; flex-wrap: wrap; border: 0; padding: 0; margin: 0; }
+  .consent-cat { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 600; font-size: 0.92rem; cursor: pointer; }
+  .consent-cat:has(input:disabled) { color: var(--muted); cursor: not-allowed; }
+  .consent-cat input { width: 1.05rem; height: 1.05rem; accent-color: var(--primary); margin: 0; }
+  /* Grid, not wrapping flex: a wrapped flex line distributes free space on
+     its own, so a lone "Allow all" would stretch across a full row and read
+     as the prominent option. Equal columns, or equal full-width rows. */
+  .consent-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8rem; }
+  .consent-actions .btn { justify-content: center; }
+  @media (max-width: 560px) { .consent-actions { grid-template-columns: minmax(0, 1fr); } }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="/">← webmcpify.at</a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-set-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-set-lang="de" aria-pressed="false">DE</button>
+    </div>
+  </div>
+
+  <h1><span lang="en">WebMCP agent skill</span><span lang="de">WebMCP Agent-Skill</span></h1>
+  <p class="sub">webmcpify · MIT · <span lang="en">Claude Code · Codex · Cursor · opencode · Copilot</span><span lang="de">Claude Code · Codex · Cursor · opencode · Copilot</span></p>
+
+  <p class="lede"><span lang="en"><b>webmcpify</b> is an agent skill: a portable instruction set you install into your
+  coding agent, which then makes an existing web application agent-ready by integrating
+  <a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP</a>
+  (<code>document.modelContext</code>) end to end — and verifies every tool in a real
+  browser instead of assuming it works.</span>
+  <span lang="de"><b>webmcpify</b> ist ein Agent-Skill: ein portables Instruction-Set, das du in deinen
+  Coding-Agent installierst. Er macht eine bestehende Web-App agent-ready, indem er
+  <a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP</a>
+  (<code>document.modelContext</code>) vollständig integriert — und jedes Tool im echten
+  Browser verifiziert, statt es anzunehmen.</span></p>
+
+  <p><span lang="en">Two different things are often called the same name, so to be precise: this skill is
+  the thing that <em>writes</em> the WebMCP integration into your codebase. It is not a
+  browser agent, and not a classic MCP server — no separate process, no new endpoint,
+  no protocol bridge. The tools it registers live in your page and call the code paths
+  your own UI already uses.</span>
+  <span lang="de">Zwei verschiedene Dinge tragen oft denselben Namen, deshalb präzise: Dieser Skill
+  <em>schreibt</em> die WebMCP-Integration in deine Codebase. Er ist kein Browser-Agent
+  und kein klassischer MCP-Server — kein separater Prozess, kein neuer Endpoint, keine
+  Protokoll-Bridge. Die registrierten Tools leben in deiner Seite und rufen genau die
+  Code-Pfade auf, die deine UI ohnehin nutzt.</span></p>
+
+  <h2><span lang="en">Install it in your agent</span><span lang="de">In deinen Agent installieren</span></h2>
+
+  <h3><span lang="en">Any skill-loading agent</span><span lang="de">Jeder Skill-fähige Agent</span></h3>
+  <p><span lang="en">Claude Code, Codex, Cursor, opencode, GitHub Copilot and
+  <a href="https://github.com/vercel-labs/skills" target="_blank" rel="noopener">70+ more</a>:</span>
+  <span lang="de">Claude Code, Codex, Cursor, opencode, GitHub Copilot und
+  <a href="https://github.com/vercel-labs/skills" target="_blank" rel="noopener">70+ weitere</a>:</span></p>
+  <div class="cmd">
+    <div class="cmd-label">
+      <span>TERMINAL</span>
+      <button class="copy-btn" type="button" data-copy="npx skills add TueJon/webmcpify">
+        <span lang="en">COPY</span><span lang="de">KOPIEREN</span>
+      </button>
+    </div>
+    <pre><code><span class="c">$</span> npx skills add TueJon/webmcpify
+<span class="c">$</span> claude          <span class="c"># or: codex · cursor · opencode · copilot</span>
+<span class="c">&gt;</span> <span class="p">/webmcpify</span></code></pre>
+  </div>
+
+  <h3><span lang="en">Claude Code, as a plugin</span><span lang="de">Claude Code, als Plugin</span></h3>
+  <div class="cmd">
+    <div class="cmd-label">
+      <span>CLAUDE CODE</span>
+      <button class="copy-btn" type="button" data-copy="/plugin marketplace add TueJon/webmcpify">
+        <span lang="en">COPY</span><span lang="de">KOPIEREN</span>
+      </button>
+    </div>
+    <pre><code><span class="c">&gt;</span> <span class="p">/plugin marketplace add TueJon/webmcpify</span>
+<span class="c">&gt;</span> <span class="p">/plugin install webmcpify@webmcpify</span></code></pre>
+  </div>
+
+  <h3><span lang="en">Manually</span><span lang="de">Manuell</span></h3>
+  <p><span lang="en">Copy <code>skills/webmcpify/</code> from the
+  <a data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">repository</a>
+  into your agent's skills directory, or simply point your agent at
+  <code>SKILL.md</code>. The skill directory is self-contained: pipeline, phase guides,
+  the vendorable runtime and the verification template all ship inside it.</span>
+  <span lang="de">Kopiere <code>skills/webmcpify/</code> aus dem
+  <a data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">Repository</a>
+  in das Skills-Verzeichnis deines Agents, oder zeige deinem Agent einfach
+  <code>SKILL.md</code>. Das Skill-Verzeichnis ist self-contained: Pipeline,
+  Phasen-Guides, vendorbares Runtime und Verifikations-Template liegen darin.</span></p>
+
+  <h2><span lang="en">What it runs</span><span lang="de">Was es ausführt</span></h2>
+  <div class="pipeline">DETECT ─▶ INVENTORY ─▶ [<span lang="en">you approve the tool manifest</span><span lang="de">du gibst das Tool-Manifest frei</span>] ─▶ INTEGRATE ─▶ VERIFY ─▶ HEAL ─▶ AUDIT</div>
+  <ul>
+    <li><span lang="en"><b>Inventory</b> maps the codebase into areas and deep-reads one area per iteration, so a
+    500-file SaaS is processed area by area instead of one context-busting sweep.</span>
+    <span lang="de"><b>Inventory</b> zerlegt die Codebase in Areas und liest pro Iteration eine Area tief —
+    ein SaaS mit 500 Dateien wird Area für Area verarbeitet, nicht in einem Kontext-Sweep.</span></li>
+    <li><span lang="en"><b>The gate</b> is yours: names, schemas, examples and a read-only/mutating
+    classification for every proposed tool, before a single line is written.</span>
+    <span lang="de"><b>Das Gate</b> gehört dir: Namen, Schemas, Beispiele und eine Read-only/Mutating-
+    Klassifikation für jedes vorgeschlagene Tool, bevor eine Zeile geschrieben wird.</span></li>
+    <li><span lang="en"><b>Integrate</b> works in small batches (one area or ≤5 tools), each built and typechecked
+    independently.</span>
+    <span lang="de"><b>Integrate</b> arbeitet in kleinen Batches (eine Area oder ≤5 Tools), jeder einzeln
+    gebaut und typgeprüft.</span></li>
+    <li><span lang="en"><b>Verify and heal</b> iterate per tool with attempt caps and honest escalation instead of
+    infinite loops.</span>
+    <span lang="de"><b>Verify und Heal</b> iterieren pro Tool mit Attempt-Caps und ehrlicher Eskalation statt
+    Endlosschleifen.</span></li>
+    <li><span lang="en"><b>Resumable:</b> all state lives in <code>.webmcpify/manifest.json</code>, so a run survives
+    context windows, sessions, and even a switch of agent.</span>
+    <span lang="de"><b>Resumable:</b> der ganze State liegt in <code>.webmcpify/manifest.json</code> — ein Run
+    übersteht Kontextfenster, Sessions und sogar einen Agent-Wechsel.</span></li>
+  </ul>
+
+  <h2><span lang="en">What it will not do</span><span lang="de">Was es nicht tut</span></h2>
+  <ul>
+    <li><span lang="en">Touch unrelated logic or UI — every diff hunk traces to a manifest entry, and files that
+    were already dirty when the run started are never modified or reverted.</span>
+    <span lang="de">Fremde Logik oder UI anfassen — jeder Diff-Hunk ist einem Manifest-Eintrag zuordenbar,
+    und Dateien, die vor dem Run dirty waren, werden nie geändert oder zurückgesetzt.</span></li>
+    <li><span lang="en">Expose mutating tools without your explicit per-tool approval; destructive or payment
+    actions are never exposed in a first integration.</span>
+    <span lang="de">Mutierende Tools ohne explizite Freigabe pro Tool bereitstellen; destruktive oder
+    Zahlungs-Aktionen werden in einer ersten Integration nie exponiert.</span></li>
+    <li><span lang="en">Move the trust boundary — tools call the code paths your UI already uses: same
+    endpoints, same validation, same auth. Your server stays the only trust boundary.</span>
+    <span lang="de">Die Trust Boundary verschieben — Tools rufen die Code-Pfade auf, die deine UI ohnehin
+    nutzt: gleiche Endpoints, gleiche Validierung, gleiche Auth. Dein Server bleibt die
+    einzige Trust Boundary.</span></li>
+    <li><span lang="en">Add a runtime dependency — a small MIT runtime is vendored into your repo, fully
+    feature-detected, so your app is behaviorally unchanged in browsers without WebMCP.</span>
+    <span lang="de">Eine Runtime-Dependency hinzufügen — ein kleines MIT-Runtime wird ins Repo vendored,
+    vollständig feature-detected: ohne WebMCP verhält sich deine App unverändert.</span></li>
+  </ul>
+
+  <h2>FAQ</h2>
+  <div class="faq">
+    <details>
+      <summary><span lang="en">Which agents can run this skill?</span><span lang="de">Welche Agents können diesen Skill ausführen?</span></summary>
+      <p><span lang="en">Any coding agent that loads skills: Claude Code, Codex, Cursor, opencode, GitHub Copilot and 70+ more through the skills CLI. The result is vendor-neutral — the integration is plain WebMCP, so any browser agent that speaks the standard can call your tools.</span>
+      <span lang="de">Jeder Coding-Agent, der Skills lädt: Claude Code, Codex, Cursor, opencode, GitHub Copilot und über die Skills-CLI 70+ weitere. Das Ergebnis ist herstellerneutral — die Integration ist reines WebMCP, jeder Browser-Agent, der den Standard spricht, kann deine Tools aufrufen.</span></p>
+    </details>
+    <details>
+      <summary><span lang="en">Do I need the Chrome origin trial?</span><span lang="de">Brauche ich den Chrome Origin Trial?</span></summary>
+      <p><span lang="en">For local development you enable chrome://flags/#enable-webmcp-testing; exposing tools on a production origin needs an origin-trial token. The vendored runtime is feature-detected, so your app behaves identically in browsers without WebMCP.</span>
+      <span lang="de">Für lokale Entwicklung aktivierst du chrome://flags/#enable-webmcp-testing; Tools auf einem Produktions-Origin brauchen ein Origin-Trial-Token. Das vendored Runtime ist feature-detected — ohne WebMCP verhält sich deine App identisch.</span></p>
+    </details>
+    <details>
+      <summary><span lang="en">Will it change code I did not approve?</span><span lang="de">Ändert es Code, den ich nicht freigegeben habe?</span></summary>
+      <p><span lang="en">No. You approve the tool manifest before anything is integrated, every diff hunk must trace back to an approved entry, and a final audit against the baseline commit flags anything else. Files that were already dirty when the run started are never modified.</span>
+      <span lang="de">Nein. Du gibst das Tool-Manifest frei, bevor irgendetwas integriert wird, jeder Diff-Hunk muss auf einen freigegebenen Eintrag zurückführbar sein, und ein Audit gegen den Baseline-Commit flaggt alles andere. Dateien, die vor dem Run dirty waren, werden nie geändert.</span></p>
+    </details>
+    <details>
+      <summary><span lang="en">How is each tool verified?</span><span lang="de">Wie wird jedes Tool verifiziert?</span></summary>
+      <p><span lang="en">Every tool is enumerated and executed in real Chrome from the examples recorded in the manifest, asserting both the tool result and the resulting UI state — including the real submit interaction Chrome requires before a mutating declarative form completes.</span>
+      <span lang="de">Jedes Tool wird im echten Chrome aus den im Manifest hinterlegten Beispielen aufgezählt und ausgeführt, geprüft werden Tool-Ergebnis und resultierender UI-State — inklusive des echten Submit-Klicks, den Chrome bei mutierenden Declarative Forms verlangt.</span></p>
+    </details>
+  </div>
+
+  <h2><span lang="en">Status &amp; requirements</span><span lang="de">Status &amp; Voraussetzungen</span></h2>
+  <p><span lang="en">WebMCP is an origin trial from Chrome 149 onwards, and its API surface has already
+  changed during the trial (the testing API was removed in July 2026;
+  <code>navigator</code> → <code>document</code>). webmcpify isolates that churn in one
+  vendored file, probes for the current enumeration/execution surface, and treats
+  Google's live
+  <a href="https://github.com/GoogleChrome/modern-web-guidance" target="_blank" rel="noopener">modern-web-guidance</a>
+  as the source of current best practice at integration time.</span>
+  <span lang="de">WebMCP läuft ab Chrome 149 als Origin Trial, und die API-Oberfläche hat sich während
+  des Trials schon geändert (Testing-API im Juli 2026 entfernt;
+  <code>navigator</code> → <code>document</code>). webmcpify kapselt diese Bewegung in
+  einer vendored Datei, probt die aktuelle Enumeration/Execution-Oberfläche und nutzt
+  Googles live
+  <a href="https://github.com/GoogleChrome/modern-web-guidance" target="_blank" rel="noopener">modern-web-guidance</a>
+  als Quelle der aktuellen Best Practices zum Integrationszeitpunkt.</span></p>
+
+  <h2><span lang="en">Links</span><span lang="de">Links</span></h2>
+  <ul>
+    <li><a data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">github.com/TueJon/webmcpify</a> — <span lang="en">source, skill, runtime, verification harness</span><span lang="de">Quellcode, Skill, Runtime, Verifikations-Harness</span></li>
+    <li><a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP proposal</a> — <span lang="en">the W3C Web Machine Learning CG spec draft</span><span lang="de">der Spec-Draft der W3C Web Machine Learning CG</span></li>
+    <li><a href="https://developer.chrome.com/docs/ai/webmcp" target="_blank" rel="noopener">Chrome WebMCP docs</a> — <span lang="en">origin-trial details</span><span lang="de">Details zum Origin Trial</span></li>
+    <li><a href="/"><span lang="en">webmcpify.at — the project page (itself agent-ready)</span><span lang="de">webmcpify.at — die Projektseite (selbst agent-ready)</span></a></li>
+  </ul>
+
+  <p style="margin-top:1.6rem"><a class="btn" data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener"><span lang="en">Read the source ↗</span><span lang="de">Quellcode lesen ↗</span></a></p>
+
+  <h2><span lang="en">Legal</span><span lang="de">Rechtliches</span></h2>
+  <p><a href="/imprint.html"><span lang="en">Imprint</span><span lang="de">Impressum</span></a> ·
+  <a href="/privacy.html"><span lang="en">Privacy</span><span lang="de">Datenschutz</span></a> ·
+  <button type="button" class="foot-btn" data-consent-open hidden><span lang="en">Cookie settings</span><span lang="de">Cookie-Einstellungen</span></button></p>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="consent" id="consent" role="region" aria-label="Cookie consent" hidden>
+  <div class="consent-inner">
+    <p class="consent-text">
+      <span lang="en">With your consent we process usage data in two separate ways.
+      <b>Statistics</b>: Google Analytics 4 measures how this page is used (cookies
+      <code>_ga</code>, <code>_ga_*</code>). <b>Marketing</b>: usage signals are
+      additionally shared with our linked Google Ads account for conversion attribution
+      and audience measurement (cookie <code>_gcl_au</code> and related Ads signals).
+      Personalized advertising stays off in every case. TWB-Digital OG is the
+      controller; you can change or withdraw your choice at any time via "Cookie
+      settings" at the bottom of each page. Nothing is loaded and no cookies
+      are set for a category unless you enable it. Details in the
+      <a href="/privacy.html">privacy policy</a>.</span>
+      <span lang="de">Mit Ihrer Einwilligung verarbeiten wir Nutzungsdaten auf zwei
+      getrennten Wegen. <b>Statistik</b>: Google Analytics 4 misst die Nutzung dieser
+      Seite (Cookies <code>_ga</code>, <code>_ga_*</code>). <b>Marketing</b>:
+      Nutzungssignale werden zusätzlich mit unserem verknüpften Google-Ads-Konto zur
+      Conversion-Zuordnung und Zielgruppenmessung geteilt (Cookie <code>_gcl_au</code>
+      und verwandte Ads-Signale). Personalisierte Werbung bleibt in jedem Fall
+      deaktiviert. Verantwortlicher ist die TWB-Digital OG; Sie können Ihre Wahl
+      jederzeit über „Cookie-Einstellungen“ am Ende jeder Seite ändern oder widerrufen.
+      Ohne Aktivierung wird für die jeweilige Kategorie nichts geladen und
+      kein Cookie gesetzt. Details in der
+      <a href="/privacy.html">Datenschutzerklärung</a>.</span>
+    </p>
+    <div class="consent-controls">
+      <fieldset class="consent-cats">
+        <legend class="sr-only"><span lang="en">Consent categories</span><span lang="de">Einwilligungskategorien</span></legend>
+        <label class="consent-cat">
+          <input type="checkbox" data-consent-cat="statistics">
+          <span lang="en">Statistics</span><span lang="de">Statistik</span>
+        </label>
+        <label class="consent-cat">
+          <input type="checkbox" data-consent-cat="marketing" disabled>
+          <span lang="en">Marketing (requires Statistics)</span><span lang="de">Marketing (setzt Statistik voraus)</span>
+        </label>
+      </fieldset>
+      <div class="consent-actions">
+        <button type="button" class="btn" data-consent-decline><span lang="en">Reject all</span><span lang="de">Alle ablehnen</span></button>
+        <button type="button" class="btn" data-consent-save><span lang="en">Save choices</span><span lang="de">Auswahl speichern</span></button>
+        <button type="button" class="btn" data-consent-accept><span lang="en">Allow all</span><span lang="de">Alle erlauben</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  // Persistence only on explicit request (toggle click), never on the
+  // automatic first-load detection (§165(3) TKG strictly-necessary storage).
+  const setLang = (l) => {
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    document.querySelectorAll("[data-set-lang]").forEach(b =>
+      b.setAttribute("aria-pressed", String(b.dataset.setLang === l)));
+    document.querySelectorAll(".lang-toggle").forEach(g =>
+      g.setAttribute("aria-label", l === "de" ? "Sprache" : "Language"));
+  };
+  const persistLang = (l) => { try { localStorage.setItem("wmcp-lang", l); } catch {} };
+  document.querySelectorAll("[data-set-lang]").forEach(b =>
+    b.addEventListener("click", () => { setLang(b.dataset.setLang); persistLang(b.dataset.setLang); }));
+  let saved = null;
+  try { saved = localStorage.getItem("wmcp-lang"); } catch {}
+  setLang(saved || (navigator.language?.startsWith("de") ? "de" : "en"));
+
+  const toast = document.getElementById("toast");
+  document.querySelectorAll("[data-copy]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      let ok = true;
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy);
+      } catch {
+        ok = false;
+        const pre = btn.closest("div")?.parentElement?.querySelector("pre");
+        if (pre) {
+          const range = document.createRange();
+          range.selectNodeContents(pre);
+          const sel = getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+          try { ok = document.execCommand("copy"); } catch {}
+        }
+      }
+      if (ok) {
+        window.dispatchEvent(new CustomEvent("webmcpify:install-copy"));
+        // Text is inserted on show so role="status" actually announces it.
+        toast.textContent = document.documentElement.lang === "de" ? "Kopiert ✓" : "Copied ✓";
+        toast.classList.add("show");
+        setTimeout(() => { toast.classList.remove("show"); toast.textContent = ""; }, 1800);
+      }
+    });
+  });
+</script>
+<script type="module" src="/consent.js"></script>
+<script type="module" src="/webmcp/site-tools.js"></script>
+</body>
+</html>

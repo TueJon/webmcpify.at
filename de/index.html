@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>webmcpify — mach deine Web-App agent-ready mit WebMCP</title>
-<meta name="description" content="webmcpify verbindet deine bestehende Web-App mit WebMCP: Inventar, Freigabe, Integration, Verifikation im echten Browser. Open Source, MIT.">
+<title>webmcpify — der WebMCP-Agent-Skill, der deine Web-App agent-ready macht</title>
+<meta name="description" content="webmcpify ist ein Agent-Skill, der deine bestehende Web-App mit WebMCP verbindet: Inventar, Freigabe, Integration, Verifikation im echten Browser. Open Source, MIT.">
 <link rel="canonical" href="https://webmcpify.at/de/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://webmcpify.at/de/">
 <meta property="og:site_name" content="webmcpify">
-<meta property="og:title" content="webmcpify — mach deine Web-App agent-ready mit WebMCP">
-<meta property="og:description" content="webmcpify verbindet deine bestehende Web-App mit WebMCP: Inventar, Freigabe, Integration, Verifikation im echten Browser. Open Source, MIT.">
+<meta property="og:title" content="webmcpify — der WebMCP-Agent-Skill, der deine Web-App agent-ready macht">
+<meta property="og:description" content="webmcpify ist ein Agent-Skill, der deine bestehende Web-App mit WebMCP verbindet: Inventar, Freigabe, Integration, Verifikation im echten Browser. Open Source, MIT.">
 <meta property="og:image" content="https://webmcpify.at/og.png">
 <meta property="og:image:alt" content="webmcpify — mach deine Web-App agent-ready mit WebMCP">
 <meta property="og:image:width" content="1200">
@@ -18,8 +18,8 @@
 <meta property="og:locale" content="de_AT">
 <meta property="og:locale:alternate" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="webmcpify — mach deine Web-App agent-ready mit WebMCP">
-<meta name="twitter:description" content="webmcpify verbindet deine bestehende Web-App mit WebMCP: Inventar, Freigabe, Integration, Verifikation im echten Browser. Open Source, MIT.">
+<meta name="twitter:title" content="webmcpify — der WebMCP-Agent-Skill, der deine Web-App agent-ready macht">
+<meta name="twitter:description" content="webmcpify ist ein Agent-Skill, der deine bestehende Web-App mit WebMCP verbindet: Inventar, Freigabe, Integration, Verifikation im echten Browser. Open Source, MIT.">
 <meta name="twitter:image" content="https://webmcpify.at/og.png">
 <meta name="twitter:image:alt" content="webmcpify — mach deine Web-App agent-ready mit WebMCP">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -35,9 +35,9 @@
   "@type": "SoftwareApplication",
   "name": "webmcpify",
   "url": "https://webmcpify.at/",
-  "description": "webmcpify wires your existing web app into WebMCP: inventory, approval, integration, real-browser verification. Open source, MIT.",
+  "description": "webmcpify is an agent skill that wires your existing web app into WebMCP: inventory, approval, integration, real-browser verification. Open source, MIT.",
   "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Any (agent skill for Claude Code and compatible coding agents)",
+  "operatingSystem": "Any (agent skill for Claude Code, Codex, Cursor, opencode, GitHub Copilot and other skill-loading agents)",
   "license": "https://opensource.org/license/MIT",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
   "author": { "@type": "Person", "name": "Jonas Tüchler", "url": "https://jonastuechler.at" },
@@ -45,7 +45,7 @@
   "sameAs": ["https://github.com/TueJon/webmcpify"]
 }
 </script>
-<script type="application/ld+json" id="faq-schema">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Was ist WebMCP?", "acceptedAnswer": {"@type": "Answer", "text": "Ein vorgeschlagener Webstandard (W3C Web Machine Learning CG), mit dem eine Seite typisierte Tools registriert, die Browser-KI-Agents aufrufen können, statt das DOM zu scrapen. Läuft aktuell als Chrome Origin Trial."}}, {"@type": "Question", "name": "Fasst webmcpify Code an, den ich nicht freigegeben habe?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Jeder Diff-Hunk muss einem freigegebenen Tool oder dokumentiertem Setup zuordenbar sein; alles andere flaggt die Audit-Phase im Report. Dateien, die vor dem Run dirty waren, werden nie angefasst."}}, {"@type": "Question", "name": "Ist das ein Sicherheitsrisiko für meine App?", "acceptedAnswer": {"@type": "Answer", "text": "Tools dürfen nur Code-Pfade aufrufen, die deine UI ohnehin nutzt: gleiche Endpoints, gleiche Validierung, gleiche Auth. Dein Server bleibt die einzige Trust Boundary, und mutierende Tools brauchen explizite Freigabe pro Tool."}}, {"@type": "Question", "name": "Welche Agents können webmcpify ausführen, und welche das Ergebnis nutzen?", "acceptedAnswer": {"@type": "Answer", "text": "Die Pipeline läuft als Claude-Code-Skill. Das Ergebnis ist reine, dependency-freie WebMCP-Integration: jeder Browser-Agent, der WebMCP spricht, kann deine Tools aufrufen."}}]}</script>
+<script type="application/ld+json" id="faq-schema">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Was ist WebMCP?", "acceptedAnswer": {"@type": "Answer", "text": "Ein vorgeschlagener Webstandard (W3C Web Machine Learning CG), mit dem eine Seite typisierte Tools registriert, die Browser-KI-Agents aufrufen können, statt dein DOM zu scrapen. Läuft aktuell als Chrome Origin Trial."}}, {"@type": "Question", "name": "Fasst webmcpify Code an, den ich nicht freigegeben habe?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Jeder Diff-Hunk muss einem freigegebenen Tool oder dokumentiertem Setup zuordenbar sein; alles andere flaggt die Audit-Phase im Report. Dateien, die vor dem Run dirty waren, werden nie angefasst."}}, {"@type": "Question", "name": "Ist das ein Sicherheitsrisiko für meine App?", "acceptedAnswer": {"@type": "Answer", "text": "Tools dürfen nur Code-Pfade aufrufen, die deine UI ohnehin nutzt: gleiche Endpoints, gleiche Validierung, gleiche Auth. Dein Server bleibt die einzige Trust Boundary. Mutierende Tools brauchen zusätzlich explizite Freigabe pro Tool; destruktive oder Zahlungs-Aktionen werden in einer Erstintegration nie exponiert."}}, {"@type": "Question", "name": "Welche Agents können webmcpify ausführen, und welche das Ergebnis nutzen?", "acceptedAnswer": {"@type": "Answer", "text": "Er läuft in jedem Agent, der Skills lädt — Claude Code, Codex, Cursor, opencode, Copilot. Das Ergebnis ist reine, dependency-freie WebMCP-Integration: jeder Browser-Agent, der WebMCP spricht, kann deine Tools aufrufen."}}]}</script>
 <link rel="stylesheet" href="/fonts/fonts.css">
 <style>
   :root {
@@ -201,6 +201,7 @@
   .after-install .no { font: 700 0.9rem var(--font-mono); color: var(--primary); }
   .after-install p { color: var(--muted); font-size: 0.95rem; }
   .after-install b { color: var(--ink); }
+  .install-more { color: var(--muted); font-size: 0.95rem; margin-top: 1.3rem; max-width: 68ch; }
 
   /* ---------- FAQ ---------- */
   .faq { max-width: 820px; }
@@ -277,6 +278,7 @@
     <span class="doc-no" aria-hidden="true">REV 2026-07 · MIT</span>
     <span class="nav-spacer"></span>
     <a class="ghost" href="#procedure"><span lang="en">Procedure</span><span lang="de">Ablauf</span></a>
+    <a class="ghost" href="/webmcp-agent-skill/"><span lang="en">Agent skill</span><span lang="de">Agent-Skill</span></a>
     <a class="ghost" href="#faq">FAQ</a>
     <div class="lang-toggle" role="group" aria-label="Sprache">
       <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
@@ -539,6 +541,10 @@
         </li>
       </ol>
     </div>
+    <p class="install-more"><span lang="en">Using Codex, Cursor, opencode or Copilot instead? Per-runtime install commands are on the
+    <a href="/webmcp-agent-skill/">WebMCP agent skill</a> page.</span>
+    <span lang="de">Du nutzt Codex, Cursor, opencode oder Copilot? Die Install-Befehle pro Runtime stehen auf der
+    <a href="/webmcp-agent-skill/">WebMCP-Agent-Skill</a>-Seite.</span></p>
   </section>
 
   <!-- ============ FAQ ============ -->
@@ -565,8 +571,8 @@
       </details>
       <details>
         <summary><span lang="en">Which agents can run it, and which can use the result?</span><span lang="de">Welche Agents führen es aus, und welche nutzen das Ergebnis?</span></summary>
-        <p><span lang="en">The pipeline runs as a Claude Code skill. The result is plain, dependency-free WebMCP integration: any browser agent that speaks WebMCP can call your tools, regardless of vendor.</span>
-        <span lang="de">Die Pipeline läuft als Claude-Code-Skill. Das Ergebnis ist reine, dependency-freie WebMCP-Integration: jeder Browser-Agent, der WebMCP spricht, kann deine Tools aufrufen, egal von welchem Anbieter.</span></p>
+        <p><span lang="en">It runs in any agent that loads skills — Claude Code, Codex, Cursor, opencode, Copilot. The result is plain, dependency-free WebMCP integration: any browser agent that speaks WebMCP can call your tools, regardless of vendor.</span>
+        <span lang="de">Er läuft in jedem Agent, der Skills lädt — Claude Code, Codex, Cursor, opencode, Copilot. Das Ergebnis ist reine, dependency-freie WebMCP-Integration: jeder Browser-Agent, der WebMCP spricht, kann deine Tools aufrufen.</span></p>
       </details>
     </div>
   </section>
@@ -575,6 +581,7 @@
 <footer>
   <div class="wrap foot">
     <span>webmcpify.at</span>
+    <a href="/webmcp-agent-skill/"><span lang="en">WebMCP agent skill</span><span lang="de">WebMCP Agent-Skill</span></a>
     <a data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">GitHub</a>
     <a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP <span lang="en">proposal</span><span lang="de">Proposal</span></a>
     <span class="fill"></span>
