@@ -4,12 +4,24 @@
  */
 import { createToolScope } from './webmcpify.js';
 
-const INSTALL = [
-  '$ npx skills add TueJon/webmcpify',
-  '# or: git clone https://github.com/TueJon/webmcpify ~/.claude/skills/webmcpify',
-  '$ claude',
-  '> /webmcpify',
-].join('\n');
+const INSTALL_ROUTES = {
+  npx: [
+    '$ npx skills add TueJon/webmcpify   # any agent: Claude Code, Codex, Cursor, opencode, Copilot, …',
+    '$ claude',
+    '> /webmcpify',
+  ].join('\n'),
+  plugin: [
+    '# in Claude Code',
+    '> /plugin marketplace add TueJon/webmcpify',
+    '> /plugin install webmcpify@webmcpify',
+    '> /webmcpify',
+  ].join('\n'),
+  git: [
+    '$ git clone https://github.com/TueJon/webmcpify ~/.claude/skills/webmcpify',
+    '$ claude',
+    '> /webmcpify',
+  ].join('\n'),
+};
 
 const PHASES = [
   ['DETECT', 'identifies stack, build commands, auth model, and how the app starts locally'],
@@ -35,11 +47,22 @@ const TOOLS = [
   {
     name: 'get_install_command',
     description:
-      'Returns the terminal commands to install the webmcpify skill and start the pipeline. Read-only.',
-    inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+      'Returns the terminal commands to install the webmcpify skill and start the pipeline, for a given install route. Read-only; does not change the page (use show_install_command for that).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        agent: {
+          type: 'string',
+          enum: ['npx', 'plugin', 'git'],
+          description:
+            'Install route: npx (skills CLI, works with any agent), plugin (Claude Code plugin marketplace), git (manual clone). Defaults to npx.',
+        },
+      },
+      additionalProperties: false,
+    },
     annotations: { readOnlyHint: true },
-    execute: () =>
-      `${INSTALL}\n\nThe skill is MIT-licensed and self-contained: https://github.com/TueJon/webmcpify`,
+    execute: ({ agent } = {}) =>
+      `${INSTALL_ROUTES[agent] ?? INSTALL_ROUTES.npx}\n\nThe skill is MIT-licensed and self-contained: https://github.com/TueJon/webmcpify`,
   },
   {
     name: 'get_pipeline_overview',

@@ -17,7 +17,25 @@ Google Analytics 4 measurement is documented in
 banner (Statistics / Marketing); the compliance record lives in
 [`docs/LEGAL_COMPLIANCE_PLAN.md`](docs/LEGAL_COMPLIANCE_PLAN.md).
 
-Run its dependency-free contract tests with `node --test tests/analytics.test.mjs tests/consent.test.mjs tests/pages.test.mjs`.
+Run its dependency-free contract tests with `node --test 'tests/*.test.mjs'`.
+
+## Agent surface
+
+The site is itself agent-ready, in the three layers a WebMCP integration can have:
+
+- **Imperative** — `webmcp/site-tools.js` registers `get_install_command`,
+  `get_pipeline_overview`, `get_faq`, `set_language` via `document.modelContext`,
+  using the vendored runtime (`webmcp/webmcpify.js`).
+- **Declarative** — the install form (`#install-picker`) carries `toolname`,
+  `tooldescription`, `toolautosubmit` and a `toolparamdescription` select, so
+  `show_install_command` exists without JavaScript registration. Agents and humans
+  go through the same submit handler.
+- **Pre-visit discovery** — [`.well-known/webmcp.json`](.well-known/webmcp.json),
+  served at `/.well-known/webmcp` (nginx alias, `application/json`) and advertised
+  from every page via `<link rel="webmcp">` plus an RFC 8288 `Link` response header.
+  The WebMCP spec defines **no** manifest format; this follows the de-facto shape
+  third-party crawlers and inspectors probe. Runtime registration stays
+  authoritative — `tests/agent-discovery.test.mjs` fails if the two drift.
 
 ## Deploy
 
