@@ -3,12 +3,15 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { TOOLS, INSTALL_ROUTES } from '../webmcp/tools.js';
+import { buildManifest } from '../build-manifest.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(root, p), 'utf8');
 const PAGES = ['index.html', 'de/index.html', 'imprint.html', 'privacy.html'];
 
 const manifest = JSON.parse(read('.well-known/webmcp.json'));
+const listed = (name) => manifest.tools.find((t) => t.name === name);
 
 test('the discovery manifest carries the fields crawlers read', () => {
   for (const field of ['name', 'description', 'version', 'homepage', 'tools']) {
@@ -32,16 +35,36 @@ test('every page advertises the manifest', () => {
   }
 });
 
-test('the manifest matches the tools the site actually exposes', () => {
-  const imperative = [...read('webmcp/site-tools.js').matchAll(/^ {4}name: '([a-z0-9_]+)',$/gm)]
-    .map((m) => m[1]);
-  const declarative = [...read('index.html').matchAll(/\btoolname="([a-z0-9_]+)"/g)].map((m) => m[1]);
-  const exposed = [...imperative, ...declarative].sort();
-  const listed = manifest.tools.map((t) => t.name).sort();
+test('the published manifest is the generated one, byte for byte', () => {
+  // Names alone would let a description, schema, enum, or annotation change slip
+  // through — so the file must equal what build-manifest.mjs produces right now.
+  assert.equal(
+    read('.well-known/webmcp.json'),
+    buildManifest(),
+    'manifest is stale — run `node build-manifest.mjs` and commit the result',
+  );
+});
 
-  assert.ok(imperative.length > 0, 'no imperative tools found — check the regex');
-  assert.ok(declarative.length > 0, 'no declarative tools found — check the regex');
-  assert.deepEqual(listed, exposed, 'manifest and page tools drifted apart');
+test('the manifest lists exactly the tools the page exposes', () => {
+  const declarative = [...read('index.html').matchAll(/\btoolname="([a-z0-9_]+)"/g)].map((m) => m[1]);
+  assert.ok(TOOLS.length > 0 && declarative.length > 0, 'no tools found to compare');
+
+  assert.deepEqual(
+    manifest.tools.map((t) => t.name).sort(),
+    [...TOOLS.map((t) => t.name), ...declarative].sort(),
+    'manifest and page tools drifted apart',
+  );
+  for (const tool of TOOLS) {
+    const entry = listed(tool.name);
+    assert.equal(entry.description, tool.description, `${tool.name}: description drifted`);
+    assert.deepEqual(entry.inputSchema, tool.inputSchema, `${tool.name}: inputSchema drifted`);
+    assert.deepEqual(entry.annotations, tool.annotations, `${tool.name}: annotations drifted`);
+  }
+  // The declarative entry has no runtime object — the browser derives it from the
+  // form, so it is marked as such and checked against the markup below.
+  for (const name of declarative) {
+    assert.equal(listed(name).declarative, true, `${name} must be marked declarative`);
+  }
 });
 
 test('the declarative install form stays agent-callable in both languages', () => {
@@ -55,23 +78,43 @@ test('the declarative install form stays agent-callable in both languages', () =
     assert.match(markup, /tooldescription="[^"]{40,}"/, `${page}: tooldescription too thin`);
     // Only pure read forms may auto-submit — this one just swaps displayed text.
     assert.match(markup, /toolautosubmit=""/, `${page}: missing toolautosubmit`);
-    assert.match(markup, /<select id="install-agent" name="agent"/, `${page}: select lost id/name`);
+    // `required` is what makes the browser-derived schema require `agent` —
+    // without it the published manifest would promise a stricter contract.
+    assert.match(markup, /<select id="install-agent" name="agent" required/, `${page}: select lost id/name/required`);
     assert.match(markup, /toolparamdescription="[^"]{20,}"/, `${page}: select needs a param description`);
     assert.match(markup, /<label for="install-agent">/, `${page}: select has no label`);
     assert.match(markup, /<button class="copy-btn" type="submit"/, `${page}: no submit path`);
 
     const options = [...markup.matchAll(/<option value="([a-z]+)"/g)].map((m) => m[1]);
     assert.deepEqual(options, ['npx', 'plugin', 'git'], `${page}: install routes drifted`);
-    const schema = manifest.tools.find((t) => t.name === 'show_install_command').inputSchema;
+    const schema = listed('show_install_command').inputSchema;
     assert.deepEqual(schema.properties.agent.enum, options, `${page}: manifest enum ≠ form options`);
+    assert.deepEqual(schema.required, ['agent'], `${page}: manifest requiredness ≠ the required select`);
   }
 });
 
-test('the picker renders every route the schema promises', () => {
-  const html = read('index.html');
-  const routes = [...html.matchAll(/^ {4}([a-z]+): \{$/gm)].map((m) => m[1]);
-  assert.deepEqual(routes, ['npx', 'plugin', 'git'], 'INSTALL_VARIANTS drifted from the form');
+test('every route the schema promises can actually be rendered and returned', () => {
+  const routes = ['npx', 'plugin', 'git'];
 
-  const jsRoutes = [...read('webmcp/site-tools.js').matchAll(/^ {2}([a-z]+): \[$/gm)].map((m) => m[1]);
-  assert.deepEqual(jsRoutes, ['npx', 'plugin', 'git'], 'INSTALL_ROUTES drifted from the form');
+  const variants = [...read('index.html').matchAll(/^ {4}([a-z]+): \{$/gm)].map((m) => m[1]);
+  assert.deepEqual(variants, routes, 'INSTALL_VARIANTS drifted from the form');
+  assert.deepEqual(Object.keys(INSTALL_ROUTES), routes, 'INSTALL_ROUTES drifted from the form');
+
+  assert.deepEqual(listed('get_install_command').inputSchema.properties.agent.enum, routes);
+  for (const route of routes) {
+    assert.match(INSTALL_ROUTES[route], /webmcpify/, `${route}: install text looks empty`);
+  }
+});
+
+test('the no-script fallback names the routes the picker would otherwise hide', () => {
+  for (const page of ['index.html', 'de/index.html']) {
+    const html = read(page);
+    assert.match(html, /<noscript><style>#install-picker \.cmd-label \{ display: none; \}/, `${page}: dead picker not hidden`);
+    const fallback = html.match(/<p class="alt-routes">[\s\S]*?<\/p>/)?.[0] ?? '';
+    assert.match(fallback, /plugin marketplace add TueJon\/webmcpify/, `${page}: plugin route missing`);
+    assert.match(fallback, /git clone https:\/\/github\.com\/TueJon\/webmcpify/, `${page}: git route missing`);
+    for (const lang of ['en', 'de']) {
+      assert.match(fallback, new RegExp(`<span lang="${lang}">`), `${page}: fallback not bilingual`);
+    }
+  }
 });

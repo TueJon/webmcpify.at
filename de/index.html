@@ -30,6 +30,9 @@
 <link rel="alternate" hreflang="de" href="https://webmcpify.at/de/">
 <link rel="alternate" hreflang="x-default" href="https://webmcpify.at/">
 <link rel="webmcp" href="/.well-known/webmcp" type="application/json">
+<!-- No scripting: the picker cannot swap the block and COPY cannot reach the
+     clipboard, so the whole control row goes and every route is listed instead. -->
+<noscript><style>#install-picker .cmd-label { display: none; } .alt-routes { display: block; }</style></noscript>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -198,6 +201,8 @@
   }
   .copy-btn:hover { background: var(--ink); color: var(--bg); }
   .cmd-pick, .cmd-actions { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+  .alt-routes { display: none; padding: 0.75rem 0.95rem; border-top: 1px solid var(--hairline); font-size: 0.86rem; color: var(--muted); }
+  .alt-routes code { font-size: 0.85em; color: var(--ink); }
   .cmd-pick select {
     font: 700 0.75rem var(--font-mono); letter-spacing: 0.03em; color: var(--ink);
     background: var(--bg); border: 1px solid var(--hairline); padding: 0.3rem 0.4rem; cursor: pointer;
@@ -527,7 +532,7 @@
         <div class="cmd-label">
           <span class="cmd-pick">
             <label for="install-agent"><span lang="en">INSTALL VIA</span><span lang="de">INSTALLATION VIA</span></label>
-            <select id="install-agent" name="agent"
+            <select id="install-agent" name="agent" required
                     toolparamdescription="Install route to display: npx (skills CLI, works with any agent), plugin (Claude Code plugin marketplace), git (manual clone)">
               <option value="npx" selected>npx skills add</option>
               <option value="plugin">Claude Code plugin</option>
@@ -544,9 +549,15 @@
           </span>
         </div>
         <pre aria-live="polite"><code><span class="c">$</span> npx skills add TueJon/webmcpify
-<span class="c"># any agent: Claude Code, Codex, Cursor, opencode, Copilot, …</span>
+<span class="c"># any agent: Claude Code, Codex, Cursor, opencode, …</span>
 <span class="c">$</span> claude
 <span class="c">&gt;</span> <span class="p">/webmcpify</span></code></pre>
+        <!-- Without scripting the picker cannot swap the block, so it is hidden
+             (see the noscript rule in <head>) and every route is listed here. -->
+        <p class="alt-routes">
+          <span lang="en">Claude Code plugin: <code>/plugin marketplace add TueJon/webmcpify</code>, then <code>/plugin install webmcpify@webmcpify</code>. Manual: <code>git clone https://github.com/TueJon/webmcpify ~/.claude/skills/webmcpify</code>.</span>
+          <span lang="de">Claude-Code-Plugin: <code>/plugin marketplace add TueJon/webmcpify</code>, dann <code>/plugin install webmcpify@webmcpify</code>. Manuell: <code>git clone https://github.com/TueJon/webmcpify ~/.claude/skills/webmcpify</code>.</span>
+        </p>
       </form>
       <ol class="after-install">
         <li>
@@ -689,7 +700,7 @@
     npx: {
       copy: "npx skills add TueJon/webmcpify",
       html: `<span class="c">$</span> npx skills add TueJon/webmcpify
-<span class="c"># any agent: Claude Code, Codex, Cursor, opencode, Copilot, …</span>
+<span class="c"># any agent: Claude Code, Codex, Cursor, opencode, …</span>
 <span class="c">$</span> claude
 <span class="c">&gt;</span> <span class="p">/webmcpify</span>`,
     },
