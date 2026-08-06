@@ -10,6 +10,20 @@ English default with a client-side German toggle. `/de/` is the crawlable German
 variant — regenerate it with `python3 build-de.py` after editing `index.html`
 and commit both files (hreflang pairs live in both pages and `sitemap.xml`).
 
+Routes:
+
+| Path | Purpose |
+|---|---|
+| `/` · `/de/` | start page (bilingual copy, `/de/` generated from `index.html`) |
+| `/webmcp-agent-skill/` | the category page: **its title and `<h1>` must keep the phrase "WebMCP agent skill"** — `webmcpify` is a coined single token and cannot rank for it. Bilingual in place, no separate `/de/` variant, so it is not part of `build-de.py`. Per-runtime install instructions live here. |
+| `/imprint.html` · `/privacy.html` | legal pages (`noindex`) |
+
+`tests/pages.test.mjs` guards the parts that silently rot: the consent surface on
+every page, a self-canonical per indexable page, the category phrase on
+`/webmcp-agent-skill/`, that the start pages and the sitemap still link it (an
+unlinked page is reachable through the sitemap only), and that every `FAQPage`
+schema answer still exists in the visible copy of its page.
+
 Production: https://webmcpify.at
 
 Google Analytics 4 measurement is documented in

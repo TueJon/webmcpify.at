@@ -3,7 +3,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://webmcpify.at/</loc>
-    <lastmod>2026-07-22</lastmod>
+    <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <xhtml:link rel="alternate" hreflang="en" href="https://webmcpify.at/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://webmcpify.at/de/"/>
@@ -11,10 +11,15 @@
   </url>
   <url>
     <loc>https://webmcpify.at/de/</loc>
-    <lastmod>2026-07-22</lastmod>
+    <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <xhtml:link rel="alternate" hreflang="en" href="https://webmcpify.at/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://webmcpify.at/de/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://webmcpify.at/"/>
+  </url>
+  <url>
+    <loc>https://webmcpify.at/webmcp-agent-skill/</loc>
+    <lastmod>2026-08-05</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
 </urlset>

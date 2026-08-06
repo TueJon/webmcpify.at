@@ -1,14 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { globSync, readFileSync } from 'node:fs';
+import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { TOOLS, INSTALL_ROUTES } from '../webmcp/tools.js';
 import { buildManifest } from '../build-manifest.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(root, p), 'utf8');
-const PAGES = ['index.html', 'de/index.html', 'imprint.html', 'privacy.html'];
+// Globbed, not listed: a page added later must advertise the manifest too, and a
+// hardcoded list would silently exempt it.
+const PAGES = globSync('**/*.html', { cwd: root }).map((p) => relative('.', p)).sort();
 
 const manifest = JSON.parse(read('.well-known/webmcp.json'));
 const listed = (name) => manifest.tools.find((t) => t.name === name);
