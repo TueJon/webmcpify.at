@@ -29,6 +29,12 @@
 <link rel="alternate" hreflang="en" href="https://webmcpify.at/">
 <link rel="alternate" hreflang="de" href="https://webmcpify.at/de/">
 <link rel="alternate" hreflang="x-default" href="https://webmcpify.at/">
+<link rel="webmcp" href="/.well-known/webmcp" type="application/json">
+<!-- No scripting: the picker cannot swap the block and COPY cannot reach the
+     clipboard, so the whole control row goes and every route is listed instead. -->
+<!-- Both selectors are id-qualified on purpose: this block sits BEFORE the main
+     stylesheet, so it needs the higher specificity to beat `.alt-routes`. -->
+<noscript><style>#install-picker .cmd-label { display: none; } #install-picker .alt-routes { display: block; }</style></noscript>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -196,6 +202,15 @@
     border: 1px solid var(--ink); padding: 0.4rem 0.75rem; cursor: pointer;
   }
   .copy-btn:hover { background: var(--ink); color: var(--bg); }
+  .cmd-pick, .cmd-actions { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+  .alt-routes { display: none; padding: 0.75rem 0.95rem; border-top: 1px solid var(--hairline); font-size: 0.86rem; color: var(--muted); }
+  .alt-routes code { font-size: 0.85em; color: var(--ink); }
+  .cmd-pick select {
+    font: 700 0.75rem var(--font-mono); letter-spacing: 0.03em; color: var(--ink);
+    background: var(--bg); border: 1px solid var(--hairline); padding: 0.3rem 0.4rem; cursor: pointer;
+  }
+  /* Own rule: browsers without the WebMCP pseudo-class drop it, not the block above. */
+  .cmd:tool-form-active { outline: 2px solid var(--primary); outline-offset: 2px; }
   .after-install { list-style: none; }
   .after-install li { display: grid; grid-template-columns: 2rem 1fr; gap: 0.9rem; padding-block: 0.7rem; }
   .after-install .no { font: 700 0.9rem var(--font-mono); color: var(--primary); }
@@ -511,18 +526,43 @@
       <span class="mono-tag"><span lang="en">est. time: one coffee</span><span lang="de">Dauer: ein Kaffee</span></span>
     </div>
     <div class="install-grid">
-      <div class="cmd">
+      <!-- Declarative WebMCP tool: the browser derives the schema from the select,
+           so agents can switch the shown command through the same submit path a
+           human uses. Read-only display change, hence toolautosubmit. -->
+      <form class="cmd" id="install-picker"
+            toolname="show_install_command"
+            tooldescription="Switches the install command shown in the Installation section of webmcpify.at to the variant for a given agent setup. Page-local display change; nothing is sent anywhere."
+            toolautosubmit="">
         <div class="cmd-label">
-          <span><span lang="en">TERMINAL</span><span lang="de">TERMINAL</span></span>
-          <button class="copy-btn" type="button" data-copy="npx skills add TueJon/webmcpify">
-            <span lang="en">COPY</span><span lang="de">KOPIEREN</span>
-          </button>
+          <span class="cmd-pick">
+            <label for="install-agent"><span lang="en">INSTALL VIA</span><span lang="de">INSTALLATION VIA</span></label>
+            <select id="install-agent" name="agent" required
+                    toolparamdescription="Install route to display: npx (skills CLI, works with any agent), plugin (Claude Code plugin marketplace), git (manual clone)">
+              <option value="npx" selected>npx skills add</option>
+              <option value="plugin">Claude Code plugin</option>
+              <option value="git">git clone</option>
+            </select>
+          </span>
+          <span class="cmd-actions">
+            <button class="copy-btn" type="submit" data-install-show>
+              <span lang="en">SHOW</span><span lang="de">ZEIGEN</span>
+            </button>
+            <button class="copy-btn" type="button" data-copy="npx skills add TueJon/webmcpify">
+              <span lang="en">COPY</span><span lang="de">KOPIEREN</span>
+            </button>
+          </span>
         </div>
-        <pre><code><span class="c">$</span> npx skills add TueJon/webmcpify
-<span class="c"># or: git clone https://github.com/TueJon/webmcpify ~/.claude/skills/webmcpify</span>
+        <pre aria-live="polite"><code><span class="c">$</span> npx skills add TueJon/webmcpify
+<span class="c"># any agent: Claude Code, Codex, Cursor, opencode, …</span>
 <span class="c">$</span> claude
 <span class="c">&gt;</span> <span class="p">/webmcpify</span></code></pre>
-      </div>
+        <!-- Without scripting the picker cannot swap the block, so it is hidden
+             (see the noscript rule in <head>) and every route is listed here. -->
+        <p class="alt-routes">
+          <span lang="en">Claude Code plugin: <code>/plugin marketplace add TueJon/webmcpify</code>, then <code>/plugin install webmcpify@webmcpify</code>. Manual: <code>git clone https://github.com/TueJon/webmcpify ~/.claude/skills/webmcpify</code>.</span>
+          <span lang="de">Claude-Code-Plugin: <code>/plugin marketplace add TueJon/webmcpify</code>, dann <code>/plugin install webmcpify@webmcpify</code>. Manuell: <code>git clone https://github.com/TueJon/webmcpify ~/.claude/skills/webmcpify</code>.</span>
+        </p>
+      </form>
       <ol class="after-install">
         <li>
           <span class="no">1.</span>
@@ -662,6 +702,58 @@
   let saved = null;
   try { saved = localStorage.getItem("wmcp-lang"); } catch {}
   setLang(saved || (navigator.language?.startsWith("de") ? "de" : "en"));
+
+  // Install-command picker. One submit path for humans and for agents: the
+  // declarative WebMCP tool on the form (show_install_command) lands here too.
+  const INSTALL_VARIANTS = {
+    npx: {
+      copy: "npx skills add TueJon/webmcpify",
+      html: `<span class="c">$</span> npx skills add TueJon/webmcpify
+<span class="c"># any agent: Claude Code, Codex, Cursor, opencode, …</span>
+<span class="c">$</span> claude
+<span class="c">&gt;</span> <span class="p">/webmcpify</span>`,
+    },
+    plugin: {
+      copy: "/plugin marketplace add TueJon/webmcpify",
+      html: `<span class="c"># in Claude Code</span>
+<span class="c">&gt;</span> <span class="p">/plugin marketplace add TueJon/webmcpify</span>
+<span class="c">&gt;</span> <span class="p">/plugin install webmcpify@webmcpify</span>
+<span class="c">&gt;</span> <span class="p">/webmcpify</span>`,
+    },
+    git: {
+      copy: "git clone https://github.com/TueJon/webmcpify ~/.claude/skills/webmcpify",
+      html: `<span class="c">$</span> git clone https://github.com/TueJon/webmcpify \\
+    ~/.claude/skills/webmcpify
+<span class="c">$</span> claude
+<span class="c">&gt;</span> <span class="p">/webmcpify</span>`,
+    },
+  };
+  const picker = document.getElementById("install-picker");
+  if (picker) {
+    const select = picker.querySelector("select[name='agent']");
+    const code = picker.querySelector("pre code");
+    const copyTarget = picker.querySelector("[data-copy]");
+    const showVariant = (key) => {
+      const variant = INSTALL_VARIANTS[key];
+      if (!variant) return null;
+      select.value = key;
+      code.innerHTML = variant.html;
+      copyTarget.dataset.copy = variant.copy;
+      return variant.copy;
+    };
+    // Humans never need the submit button; agents and keyboard users do.
+    select.addEventListener("change", () => picker.requestSubmit());
+    picker.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const key = String(new FormData(picker).get("agent"));
+      const shown = showVariant(key);
+      if (e.agentInvoked) {
+        e.respondWith(Promise.resolve(shown
+          ? `Install command shown on the page: ${shown}`
+          : `Unknown install route "${key}". Valid values: npx, plugin, git.`));
+      }
+    });
+  }
 
   const toast = document.getElementById("toast");
   document.querySelectorAll("[data-copy]").forEach(btn => {
