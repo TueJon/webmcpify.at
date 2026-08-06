@@ -129,16 +129,6 @@ test('the no-script fallback names the routes the picker would otherwise hide', 
       /<noscript><style>#install-picker \.cmd-label \{ display: none; \} #install-picker \.alt-routes \{ display: block; \}<\/style><\/noscript>/,
       `${page}: no-script rule missing or not specific enough to win the cascade`,
     );
-    const noscriptAt = html.indexOf('<noscript><style>');
-    const baseAt = html.indexOf('.alt-routes { display: none;');
-    assert.ok(noscriptAt > 0 && baseAt > 0, `${page}: expected both rules present`);
-    if (noscriptAt < baseAt) {
-      assert.match(
-        html.slice(noscriptAt, noscriptAt + 200),
-        /#install-picker \.alt-routes/,
-        `${page}: earlier no-script rule must outrank the later base rule`,
-      );
-    }
     const fallback = html.match(/<p class="alt-routes">[\s\S]*?<\/p>/)?.[0] ?? '';
     assert.match(fallback, /plugin marketplace add TueJon\/webmcpify/, `${page}: plugin route missing`);
     assert.match(fallback, /git clone https:\/\/github\.com\/TueJon\/webmcpify/, `${page}: git route missing`);

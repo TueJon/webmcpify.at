@@ -21,32 +21,76 @@ const OUT = join(root, '.well-known', 'webmcp.json');
  * install form. So derive the manifest entry from the same markup instead of
  * restating it here, which is how the two used to drift.
  */
+const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", '#39': "'", nbsp: ' ' };
+const decode = (s) =>
+  s.replace(/&(#\d+|#x[0-9a-f]+|[a-z]+);/gi, (m, ref) => {
+    if (ENTITIES[ref.toLowerCase()]) return ENTITIES[ref.toLowerCase()];
+    if (ref[0] === '#') return String.fromCodePoint(Number(ref.slice(1).replace(/^x/i, '0x')));
+    return m;
+  });
+
+/** Attributes of one start tag, order-independent, values decoded. */
+function attrsOf(tag) {
+  const out = {};
+  for (const m of tag.slice(1).matchAll(/([a-zA-Z_:][\w:.-]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+)))?/g)) {
+    out[m[1].toLowerCase()] = decode(m[2] ?? m[3] ?? m[4] ?? '');
+  }
+  return out;
+}
+
+/** Start tags of `name`, with their attributes and the offset just after the tag. */
+function* startTags(html, name) {
+  for (const m of html.matchAll(new RegExp(`<${name}\\b[^>]*>`, 'gi'))) {
+    yield { attrs: attrsOf(m[0]), end: m.index + m[0].length };
+  }
+}
+
+/**
+ * The declarative tool has no runtime object — the browser derives it from the
+ * install form. So derive the manifest entry from the same markup instead of
+ * restating it here, which is how the two used to drift. Everything is looked up
+ * by parsed attribute, never by one exact serialization: a reformat that the
+ * browser still accepts must not silently change what we publish.
+ */
 function declarativeTools() {
   const html = readFileSync(join(root, 'index.html'), 'utf8');
-  const form = html.match(/<form class="cmd" id="install-picker"[\s\S]*?<\/form>/)?.[0];
-  if (!form) throw new Error('install form not found in index.html');
-  const select = form.match(/<select[\s\S]*?<\/select>/)?.[0];
-  if (!select) throw new Error('install form has no select');
 
-  const attr = (name, src) => src.match(new RegExp(`(?:^|\\s)${name}="([^"]*)"`))?.[1];
-  const param = attr('name', select);
-  const enumValues = [...select.matchAll(/<option value="([^"]+)"/g)].map((m) => m[1]);
+  const form = [...startTags(html, 'form')].find((t) => t.attrs.id === 'install-picker');
+  if (!form) throw new Error('index.html: no <form id="install-picker">');
+  const closing = html.indexOf('</form>', form.end);
+  if (closing < 0) throw new Error('index.html: install form is not closed');
+  const inner = html.slice(form.end, closing);
+
+  const select = [...startTags(inner, 'select')][0];
+  if (!select) throw new Error('install form has no <select>');
+  const param = select.attrs.name;
+  if (!param) throw new Error('install form select has no name');
+
+  const selectClose = inner.indexOf('</select>', select.end);
+  if (selectClose < 0) throw new Error('install form select is not closed');
+  const options = [...startTags(inner.slice(select.end, selectClose), 'option')].map((t) => t.attrs.value);
+  if (!options.length || options.some((v) => !v)) throw new Error('install form options lack values');
+
+  for (const [key, tag] of [['toolname', form], ['tooldescription', form], ['toolparamdescription', select]]) {
+    if (!tag.attrs[key]) throw new Error(`install form is missing ${key}`);
+  }
 
   return [
     {
-      name: attr('toolname', form),
-      description: attr('tooldescription', form),
+      name: form.attrs.toolname,
+      description: form.attrs.tooldescription,
       inputSchema: {
         type: 'object',
         properties: {
           [param]: {
             type: 'string',
-            enum: enumValues,
-            description: attr('toolparamdescription', select),
+            enum: options,
+            description: select.attrs.toolparamdescription,
           },
         },
-        // The browser derives requiredness from the HTML constraint, not from us.
-        ...(/<select[^>]*\srequired[\s>]/.test(select) ? { required: [param] } : {}),
+        // The browser derives requiredness from the HTML constraint, not from us —
+        // `required`, `required=""` and `required="required"` all mean the same.
+        ...('required' in select.attrs ? { required: [param] } : {}),
         additionalProperties: false,
       },
       annotations: { readOnlyHint: false },
