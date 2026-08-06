@@ -80,7 +80,7 @@
     },
     {
       "name": "show_install_command",
-      "description": "Switches the install command shown in the Installation section to the variant for a given agent setup. Page-local display change; use get_install_command for the raw text.",
+      "description": "Switches the install command shown in the Installation section of webmcpify.at to the variant for a given agent setup. Page-local display change; nothing is sent anywhere.",
       "inputSchema": {
         "type": "object",
         "properties": {

@@ -8,7 +8,7 @@
  * install form in index.html (tests/agent-discovery.test.mjs asserts that pairing).
  * Run after changing any tool contract and commit the result.
  */
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { TOOLS } from './webmcp/tools.js';
@@ -16,30 +16,44 @@ import { TOOLS } from './webmcp/tools.js';
 const root = dirname(fileURLToPath(import.meta.url));
 const OUT = join(root, '.well-known', 'webmcp.json');
 
-// Registered by the browser from <form id="install-picker">, so it has no runtime
-// object to read: keep in step with the form's attributes and options.
-const DECLARATIVE = [
-  {
-    name: 'show_install_command',
-    description:
-      'Switches the install command shown in the Installation section to the variant for a given agent setup. Page-local display change; use get_install_command for the raw text.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        agent: {
-          type: 'string',
-          enum: ['npx', 'plugin', 'git'],
-          description:
-            'Install route to display: npx (skills CLI, works with any agent), plugin (Claude Code plugin marketplace), git (manual clone)',
+/**
+ * The declarative tool has no runtime object — the browser derives it from the
+ * install form. So derive the manifest entry from the same markup instead of
+ * restating it here, which is how the two used to drift.
+ */
+function declarativeTools() {
+  const html = readFileSync(join(root, 'index.html'), 'utf8');
+  const form = html.match(/<form class="cmd" id="install-picker"[\s\S]*?<\/form>/)?.[0];
+  if (!form) throw new Error('install form not found in index.html');
+  const select = form.match(/<select[\s\S]*?<\/select>/)?.[0];
+  if (!select) throw new Error('install form has no select');
+
+  const attr = (name, src) => src.match(new RegExp(`(?:^|\\s)${name}="([^"]*)"`))?.[1];
+  const param = attr('name', select);
+  const enumValues = [...select.matchAll(/<option value="([^"]+)"/g)].map((m) => m[1]);
+
+  return [
+    {
+      name: attr('toolname', form),
+      description: attr('tooldescription', form),
+      inputSchema: {
+        type: 'object',
+        properties: {
+          [param]: {
+            type: 'string',
+            enum: enumValues,
+            description: attr('toolparamdescription', select),
+          },
         },
+        // The browser derives requiredness from the HTML constraint, not from us.
+        ...(/<select[^>]*\srequired[\s>]/.test(select) ? { required: [param] } : {}),
+        additionalProperties: false,
       },
-      required: ['agent'],
-      additionalProperties: false,
+      annotations: { readOnlyHint: false },
+      declarative: true,
     },
-    annotations: { readOnlyHint: false },
-    declarative: true,
-  },
-];
+  ];
+}
 
 export function buildManifest() {
   const manifest = {
@@ -60,7 +74,7 @@ export function buildManifest() {
         inputSchema,
         annotations,
       })),
-      ...DECLARATIVE,
+      ...declarativeTools(),
     ],
   };
   return `${JSON.stringify(manifest, null, 2)}\n`;

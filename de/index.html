@@ -32,7 +32,9 @@
 <link rel="webmcp" href="/.well-known/webmcp" type="application/json">
 <!-- No scripting: the picker cannot swap the block and COPY cannot reach the
      clipboard, so the whole control row goes and every route is listed instead. -->
-<noscript><style>#install-picker .cmd-label { display: none; } .alt-routes { display: block; }</style></noscript>
+<!-- Both selectors are id-qualified on purpose: this block sits BEFORE the main
+     stylesheet, so it needs the higher specificity to beat `.alt-routes`. -->
+<noscript><style>#install-picker .cmd-label { display: none; } #install-picker .alt-routes { display: block; }</style></noscript>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
