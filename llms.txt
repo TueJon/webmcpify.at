@@ -7,7 +7,8 @@ Key facts:
 - Pipeline: DETECT → INVENTORY → GATE (human approval) → INTEGRATE → VERIFY → HEAL → AUDIT.
 - Security model: tools only call code paths the app's UI already uses; the server remains the only trust boundary; server-mutating tools require explicit per-tool human approval; destructive or payment actions are never exposed in a first integration.
 - Zero runtime dependencies; the integration is feature-detected and behaves identically in browsers without WebMCP.
-- This site itself registers WebMCP tools (get_install_command, get_pipeline_overview, get_faq, set_language) — agents visiting webmcpify.at can use them directly.
+- This site itself registers WebMCP tools — imperatively via `document.modelContext` (get_install_command, get_pipeline_overview, get_faq, set_language) and declaratively on the install form (show_install_command). Agents visiting webmcpify.at can use them directly.
+- Pre-visit tool discovery: `https://webmcpify.at/.well-known/webmcp` (JSON, also linked from every page via `<link rel="webmcp">`). The WebMCP spec defines no manifest format — this mirrors the de-facto shape; the runtime registration stays authoritative.
 
 ## Links
 
