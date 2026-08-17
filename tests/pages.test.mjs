@@ -81,6 +81,15 @@ test('the agent-skill page is linked from the start pages and the sitemap', () =
   );
 });
 
+test('the public product pages surface the reproducible verification proof', () => {
+  const video = 'proof/artifacts/webmcpify-proof-480p.mp4';
+  for (const page of ['index.html', 'de/index.html', 'webmcp-agent-skill/index.html']) {
+    const html = read(page);
+    assert.ok(html.includes(video), `${page} must link the uncut proof recording`);
+    assert.match(html, /63[- ](?:second|Sekunden)/, `${page} must describe the proof length`);
+  }
+});
+
 /** Schema that disagrees with the visible answer is the kind of drift crawlers punish. */
 test('every FAQPage answer also exists in the visible copy of its page', () => {
   for (const page of ['index.html', 'de/index.html', 'webmcp-agent-skill/index.html']) {
