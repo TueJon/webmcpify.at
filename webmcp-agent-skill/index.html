@@ -103,6 +103,11 @@
   }
   .copy-btn:hover { background: var(--ink); color: var(--bg); }
   .pipeline { font: 400 0.8rem var(--font-mono); background: var(--tint); padding: 0.9rem; overflow-x: auto; margin: 0.6rem 0 1rem; }
+  .proof { border-block: 1px solid var(--ink); padding-block: 1rem; margin: 1.8rem 0 0.3rem; }
+  .proof p { margin-bottom: 0.8rem; }
+  .proof-meta { color: var(--muted); font: 400 0.78rem var(--font-mono); }
+  .proof-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem 1rem; margin-top: 1rem; }
+  .proof-actions a:not(.btn) { font-weight: 700; }
   .faq details { border-top: 1px solid var(--hairline); padding: 0.8rem 0; }
   .faq summary { font-weight: 700; cursor: pointer; }
   .faq p { color: var(--muted); margin-top: 0.4rem; }
@@ -180,6 +185,16 @@
   und kein klassischer MCP-Server — kein separater Prozess, kein neuer Endpoint, keine
   Protokoll-Bridge. Die registrierten Tools leben in deiner Seite und rufen genau die
   Code-Pfade auf, die deine UI ohnehin nutzt.</span></p>
+
+  <div class="proof">
+    <p><span lang="en"><b>See native runtime verification:</b> an uncut 63-second Chrome recording uses a real approval click and registration, then calls <code>getTools()</code> / <code>executeTool()</code> against one prepared tool. Its phase narration is scripted; the recording does not execute the full skill pipeline.</span>
+    <span lang="de"><b>Sieh native Runtime-Verifikation:</b> Eine ungeschnittene 63-Sekunden-Chrome-Aufnahme nutzt einen echten Freigabe-Klick und eine reale Registrierung und ruft anschließend <code>getTools()</code> / <code>executeTool()</code> gegen ein vorbereitetes Tool auf. Die Phasenerzählung ist geskriptet; die Aufnahme führt nicht die vollständige Skill-Pipeline aus.</span></p>
+    <p class="proof-meta"><span lang="en">Runnable fixture · example manifests · illustrative patch · checksums</span><span lang="de">Ausführbares Fixture · Beispielmanifeste · illustrativer Patch · Checksummen</span></p>
+    <div class="proof-actions">
+      <a class="btn" data-measure="github-outbound" href="https://github.com/TueJon/webmcpify/blob/main/proof/artifacts/webmcpify-proof-480p.mp4" target="_blank" rel="noopener"><span lang="en">Watch the demo ↗</span><span lang="de">Demo ansehen ↗</span></a>
+      <a data-measure="github-outbound" href="https://github.com/TueJon/webmcpify/tree/main/proof" target="_blank" rel="noopener"><span lang="en">Inspect the proof pack</span><span lang="de">Proof-Pack prüfen</span></a>
+    </div>
+  </div>
 
   <h2><span lang="en">Install it in your agent</span><span lang="de">In deinen Agent installieren</span></h2>
 
