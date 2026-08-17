@@ -95,7 +95,7 @@
   .nav-spacer { flex: 1; }
   .nav a.ghost { text-decoration: none; color: var(--muted); font-weight: 500; font-size: 0.95rem; }
   .nav a.ghost:hover { color: var(--ink); }
-  @media (max-width: 680px) { .nav a.ghost, .doc-no { display: none; } .nav { gap: 0.9rem; } }
+  @media (max-width: 760px) { .nav a.ghost, .doc-no { display: none; } .nav { gap: 0.9rem; } }
   .lang-toggle { flex-shrink: 0; }
   .btn { white-space: nowrap; }
   @media (max-width: 420px) {
@@ -470,19 +470,19 @@
   <section class="wrap" id="proof">
     <div class="proof-grid">
       <div class="proof-copy">
-        <h2><span lang="en">A complete run in 63 seconds</span><span lang="de">Ein kompletter Run in 63 Sekunden</span></h2>
-        <p><span lang="en">A sanitized release-notes app goes from one discovered tool to a verified integration in an uncut Chrome recording. The fixture, manifests, full patch, and checksums are public and reproducible.</span>
-        <span lang="de">Eine bereinigte Release-Notes-App geht in einer ungeschnittenen Chrome-Aufnahme von einem entdeckten Tool zur verifizierten Integration. Fixture, Manifeste, vollständiger Patch und Checksummen sind öffentlich und reproduzierbar.</span></p>
+        <h2><span lang="en">Native Chrome verification in 63 seconds</span><span lang="de">Native Chrome-Verifikation in 63 Sekunden</span></h2>
+        <p><span lang="en">A deterministic release-notes fixture uses a real approval click and tool registration, then verifies the prepared tool through Chrome's native API. The phase labels and example manifests illustrate the surrounding workflow; the recording does not execute the full skill pipeline.</span>
+        <span lang="de">Ein deterministisches Release-Notes-Fixture nutzt einen echten Freigabe-Klick und eine reale Tool-Registrierung und verifiziert das vorbereitete Tool anschließend über Chromes native API. Phasenlabels und Beispielmanifeste illustrieren den umgebenden Workflow; die Aufnahme führt nicht die vollständige Skill-Pipeline aus.</span></p>
         <div class="proof-actions">
-          <a class="btn primary" data-measure="github-outbound" href="https://github.com/TueJon/webmcpify/blob/main/proof/artifacts/webmcpify-proof-480p.mp4" target="_blank" rel="noopener"><span lang="en">Watch the uncut run ↗</span><span lang="de">Ungeschnittenen Run ansehen ↗</span></a>
+          <a class="btn primary" data-measure="github-outbound" href="https://github.com/TueJon/webmcpify/blob/main/proof/artifacts/webmcpify-proof-480p.mp4" target="_blank" rel="noopener"><span lang="en">Watch the uncut demo ↗</span><span lang="de">Ungeschnittene Demo ansehen ↗</span></a>
           <a class="text-link" data-measure="github-outbound" href="https://github.com/TueJon/webmcpify/tree/main/proof" target="_blank" rel="noopener"><span lang="en">Inspect every artifact</span><span lang="de">Alle Artefakte prüfen</span></a>
         </div>
       </div>
       <ol class="proof-points">
-        <li><b>GATE</b><span><span lang="en">One browser-local tool, explicitly approved before integration.</span><span lang="de">Ein browserlokales Tool, vor der Integration explizit freigegeben.</span></span></li>
+        <li><b>GATE</b><span><span lang="en">A real browser approval click before prepared tool registration.</span><span lang="de">Ein echter Browser-Freigabe-Klick vor der Registrierung des vorbereiteten Tools.</span></span></li>
         <li><b>CHROME</b><span><span lang="en">Native <code>getTools()</code> and <code>executeTool()</code>, not a mocked API.</span><span lang="de">Natives <code>getTools()</code> und <code>executeTool()</code>, keine gemockte API.</span></span></li>
         <li><b>ASSERT</b><span><span lang="en">Schema, annotations, valid result, visible UI delta, invalid input, and cleanup.</span><span lang="de">Schema, Annotationen, gültiges Ergebnis, sichtbares UI-Delta, ungültige Eingabe und Cleanup.</span></span></li>
-        <li><b>AUDIT</b><span><span lang="en">The complete app diff is one module script plus one tool module.</span><span lang="de">Der vollständige App-Diff besteht aus einem Module-Script und einem Tool-Modul.</span></span></li>
+        <li><b>SCOPE</b><span><span lang="en">Scripted phase labels, example manifests, and an illustrative patch keep the demo's boundary explicit.</span><span lang="de">Geskriptete Phasenlabels, Beispielmanifeste und ein illustrativer Patch machen die Grenze der Demo explizit.</span></span></li>
       </ol>
     </div>
   </section>
