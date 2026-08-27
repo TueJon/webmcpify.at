@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WebMCP agent skill — webmcpify for Claude Code, Codex, Cursor &amp; Copilot</title>
-<meta name="description" content="webmcpify is a WebMCP agent skill: one command installs it into Claude Code, Codex, Cursor, opencode or Copilot. It inventories your web app, you approve the tool manifest, it integrates document.modelContext tools and verifies each one in real Chrome.">
+<meta name="description" content="webmcpify is a WebMCP agent skill for curated core coverage or route-by-route parity. It inventories your app, integrates approved document.modelContext tools and verifies each one in real Chrome.">
 <link rel="canonical" href="https://webmcpify.at/webmcp-agent-skill/">
 <link rel="webmcp" href="/.well-known/webmcp" type="application/json">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://webmcpify.at/webmcp-agent-skill/">
 <meta property="og:site_name" content="webmcpify">
 <meta property="og:title" content="WebMCP agent skill — webmcpify for Claude Code, Codex, Cursor &amp; Copilot">
-<meta property="og:description" content="One command installs the WebMCP agent skill into your coding agent: inventory, manifest approval, integration, real-browser verification.">
+<meta property="og:description" content="Choose curated core coverage or route-by-route parity, approve the manifest, then integrate and verify every WebMCP tool in a real browser.">
 <meta property="og:image" content="https://webmcpify.at/og.png">
 <meta property="og:image:alt" content="webmcpify — make your web app agent-ready with WebMCP">
 <meta property="og:image:width" content="1200">
@@ -19,7 +19,7 @@
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="WebMCP agent skill — webmcpify for Claude Code, Codex, Cursor &amp; Copilot">
-<meta name="twitter:description" content="One command installs the WebMCP agent skill into your coding agent: inventory, manifest approval, integration, real-browser verification.">
+<meta name="twitter:description" content="Choose curated core coverage or route-by-route parity, approve the manifest, then integrate and verify every WebMCP tool in a real browser.">
 <meta name="twitter:image" content="https://webmcpify.at/og.png">
 <meta name="twitter:image:alt" content="webmcpify — make your web app agent-ready with WebMCP">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -33,7 +33,7 @@
   "name": "webmcpify",
   "alternateName": "WebMCP agent skill",
   "url": "https://webmcpify.at/webmcp-agent-skill/",
-  "description": "An agent skill that integrates WebMCP (document.modelContext) into an existing web application: inventory, human manifest approval, integration, real-browser verification, healing.",
+  "description": "A WebMCP agent skill for curated core coverage or route-by-route parity: inventory, human manifest approval, integration, real-browser verification and healing.",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any (agent skill for Claude Code, Codex, Cursor, opencode, GitHub Copilot and other skill-loading agents)",
   "license": "https://opensource.org/license/MIT",
@@ -54,7 +54,7 @@
   ]
 }
 </script>
-<script type="application/ld+json" id="faq-schema">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Which agents can run this skill?", "acceptedAnswer": {"@type": "Answer", "text": "Any coding agent that loads skills: Claude Code, Codex, Cursor, opencode, GitHub Copilot and 70+ more through the skills CLI. The result is vendor-neutral — the integration is plain WebMCP, so any browser agent that speaks the standard can call your tools."}}, {"@type": "Question", "name": "Do I need the Chrome origin trial?", "acceptedAnswer": {"@type": "Answer", "text": "For local development you enable chrome://flags/#enable-webmcp-testing; exposing tools on a production origin needs an origin-trial token. The vendored runtime is feature-detected, so your app behaves identically in browsers without WebMCP."}}, {"@type": "Question", "name": "Will it change code I did not approve?", "acceptedAnswer": {"@type": "Answer", "text": "No. You approve the tool manifest before anything is integrated, every diff hunk must trace back to an approved entry, and a final audit against the baseline commit flags anything else. Files that were already dirty when the run started are never modified."}}, {"@type": "Question", "name": "How is each tool verified?", "acceptedAnswer": {"@type": "Answer", "text": "Every tool is enumerated and executed in real Chrome from the examples recorded in the manifest, asserting both the tool result and the resulting UI state — including the real submit interaction Chrome requires before a mutating declarative form completes."}}]}</script>
+<script type="application/ld+json" id="faq-schema">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Which agents can run this skill?", "acceptedAnswer": {"@type": "Answer", "text": "Any coding agent that loads skills: Claude Code, Codex, Cursor, opencode, GitHub Copilot and 70+ more through the skills CLI. The result is vendor-neutral. The integration is plain WebMCP, so any browser agent that speaks the standard can call your tools."}}, {"@type": "Question", "name": "Do I need the Chrome origin trial?", "acceptedAnswer": {"@type": "Answer", "text": "For local development you enable chrome://flags/#enable-webmcp-testing; exposing tools on a production origin needs an origin-trial token. The vendored runtime is feature-detected, so your app behaves identically in browsers without WebMCP."}}, {"@type": "Question", "name": "Will it change code I did not approve?", "acceptedAnswer": {"@type": "Answer", "text": "No. You approve the tool manifest before anything is integrated, every diff hunk must trace back to an approved entry, and a final audit against the baseline commit flags anything else. Files that were already dirty when the run started are never modified."}}, {"@type": "Question", "name": "How is each tool verified?", "acceptedAnswer": {"@type": "Answer", "text": "Every tool is enumerated and executed in real Chrome from the examples recorded in the manifest, asserting both the tool result and the resulting UI state, including the real submit interaction Chrome requires before a mutating declarative form completes."}}]}</script>
 <link rel="stylesheet" href="/fonts/fonts.css">
 <style>
   :root {
@@ -118,7 +118,7 @@
   }
   .toast.show { opacity: 1; }
   /* Consent banner (shared with the start page): non-modal, all actions
-     identical .btn styling — equal visual weight by design. */
+     identical .btn styling; equal visual weight by design. */
   .btn {
     display: inline-flex; align-items: center; background: var(--ink); color: var(--bg);
     font-family: var(--font-sans); font-weight: 700; font-size: 0.9rem;
@@ -164,25 +164,25 @@
   <h1><span lang="en">WebMCP agent skill</span><span lang="de">WebMCP Agent-Skill</span></h1>
   <p class="sub">webmcpify · MIT · <span lang="en">Claude Code · Codex · Cursor · opencode · Copilot</span><span lang="de">Claude Code · Codex · Cursor · opencode · Copilot</span></p>
 
-  <p class="lede"><span lang="en"><b>webmcpify</b> is an agent skill: a portable instruction set you install into your
+  <p class="lede"><span lang="en"><b>webmcpify</b> is an agent skill for curated core coverage or route-by-route parity: a portable instruction set you install into your
   coding agent, which then makes an existing web application agent-ready by integrating
   <a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP</a>
-  (<code>document.modelContext</code>) end to end — and verifies every tool in a real
+  (<code>document.modelContext</code>) end to end, then verifies every tool in a real
   browser instead of assuming it works.</span>
-  <span lang="de"><b>webmcpify</b> ist ein Agent-Skill: ein portables Instruction-Set, das du in deinen
+  <span lang="de"><b>webmcpify</b> ist ein Agent-Skill für kuratierte Kernabdeckung oder routenweise Parität: ein portables Instruction-Set, das du in deinen
   Coding-Agent installierst. Er macht eine bestehende Web-App agent-ready, indem er
   <a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP</a>
-  (<code>document.modelContext</code>) vollständig integriert — und jedes Tool im echten
+  (<code>document.modelContext</code>) vollständig integriert und jedes Tool im echten
   Browser verifiziert, statt es anzunehmen.</span></p>
 
   <p><span lang="en">Two different things are often called the same name, so to be precise: this skill is
   the thing that <em>writes</em> the WebMCP integration into your codebase. It is not a
-  browser agent, and not a classic MCP server — no separate process, no new endpoint,
+  browser agent, and not a classic MCP server: no separate process, no new endpoint,
   no protocol bridge. The tools it registers live in your page and call the code paths
   your own UI already uses.</span>
   <span lang="de">Zwei verschiedene Dinge tragen oft denselben Namen, deshalb präzise: Dieser Skill
   <em>schreibt</em> die WebMCP-Integration in deine Codebase. Er ist kein Browser-Agent
-  und kein klassischer MCP-Server — kein separater Prozess, kein neuer Endpoint, keine
+  und kein klassischer MCP-Server: kein separater Prozess, kein neuer Endpoint, keine
   Protokoll-Bridge. Die registrierten Tools leben in deiner Seite und rufen genau die
   Code-Pfade auf, die deine UI ohnehin nutzt.</span></p>
 
@@ -242,9 +242,11 @@
   <h2><span lang="en">What it runs</span><span lang="de">Was es ausführt</span></h2>
   <div class="pipeline">DETECT ─▶ INVENTORY ─▶ [<span lang="en">you approve the tool manifest</span><span lang="de">du gibst das Tool-Manifest frei</span>] ─▶ INTEGRATE ─▶ VERIFY ─▶ HEAL ─▶ AUDIT</div>
   <ul>
+    <li><span lang="en"><b>Coverage target:</b> <code>curated</code> maps selected high-value actions and explains omissions; <code>parity</code> censuses every interactive element on every authenticated route. The route map, not a raw tool count, is the evidence.</span>
+    <span lang="de"><b>Abdeckungsziel:</b> <code>curated</code> kartiert ausgewählte Kernaktionen und begründet Auslassungen; <code>parity</code> erfasst jedes interaktive Element auf jeder authentifizierten Route. Die Routenkarte, nicht eine rohe Tool-Zahl, ist der Nachweis.</span></li>
     <li><span lang="en"><b>Inventory</b> maps the codebase into areas and deep-reads one area per iteration, so a
     500-file SaaS is processed area by area instead of one context-busting sweep.</span>
-    <span lang="de"><b>Inventory</b> zerlegt die Codebase in Areas und liest pro Iteration eine Area tief —
+    <span lang="de"><b>Inventory</b> zerlegt die Codebase in Areas und liest pro Iteration eine Area tief;
     ein SaaS mit 500 Dateien wird Area für Area verarbeitet, nicht in einem Kontext-Sweep.</span></li>
     <li><span lang="en"><b>The gate</b> is yours: names, schemas, examples and a read-only/mutating
     classification for every proposed tool, before a single line is written.</span>
@@ -260,42 +262,58 @@
     Endlosschleifen.</span></li>
     <li><span lang="en"><b>Resumable:</b> all state lives in <code>.webmcpify/manifest.json</code>, so a run survives
     context windows, sessions, and even a switch of agent.</span>
-    <span lang="de"><b>Resumable:</b> der ganze State liegt in <code>.webmcpify/manifest.json</code> — ein Run
+    <span lang="de"><b>Resumable:</b> Der ganze State liegt in <code>.webmcpify/manifest.json</code>. Ein Run
     übersteht Kontextfenster, Sessions und sogar einen Agent-Wechsel.</span></li>
   </ul>
 
   <h2><span lang="en">What it will not do</span><span lang="de">Was es nicht tut</span></h2>
   <ul>
-    <li><span lang="en">Touch unrelated logic or UI — every diff hunk traces to a manifest entry, and files that
+    <li><span lang="en">Touch unrelated logic or UI. Every diff hunk traces to a manifest entry, and files that
     were already dirty when the run started are never modified or reverted.</span>
-    <span lang="de">Fremde Logik oder UI anfassen — jeder Diff-Hunk ist einem Manifest-Eintrag zuordenbar,
+    <span lang="de">Fremde Logik oder UI anfassen. Jeder Diff-Hunk ist einem Manifest-Eintrag zuordenbar,
     und Dateien, die vor dem Run dirty waren, werden nie geändert oder zurückgesetzt.</span></li>
-    <li><span lang="en">Expose mutating tools without your explicit per-tool approval; destructive or payment
-    actions are never exposed in a first integration.</span>
-    <span lang="de">Mutierende Tools ohne explizite Freigabe pro Tool bereitstellen; destruktive oder
-    Zahlungs-Aktionen werden in einer ersten Integration nie exponiert.</span></li>
-    <li><span lang="en">Move the trust boundary — tools call the code paths your UI already uses: same
+    <li><span lang="en">Expose auth, signup, billing, payment or credential-returning tools. An irreversible delete can only open the app's own confirmation UI for the user; ordinary product-object creation remains in scope.</span>
+    <span lang="de">Auth-, Signup-, Billing-, Zahlungs- oder Credential-ausgebende Tools exponieren. Eine irreversible Löschung darf nur die bestehende Bestätigungs-UI der App für den Menschen öffnen; gewöhnliche Produktobjekte zu erstellen bleibt im Scope.</span></li>
+    <li><span lang="en">Move the trust boundary. Tools call the code paths your UI already uses: same
     endpoints, same validation, same auth. Your server stays the only trust boundary.</span>
-    <span lang="de">Die Trust Boundary verschieben — Tools rufen die Code-Pfade auf, die deine UI ohnehin
+    <span lang="de">Die Trust Boundary verschieben. Tools rufen die Code-Pfade auf, die deine UI ohnehin
     nutzt: gleiche Endpoints, gleiche Validierung, gleiche Auth. Dein Server bleibt die
     einzige Trust Boundary.</span></li>
-    <li><span lang="en">Add a runtime dependency — a small MIT runtime is vendored into your repo, fully
+    <li><span lang="en">Add a runtime dependency. A small MIT runtime is vendored into your repo, fully
     feature-detected, so your app is behaviorally unchanged in browsers without WebMCP.</span>
-    <span lang="de">Eine Runtime-Dependency hinzufügen — ein kleines MIT-Runtime wird ins Repo vendored,
+    <span lang="de">Eine Runtime-Dependency hinzufügen. Ein kleines MIT-Runtime wird ins Repo vendored,
     vollständig feature-detected: ohne WebMCP verhält sich deine App unverändert.</span></li>
   </ul>
+
+  <h2><span lang="en">Using the result in ChatGPT</span><span lang="de">Das Ergebnis in ChatGPT nutzen</span></h2>
+  <p><span lang="en">ChatGPT calls WebMCP integrations <b>Site tools</b>. In the desktop app's built-in browser, keep the page open, select <b>Site tools</b> in the address bar, then open <b>Available site tools</b>. That list is the fastest client-side answer to “did this page register?”.</span>
+  <span lang="de">ChatGPT nennt WebMCP-Integrationen <b>Site tools</b>. Lass die Seite im integrierten Browser der Desktop-App geöffnet, wähle <b>Site tools</b> in der Adressleiste und öffne <b>Available site tools</b>. Diese Liste beantwortet clientseitig am schnellsten: „Hat diese Seite registriert?“</span></p>
+  <ul>
+    <li><span lang="en"><b>Model and account:</b> official OpenAI documentation checked 2026-08-27 lists GPT-5.6 Sol and Terra; Luna has WebMCP disabled. Enterprise and Edu workspaces are listed as unavailable, and rollout still varies.</span>
+    <span lang="de"><b>Modell und Konto:</b> Die am 27.08.2026 geprüfte offizielle OpenAI-Dokumentation nennt GPT-5.6 Sol und Terra; bei Luna ist WebMCP deaktiviert. Enterprise- und Edu-Workspaces sind als nicht verfügbar gelistet, und der Rollout kann variieren.</span></li>
+    <li><span lang="en"><b>Page lifetime:</b> tools belong to the open page. Closing or navigating away can make them unavailable between turns.</span>
+    <span lang="de"><b>Seiten-Lebensdauer:</b> Tools gehören zur geöffneten Seite. Schließen oder Wegnavigieren kann sie zwischen Turns unverfügbar machen.</span></li>
+    <li><span lang="en"><b>Safety:</b> every invocation receives a client-side safety review; normal access and confirmation policies still apply.</span>
+    <span lang="de"><b>Sicherheit:</b> Jeder Aufruf erhält eine clientseitige Sicherheitsprüfung; normale Zugriffs- und Bestätigungsregeln gelten weiterhin.</span></li>
+  </ul>
+  <p><a href="/docs/site-tools/"><span lang="en">Open the dated Site tools setup and troubleshooting guide →</span><span lang="de">Datierte Site-tools-Einrichtung und Fehlersuche öffnen →</span></a></p>
 
   <h2>FAQ</h2>
   <div class="faq">
     <details>
+      <summary><span lang="en">Why do Site tools look missing in ChatGPT?</span><span lang="de">Warum wirken Site tools in ChatGPT verschwunden?</span></summary>
+      <p><span lang="en">Check the page's Available site tools list first, then the current desktop-app version, supported model and workspace availability. Site tools die with the page, so keep its browser tab open. Chrome verification and ChatGPT account availability are separate checks.</span>
+      <span lang="de">Prüfe zuerst die Liste Available site tools der Seite, dann die aktuelle Desktop-App, ein unterstütztes Modell und die Workspace-Verfügbarkeit. Site tools sterben mit der Seite; lass ihren Browser-Tab offen. Chrome-Verifikation und ChatGPT-Kontoverfügbarkeit sind getrennte Prüfungen.</span></p>
+    </details>
+    <details>
       <summary><span lang="en">Which agents can run this skill?</span><span lang="de">Welche Agents können diesen Skill ausführen?</span></summary>
-      <p><span lang="en">Any coding agent that loads skills: Claude Code, Codex, Cursor, opencode, GitHub Copilot and 70+ more through the skills CLI. The result is vendor-neutral — the integration is plain WebMCP, so any browser agent that speaks the standard can call your tools.</span>
-      <span lang="de">Jeder Coding-Agent, der Skills lädt: Claude Code, Codex, Cursor, opencode, GitHub Copilot und über die Skills-CLI 70+ weitere. Das Ergebnis ist herstellerneutral — die Integration ist reines WebMCP, jeder Browser-Agent, der den Standard spricht, kann deine Tools aufrufen.</span></p>
+      <p><span lang="en">Any coding agent that loads skills: Claude Code, Codex, Cursor, opencode, GitHub Copilot and 70+ more through the skills CLI. The result is vendor-neutral. The integration is plain WebMCP, so any browser agent that speaks the standard can call your tools.</span>
+      <span lang="de">Jeder Coding-Agent, der Skills lädt: Claude Code, Codex, Cursor, opencode, GitHub Copilot und über die Skills-CLI 70+ weitere. Das Ergebnis ist herstellerneutral. Die Integration ist reines WebMCP, jeder Browser-Agent, der den Standard spricht, kann deine Tools aufrufen.</span></p>
     </details>
     <details>
       <summary><span lang="en">Do I need the Chrome origin trial?</span><span lang="de">Brauche ich den Chrome Origin Trial?</span></summary>
       <p><span lang="en">For local development you enable chrome://flags/#enable-webmcp-testing; exposing tools on a production origin needs an origin-trial token. The vendored runtime is feature-detected, so your app behaves identically in browsers without WebMCP.</span>
-      <span lang="de">Für lokale Entwicklung aktivierst du chrome://flags/#enable-webmcp-testing; Tools auf einem Produktions-Origin brauchen ein Origin-Trial-Token. Das vendored Runtime ist feature-detected — ohne WebMCP verhält sich deine App identisch.</span></p>
+      <span lang="de">Für lokale Entwicklung aktivierst du chrome://flags/#enable-webmcp-testing; Tools auf einem Produktions-Origin brauchen ein Origin-Trial-Token. Das vendored Runtime ist feature-detected. Ohne WebMCP verhält sich deine App identisch.</span></p>
     </details>
     <details>
       <summary><span lang="en">Will it change code I did not approve?</span><span lang="de">Ändert es Code, den ich nicht freigegeben habe?</span></summary>
@@ -304,8 +322,8 @@
     </details>
     <details>
       <summary><span lang="en">How is each tool verified?</span><span lang="de">Wie wird jedes Tool verifiziert?</span></summary>
-      <p><span lang="en">Every tool is enumerated and executed in real Chrome from the examples recorded in the manifest, asserting both the tool result and the resulting UI state — including the real submit interaction Chrome requires before a mutating declarative form completes.</span>
-      <span lang="de">Jedes Tool wird im echten Chrome aus den im Manifest hinterlegten Beispielen aufgezählt und ausgeführt, geprüft werden Tool-Ergebnis und resultierender UI-State — inklusive des echten Submit-Klicks, den Chrome bei mutierenden Declarative Forms verlangt.</span></p>
+      <p><span lang="en">Every tool is enumerated and executed in real Chrome from the examples recorded in the manifest, asserting both the tool result and the resulting UI state, including the real submit interaction Chrome requires before a mutating declarative form completes.</span>
+      <span lang="de">Jedes Tool wird im echten Chrome aus den im Manifest hinterlegten Beispielen aufgezählt und ausgeführt. Geprüft werden Tool-Ergebnis und resultierender UI-State, inklusive des echten Submit-Klicks, den Chrome bei mutierenden Declarative Forms verlangt.</span></p>
     </details>
   </div>
 
@@ -327,10 +345,12 @@
 
   <h2><span lang="en">Links</span><span lang="de">Links</span></h2>
   <ul>
-    <li><a data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">github.com/TueJon/webmcpify</a> — <span lang="en">source, skill, runtime, verification harness</span><span lang="de">Quellcode, Skill, Runtime, Verifikations-Harness</span></li>
-    <li><a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP proposal</a> — <span lang="en">the W3C Web Machine Learning CG spec draft</span><span lang="de">der Spec-Draft der W3C Web Machine Learning CG</span></li>
-    <li><a href="https://developer.chrome.com/docs/ai/webmcp" target="_blank" rel="noopener">Chrome WebMCP docs</a> — <span lang="en">origin-trial details</span><span lang="de">Details zum Origin Trial</span></li>
-    <li><a href="/"><span lang="en">webmcpify.at — the project page (itself agent-ready)</span><span lang="de">webmcpify.at — die Projektseite (selbst agent-ready)</span></a></li>
+    <li><a href="/docs/"><span lang="en">webmcpify docs</span><span lang="de">webmcpify-Dokumentation</span></a>: <span lang="en">installation and client-side Site tools guides</span><span lang="de">Installation und clientseitige Site-tools-Guides</span></li>
+    <li><a href="https://learn.chatgpt.com/docs/webmcp" target="_blank" rel="noopener">OpenAI Site tools documentation</a>: <span lang="en">current ChatGPT availability and controls</span><span lang="de">aktuelle ChatGPT-Verfügbarkeit und Bedienung</span></li>
+    <li><a data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">github.com/TueJon/webmcpify</a>: <span lang="en">source, skill, runtime, verification harness</span><span lang="de">Quellcode, Skill, Runtime, Verifikations-Harness</span></li>
+    <li><a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP proposal</a>: <span lang="en">the W3C Web Machine Learning CG spec draft</span><span lang="de">der Spec-Draft der W3C Web Machine Learning CG</span></li>
+    <li><a href="https://developer.chrome.com/docs/ai/webmcp" target="_blank" rel="noopener">Chrome WebMCP docs</a>: <span lang="en">origin-trial details</span><span lang="de">Details zum Origin Trial</span></li>
+    <li><a href="/"><span lang="en">webmcpify.at, the project page (itself agent-ready)</span><span lang="de">webmcpify.at, die Projektseite (selbst agent-ready)</span></a></li>
   </ul>
 
   <p style="margin-top:1.6rem"><a class="btn" data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener"><span lang="en">Read the source ↗</span><span lang="de">Quellcode lesen ↗</span></a></p>

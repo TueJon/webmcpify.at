@@ -24,12 +24,12 @@ const INSTALL_ROUTES = {
 };
 
 const PHASES = [
-  ['DETECT', 'identifies stack, build commands, auth model, and how the app starts locally'],
-  ['INVENTORY', 'maps every user action and drafts one candidate tool per action; zero code changes'],
+  ['DETECT', 'records the stack, secure context, backend and CORS origins, auth model, and a required coverage target'],
+  ['INVENTORY', 'builds a route map for curated core coverage or a route-by-route interaction census for parity; zero code changes'],
   ['GATE', 'the human approves or rejects every tool; server mutations need individual sign-off'],
   ['INTEGRATE', 'registers approved tools via document.modelContext, feature-detected, using only code paths the UI already uses'],
-  ['VERIFY', 'runs every tool in real Chrome: schema check, valid and invalid calls, resulting UI state'],
-  ['HEAL', 'fixes failed tools (implementation only) and re-verifies everything; escalates after three attempts'],
+  ['VERIFY', 'runs every tool in current headed Chrome: schema check, valid and invalid calls, resulting UI state'],
+  ['HEAL', 'classifies failures before repair, fixes implementation defects, and re-verifies affected tools'],
   ['AUDIT', 'maps every diff hunk to an approved tool or recorded setup; the rest gets flagged'],
 ];
 

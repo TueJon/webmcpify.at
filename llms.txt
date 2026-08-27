@@ -1,19 +1,24 @@
 # webmcpify
 
-> webmcpify is an MIT-licensed agent skill that makes an existing web application agent-ready: it inventories the app's user actions, lets a human approve a tool manifest, integrates the approved tools via WebMCP (`document.modelContext`, the W3C Web Machine Learning CG proposal currently in Chrome origin trial), verifies every tool in a real browser, heals failures, and audits that no unrelated code changed.
+> webmcpify is an MIT-licensed WebMCP agent skill for curated core coverage or route-by-route parity. It inventories an existing app to the chosen target, lets a human approve a tool manifest, integrates the approved tools through `document.modelContext`, verifies every tool in a real browser, classifies and heals failures, and audits that no unrelated code changed.
 
 Key facts:
 - Install: `npx skills add TueJon/webmcpify` in any skill-loading coding agent — Claude Code, Codex, Cursor, opencode, GitHub Copilot and 70+ more — then run `/webmcpify` in the target repo. Claude Code can alternatively install it as a plugin: `/plugin marketplace add TueJon/webmcpify`, then `/plugin install webmcpify@webmcpify`. Per-runtime instructions: https://webmcpify.at/webmcp-agent-skill/
 - It is an agent skill (a portable instruction set for a coding agent), not a browser agent and not an MCP server: no separate process, no new endpoint, no protocol bridge. The tools it writes live in the page and call code paths the app's UI already uses.
 - Pipeline: DETECT → INVENTORY → GATE (human approval) → INTEGRATE → VERIFY → HEAL → AUDIT.
-- Security model: tools only call code paths the app's UI already uses; the server remains the only trust boundary; server-mutating tools require explicit per-tool human approval; destructive or payment actions are never exposed in a first integration.
+- Coverage is explicit: `curated` emits a route map with omission reasons; `parity` requires every interactive element on every authenticated route to be mapped to a tool or a recorded exclusion. A high tool count alone is not proof of parity.
+- Security model: tools only call code paths the app's UI already uses; the server remains the trust boundary; server-mutating tools require per-tool human approval. Auth, signup, billing, payment and credential-returning tools are excluded. Irreversible delete tools may only open the app's own confirmation UI.
 - Zero runtime dependencies; the integration is feature-detected and behaves identically in browsers without WebMCP.
+- Tool callbacks return structured results. Null or undefined results are converted into explicit failures instead of looking like success.
 - This site itself registers WebMCP tools — imperatively via `document.modelContext` (get_install_command, get_pipeline_overview, get_faq, set_language) and declaratively on the install form (show_install_command). Agents visiting webmcpify.at can use them directly.
 - Pre-visit tool discovery: `https://webmcpify.at/.well-known/webmcp` (JSON, also linked from every page via `<link rel="webmcp">`). The WebMCP spec defines no manifest format — this mirrors the de-facto shape; the runtime registration stays authoritative.
+- ChatGPT calls page tools through **Site tools**. As documented on 2026-08-27, open Site tools from the address bar, choose **Available site tools**, and use GPT-5.6 Sol or Terra; Luna is disabled and Enterprise/Edu are not available. Tools last only while their page remains open and every invocation gets a safety review. Availability can still vary during rollout. Official source: https://learn.chatgpt.com/docs/webmcp
 
 ## Links
 
 - [WebMCP agent skill](https://webmcpify.at/webmcp-agent-skill/): what the skill is, install commands per coding agent, pipeline, guarantees, verification
+- [Documentation](https://webmcpify.at/docs/): coverage targets, proof layers and source boundaries
+- [Using Site tools in ChatGPT](https://webmcpify.at/docs/site-tools/): dated setup and troubleshooting guide
 - [webmcpify source (GitHub)](https://github.com/TueJon/webmcpify): the skill, runtime, and verification harness
 - [WebMCP proposal](https://webmachinelearning.github.io/webmcp/): the W3C Web Machine Learning CG spec draft
 - [Chrome WebMCP documentation](https://developer.chrome.com/docs/ai/webmcp): origin trial details
