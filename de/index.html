@@ -3,25 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>webmcpify — der WebMCP-Agent-Skill, der deine Web-App agent-ready macht</title>
-<meta name="description" content="webmcpify ist ein Agent-Skill, der deine bestehende Web-App mit WebMCP verbindet: Inventar, Freigabe, Integration, Verifikation im echten Browser. Open Source, MIT.">
+<title>webmcpify: der WebMCP-Agent-Skill, der deine Web-App agent-ready macht</title>
+<meta name="description" content="webmcpify ist ein WebMCP Agent-Skill für kuratierte Kernabdeckung oder routenweise Parität: Inventar, Freigabe, Integration und Verifikation im echten Browser. Open Source, MIT.">
 <link rel="canonical" href="https://webmcpify.at/de/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://webmcpify.at/de/">
 <meta property="og:site_name" content="webmcpify">
-<meta property="og:title" content="webmcpify — der WebMCP-Agent-Skill, der deine Web-App agent-ready macht">
-<meta property="og:description" content="webmcpify ist ein Agent-Skill, der deine bestehende Web-App mit WebMCP verbindet: Inventar, Freigabe, Integration, Verifikation im echten Browser. Open Source, MIT.">
+<meta property="og:title" content="webmcpify: der WebMCP-Agent-Skill, der deine Web-App agent-ready macht">
+<meta property="og:description" content="webmcpify ist ein WebMCP Agent-Skill für kuratierte Kernabdeckung oder routenweise Parität: Inventar, Freigabe, Integration und Verifikation im echten Browser. Open Source, MIT.">
 <meta property="og:image" content="https://webmcpify.at/og.png">
-<meta property="og:image:alt" content="webmcpify — mach deine Web-App agent-ready mit WebMCP">
+<meta property="og:image:alt" content="webmcpify: mach deine Web-App agent-ready mit WebMCP">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_AT">
 <meta property="og:locale:alternate" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="webmcpify — der WebMCP-Agent-Skill, der deine Web-App agent-ready macht">
-<meta name="twitter:description" content="webmcpify ist ein Agent-Skill, der deine bestehende Web-App mit WebMCP verbindet: Inventar, Freigabe, Integration, Verifikation im echten Browser. Open Source, MIT.">
+<meta name="twitter:title" content="webmcpify: der WebMCP-Agent-Skill, der deine Web-App agent-ready macht">
+<meta name="twitter:description" content="webmcpify ist ein WebMCP Agent-Skill für kuratierte Kernabdeckung oder routenweise Parität: Inventar, Freigabe, Integration und Verifikation im echten Browser. Open Source, MIT.">
 <meta name="twitter:image" content="https://webmcpify.at/og.png">
-<meta name="twitter:image:alt" content="webmcpify — mach deine Web-App agent-ready mit WebMCP">
+<meta name="twitter:image:alt" content="webmcpify: mach deine Web-App agent-ready mit WebMCP">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
@@ -41,7 +41,7 @@
   "@type": "SoftwareApplication",
   "name": "webmcpify",
   "url": "https://webmcpify.at/",
-  "description": "webmcpify is an agent skill that wires your existing web app into WebMCP: inventory, approval, integration, real-browser verification. Open source, MIT.",
+  "description": "webmcpify is a WebMCP agent skill for curated core coverage or route-by-route parity: inventory, approval, integration and real-browser verification. Open source, MIT.",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any (agent skill for Claude Code, Codex, Cursor, opencode, GitHub Copilot and other skill-loading agents)",
   "license": "https://opensource.org/license/MIT",
@@ -51,7 +51,7 @@
   "sameAs": ["https://github.com/TueJon/webmcpify"]
 }
 </script>
-<script type="application/ld+json" id="faq-schema">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Was ist WebMCP?", "acceptedAnswer": {"@type": "Answer", "text": "Ein vorgeschlagener Webstandard (W3C Web Machine Learning CG), mit dem eine Seite typisierte Tools registriert, die Browser-KI-Agents aufrufen können, statt dein DOM zu scrapen. Läuft aktuell als Chrome Origin Trial."}}, {"@type": "Question", "name": "Fasst webmcpify Code an, den ich nicht freigegeben habe?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Jeder Diff-Hunk muss einem freigegebenen Tool oder dokumentiertem Setup zuordenbar sein; alles andere flaggt die Audit-Phase im Report. Dateien, die vor dem Run dirty waren, werden nie angefasst."}}, {"@type": "Question", "name": "Ist das ein Sicherheitsrisiko für meine App?", "acceptedAnswer": {"@type": "Answer", "text": "Tools dürfen nur Code-Pfade aufrufen, die deine UI ohnehin nutzt: gleiche Endpoints, gleiche Validierung, gleiche Auth. Dein Server bleibt die einzige Trust Boundary. Mutierende Tools brauchen zusätzlich explizite Freigabe pro Tool; destruktive oder Zahlungs-Aktionen werden in einer Erstintegration nie exponiert."}}, {"@type": "Question", "name": "Welche Agents können webmcpify ausführen, und welche das Ergebnis nutzen?", "acceptedAnswer": {"@type": "Answer", "text": "Er läuft in jedem Agent, der Skills lädt — Claude Code, Codex, Cursor, opencode, Copilot. Das Ergebnis ist reine, dependency-freie WebMCP-Integration: jeder Browser-Agent, der WebMCP spricht, kann deine Tools aufrufen."}}]}</script>
+<script type="application/ld+json" id="faq-schema">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Was ist WebMCP?", "acceptedAnswer": {"@type": "Answer", "text": "Ein vorgeschlagener Webstandard (W3C Web Machine Learning CG), mit dem eine Seite typisierte Tools registriert, die Browser-KI-Agents aufrufen können, statt dein DOM zu scrapen. Läuft aktuell als Chrome Origin Trial."}}, {"@type": "Question", "name": "Fasst webmcpify Code an, den ich nicht freigegeben habe?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Jeder Diff-Hunk muss einem freigegebenen Tool oder dokumentiertem Setup zuordenbar sein; alles andere flaggt die Audit-Phase im Report. Dateien, die vor dem Run dirty waren, werden nie angefasst."}}, {"@type": "Question", "name": "Ist das ein Sicherheitsrisiko für meine App?", "acceptedAnswer": {"@type": "Answer", "text": "Tools dürfen nur Code-Pfade aufrufen, die deine UI ohnehin nutzt: gleiche Endpoints, Validierung und Auth. Der Server bleibt die Trust Boundary. Server-Mutationen brauchen Freigabe pro Tool; Auth-, Signup-, Billing-, Zahlungs- und Credential-ausgebende Tools sind ausgeschlossen. Eine irreversible Löschung darf nur die bestehende Bestätigungs-UI der App öffnen."}}, {"@type": "Question", "name": "Welche Agents können webmcpify ausführen, und welche das Ergebnis nutzen?", "acceptedAnswer": {"@type": "Answer", "text": "Er läuft in jedem Agent, der Skills lädt — Claude Code, Codex, Cursor, opencode, Copilot. Das Ergebnis ist reine, dependency-freie WebMCP-Integration: jeder Browser-Agent, der WebMCP spricht, kann deine Tools aufrufen."}}]}</script>
 <link rel="stylesheet" href="/fonts/fonts.css">
 <style>
   :root {
@@ -319,6 +319,7 @@
     <a class="ghost" href="#procedure"><span lang="en">Procedure</span><span lang="de">Ablauf</span></a>
     <a class="ghost" href="#proof"><span lang="en">Proof</span><span lang="de">Beleg</span></a>
     <a class="ghost" href="/webmcp-agent-skill/"><span lang="en">Agent skill</span><span lang="de">Agent-Skill</span></a>
+    <a class="ghost" href="/docs/">Docs</a>
     <a class="ghost" href="#faq">FAQ</a>
     <div class="lang-toggle" role="group" aria-label="Sprache">
       <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
@@ -424,14 +425,14 @@
       <li>
         <span class="no">01</span>
         <h3>DETECT</h3>
-        <p><span lang="en">Identifies your stack, build commands, auth model, and how the app starts locally.</span>
-        <span lang="de">Erkennt Stack, Build-Kommandos, Auth-Modell und wie die App lokal startet.</span></p>
+        <p><span lang="en">Records your stack, secure context, backend and CORS origins, auth model, and a required coverage target.</span>
+        <span lang="de">Erfasst Stack, Secure Context, Backend- und CORS-Origins, Auth-Modell und ein verpflichtendes Abdeckungsziel.</span></p>
       </li>
       <li>
         <span class="no">02</span>
         <h3>INVENTORY</h3>
-        <p><span lang="en">Maps every user action area by area and drafts one candidate tool per action, with schema, examples, and expected outcome. Zero code changes.</span>
-        <span lang="de">Erfasst jede User-Aktion Bereich für Bereich und entwirft pro Aktion ein Kandidaten-Tool mit Schema, Beispielen und erwartetem Ergebnis. Null Code-Änderungen.</span></p>
+        <p><span lang="en">Builds a route map for curated core coverage or a route-by-route interaction census for parity. Every omission needs a reason; tool count alone is not proof. Zero code changes.</span>
+        <span lang="de">Erstellt für kuratierte Kernabdeckung eine Route Map oder für Parität eine Interaktionsinventur jeder Route. Jede Auslassung braucht einen Grund; die Tool-Anzahl allein ist kein Beweis. Null Code-Änderungen.</span></p>
       </li>
       <li class="gate">
         <span class="no">03</span>
@@ -454,8 +455,8 @@
       <li>
         <span class="no">06</span>
         <h3>HEAL</h3>
-        <p><span lang="en">Fixes failed tools (implementation only, never the approved contract) and re-verifies everything. Three strikes and a tool is escalated to you, never silently dropped.</span>
-        <span lang="de">Repariert fehlgeschlagene Tools (nur Implementierung, nie den freigegebenen Vertrag) und re-verifiziert alles. Nach drei Versuchen wird eskaliert, nie still verworfen.</span></p>
+        <p><span lang="en">Classifies each failure before repair, so shared contract or environment defects do not burn one attempt per tool. Implementation fixes are re-verified; approved contracts stay fixed.</span>
+        <span lang="de">Klassifiziert jeden Fehler vor der Reparatur, damit gemeinsame Contract- oder Environment-Defekte nicht pro Tool einen Versuch verbrauchen. Implementierungsfixes werden erneut verifiziert; freigegebene Contracts bleiben unverändert.</span></p>
       </li>
       <li>
         <span class="no">07</span>
@@ -530,14 +531,14 @@
     </table></div>
     <figure class="cmd" style="max-width: 880px; margin-top: 2rem;">
       <div class="cmd-label">
-        <span>.webmcpify/manifest.json — <span lang="en">excerpt</span><span lang="de">Auszug</span></span>
+        <span>.webmcpify/manifest.json · <span lang="en">excerpt</span><span lang="de">Auszug</span></span>
       </div>
       <pre><code>{
   "id": "add_to_cart",
   "mutating": "server",
   "inputSchema": { <span style="color: var(--muted);">/* JSON Schema */</span> },
   "source": ["src/cart/AddButton.tsx:31"],
-  "approval": { "note": "ok — test data only" },
+  "approval": { "note": "ok: test data only" },
   "status": "verified"
 }</code></pre>
     </figure>
@@ -652,8 +653,8 @@
       </details>
       <details>
         <summary><span lang="en">Is this a security risk for my app?</span><span lang="de">Ist das ein Sicherheitsrisiko für meine App?</span></summary>
-        <p><span lang="en">Tools may only call code paths your UI already uses: same endpoints, same validation, same auth. Your server remains the only trust boundary. Mutating tools additionally require explicit per-tool human approval, and destructive or payment actions are never exposed in a first integration.</span>
-        <span lang="de">Tools dürfen nur Code-Pfade aufrufen, die deine UI ohnehin nutzt: gleiche Endpoints, gleiche Validierung, gleiche Auth. Dein Server bleibt die einzige Trust Boundary. Mutierende Tools brauchen zusätzlich explizite Freigabe pro Tool; destruktive oder Zahlungs-Aktionen werden in einer Erstintegration nie exponiert.</span></p>
+        <p><span lang="en">Tools may only call code paths your UI already uses: same endpoints, validation and auth. The server remains the trust boundary. Server mutations need per-tool approval; auth, signup, billing, payment and credential-returning tools are excluded. An irreversible delete can only open the app's own confirmation UI.</span>
+        <span lang="de">Tools dürfen nur Code-Pfade aufrufen, die deine UI ohnehin nutzt: gleiche Endpoints, Validierung und Auth. Der Server bleibt die Trust Boundary. Server-Mutationen brauchen Freigabe pro Tool; Auth-, Signup-, Billing-, Zahlungs- und Credential-ausgebende Tools sind ausgeschlossen. Eine irreversible Löschung darf nur die bestehende Bestätigungs-UI der App öffnen.</span></p>
       </details>
       <details>
         <summary><span lang="en">Which agents can run it, and which can use the result?</span><span lang="de">Welche Agents führen es aus, und welche nutzen das Ergebnis?</span></summary>
@@ -668,6 +669,7 @@
   <div class="wrap foot">
     <span>webmcpify.at</span>
     <a href="/webmcp-agent-skill/"><span lang="en">WebMCP agent skill</span><span lang="de">WebMCP Agent-Skill</span></a>
+    <a href="/docs/">Docs</a>
     <a data-measure="github-outbound" href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">GitHub</a>
     <a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP <span lang="en">proposal</span><span lang="de">Proposal</span></a>
     <span class="fill"></span>

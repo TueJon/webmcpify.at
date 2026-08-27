@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Use ChatGPT Site tools with WebMCP — webmcpify docs</title>
+<meta name="description" content="Dated setup and troubleshooting guide for ChatGPT Site tools: supported models, Available site tools, page lifetime, secure WebMCP origins and headed-Chrome verification.">
+<link rel="canonical" href="https://webmcpify.at/docs/site-tools/">
+<link rel="webmcp" href="/.well-known/webmcp" type="application/json">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://webmcpify.at/docs/site-tools/">
+<meta property="og:title" content="Use ChatGPT Site tools with WebMCP">
+<meta property="og:description" content="Check the model, page registration, address-bar tool list and page lifetime in the right order.">
+<meta property="og:image" content="https://webmcpify.at/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/docs/docs.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/">webmcpify.at</a>
+    <a href="/docs/">Docs</a>
+    <span class="meta">VERIFIED 2026-08-27</span>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="doc-nav" aria-label="Documentation">
+    <strong>WEBMCPIFY DOCS</strong>
+    <a href="/docs/">Overview</a>
+    <a href="/webmcp-agent-skill/">Install the skill</a>
+    <a href="/docs/site-tools/" aria-current="page">Use Site tools</a>
+    <a href="https://learn.chatgpt.com/docs/webmcp" target="_blank" rel="noopener">Official OpenAI docs ↗</a>
+  </nav>
+
+  <main>
+    <p class="meta">CLIENT GUIDE · SNAPSHOT 2026-08-27</p>
+    <h1>Use Site tools in ChatGPT.</h1>
+    <p class="lede">ChatGPT calls WebMCP integrations <b>Site tools</b>. Treat the browser's own Available site tools list as ground truth for the page that is open right now.</p>
+    <span class="stamp">PAGE-BOUND, MODEL-GATED</span>
+
+    <h2>Requirements at this snapshot</h2>
+    <div class="requirements">
+      <ul>
+        <li><b>Website:</b> the page registers WebMCP from a secure context. Use HTTPS in production or a trustworthy loopback origin in development.</li>
+        <li><b>ChatGPT:</b> update the desktop app, then open the website in its built-in browser.</li>
+        <li><b>Model:</b> official OpenAI documentation checked 2026-08-27 lists GPT-5.6 Sol and GPT-5.6 Terra. GPT-5.6 Luna currently has WebMCP disabled.</li>
+        <li><b>Workspace:</b> the same official page says Site tools are unavailable in Enterprise and Edu; availability can also depend on rollout.</li>
+      </ul>
+    </div>
+
+    <h2>Inspect what the page registered</h2>
+    <ol>
+      <li>Keep the target page open in ChatGPT's built-in browser.</li>
+      <li>Select <b>Site tools</b> in the browser address bar.</li>
+      <li>Open <b>Available site tools</b> and inspect the individual names.</li>
+      <li>After a call, use <b>Recently used</b> when available to review the source and invocation.</li>
+    </ol>
+    <p>If the expected tool is absent here, do not start by rewriting its schema. Check the model/workspace, page lifetime and secure registration first.</p>
+
+    <h2>Troubleshoot in this order</h2>
+    <table>
+      <thead><tr><th>Symptom</th><th>Check</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>No Site tools control</td><td>Desktop-app version, selected model, workspace and rollout.</td><td>The client surface may be unavailable before the site is involved.</td></tr>
+        <tr><td>Control exists, expected tool absent</td><td>Available site tools while the exact page is open; then secure context and registration.</td><td>The page did not register it in the current document, or registration failed.</td></tr>
+        <tr><td>Tool worked, then vanished</td><td>Did the browser close, navigate, reload or replace the page between turns?</td><td>Tools belong to their page; page teardown ends that registration.</td></tr>
+        <tr><td>Assistant uses ordinary browser interaction</td><td>Confirm Sol/Terra plus Work or Codex and inspect Available site tools directly.</td><td>Fallback browser behavior can look like a broken integration.</td></tr>
+        <tr><td>Tool call is held or asks for confirmation</td><td>Review the requested action and client safety result.</td><td>Every invocation receives a client-side safety review; normal confirmation policy still applies.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Chrome proof is a separate layer</h2>
+    <p>webmcpify verifies implementation behavior in current headed Chrome. Use the recorded verification origin and a dedicated writable profile:</p>
+    <pre><code>WEBMCP_BASE_URL=https://your-secure-test-origin.example \
+WEBMCP_PROFILE_DIR=/tmp/your-dedicated-webmcp-profile \
+npx playwright test .webmcpify/webmcp.spec.ts</code></pre>
+    <p>The first page probe is:</p>
+    <pre><code>({
+  secure: window.isSecureContext,
+  modelContext: typeof document.modelContext
+})</code></pre>
+    <p>A green Chrome harness proves registration and execution in that Chrome environment. It does not prove that a particular ChatGPT account currently exposes Site tools.</p>
+
+    <h2>FAQ</h2>
+    <div class="faq">
+      <details>
+        <summary>Why does webmcpify not call this “WebMCP” in ChatGPT instructions?</summary>
+        <p>Because the client label is <b>Site tools</b>. WebMCP is the underlying web API; Available site tools is the control a ChatGPT user can actually inspect.</p>
+      </details>
+      <details>
+        <summary>Can the tools survive after I leave the page?</summary>
+        <p>No compatibility promise says they can. Official OpenAI documentation states that closing or navigating away can make page-owned tools unavailable.</p>
+      </details>
+      <details>
+        <summary>Does ChatGPT run a safety check?</summary>
+        <p>Yes. The official guide says each built-in-browser invocation receives a safety review, and ordinary access and confirmation rules continue to apply.</p>
+      </details>
+      <details>
+        <summary>What about plain Chat or a Work workspace?</summary>
+        <p>A single session on 2026-08-26/27 observed plain Chat handing the task to Work mode and one Work workspace offering Site tools. That is a dated account/UI observation, not a published availability guarantee. Verify the exact account.</p>
+      </details>
+    </div>
+
+    <h2>Sources and date boundary</h2>
+    <ul>
+      <li><a href="https://learn.chatgpt.com/docs/webmcp" target="_blank" rel="noopener">OpenAI: Site tools</a>, checked 2026-08-27 for naming, model/workspace availability, controls, page lifetime and safety review.</li>
+      <li><a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP draft</a>, dated 2026-08-26, for the secure-context Document API.</li>
+      <li><a href="https://developer.chrome.com/docs/ai/webmcp" target="_blank" rel="noopener">Chrome WebMCP documentation</a> for origin-trial and local verification behavior.</li>
+    </ul>
+    <p>Re-check these pages before copying model names or workspace claims into another public surface.</p>
+  </main>
+</div>
+
+<footer>
+  <a href="/">Project page</a>
+  <a href="/imprint.html">Imprint</a>
+  <a href="/privacy.html">Privacy</a>
+  <button type="button" class="foot-btn" data-consent-open hidden>Cookie settings</button>
+</footer>
+
+<div class="consent" id="consent" role="region" aria-label="Cookie consent" hidden>
+  <div class="consent-inner">
+    <p class="consent-text">With your consent, <b>Statistics</b> uses Google Analytics 4 to measure this page. <b>Marketing</b> additionally shares usage signals with the linked Google Ads account for attribution and audience measurement; personalized advertising stays off. Nothing loads and no category cookie is set unless you enable it. You can change this choice at any time. See the <a href="/privacy.html">privacy policy</a>.</p>
+    <div class="consent-controls">
+      <fieldset class="consent-cats">
+        <legend class="sr-only">Consent categories</legend>
+        <label class="consent-cat"><input type="checkbox" data-consent-cat="statistics"> Statistics</label>
+        <label class="consent-cat"><input type="checkbox" data-consent-cat="marketing" disabled> Marketing (requires Statistics)</label>
+      </fieldset>
+      <div class="consent-actions">
+        <button type="button" class="btn" data-consent-decline>Reject all</button>
+        <button type="button" class="btn" data-consent-save>Save choices</button>
+        <button type="button" class="btn" data-consent-accept>Allow all</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module" src="/consent.js"></script>
+</body>
+</html>

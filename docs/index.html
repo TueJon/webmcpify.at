@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>webmcpify docs — the WebMCP agent skill</title>
+<meta name="description" content="Documentation for the webmcpify WebMCP agent skill: choose curated core coverage or route-by-route parity, install the skill, and verify Site tools in real clients.">
+<link rel="canonical" href="https://webmcpify.at/docs/">
+<link rel="webmcp" href="/.well-known/webmcp" type="application/json">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://webmcpify.at/docs/">
+<meta property="og:title" content="webmcpify docs — the WebMCP agent skill">
+<meta property="og:description" content="Install webmcpify, choose curated or parity coverage, and verify the resulting Site tools.">
+<meta property="og:image" content="https://webmcpify.at/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/docs/docs.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/">webmcpify.at</a>
+    <a href="/webmcp-agent-skill/">Agent skill</a>
+    <span class="meta">DOCS · REV 2026-08-27</span>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="doc-nav" aria-label="Documentation">
+    <strong>WEBMCPIFY DOCS</strong>
+    <a href="/docs/" aria-current="page">Overview</a>
+    <a href="/webmcp-agent-skill/">Install the skill</a>
+    <a href="/docs/site-tools/">Use Site tools</a>
+    <a href="https://github.com/TueJon/webmcpify" target="_blank" rel="noopener">Source ↗</a>
+  </nav>
+
+  <main>
+    <p class="meta">OPEN SOURCE · MIT · VERSION 0.5.0 PREPARED</p>
+    <h1>Docs for an inspectable WebMCP run.</h1>
+    <p class="lede">webmcpify is a WebMCP agent skill for curated core coverage or route-by-route parity. These guides separate what the coding agent builds, what Chrome verifies, and what a client such as ChatGPT can actually see.</p>
+    <span class="stamp">SOURCE-TRACEABLE, NOT A SCORECARD</span>
+
+    <h2>Start with the surface you need</h2>
+    <div class="doc-links">
+      <a class="doc-link" href="/webmcp-agent-skill/">
+        <span><strong>Install and run the skill</strong><br>Pick curated coverage or a route-by-route parity census, approve the manifest, then integrate and verify.</span>
+        <b>INSTALL →</b>
+      </a>
+      <a class="doc-link" href="/docs/site-tools/">
+        <span><strong>Find Site tools in ChatGPT</strong><br>Check the supported model, address-bar tool list, page lifetime and account availability in the right order.</span>
+        <b>CLIENT →</b>
+      </a>
+      <a class="doc-link" href="https://github.com/TueJon/webmcpify/tree/main/skills/webmcpify" target="_blank" rel="noopener">
+        <span><strong>Read the actual skill contract</strong><br>Inspect the manifest schema, phase references, vendored runtime and verification template.</span>
+        <b>SOURCE ↗</b>
+      </a>
+    </div>
+
+    <h2>Coverage is a named choice</h2>
+    <table>
+      <thead><tr><th>Target</th><th>Evidence</th><th>Best fit</th></tr></thead>
+      <tbody>
+        <tr><td><code>curated</code></td><td>A reviewed route-to-tool map for selected high-value actions, with written omission reasons.</td><td>A focused first integration and smaller active toolsets.</td></tr>
+        <tr><td><code>parity</code></td><td>Every interactive element on every authenticated route maps to a tool or a written reason.</td><td>Auditable product-surface equivalence.</td></tr>
+      </tbody>
+    </table>
+    <p>A raw tool count cannot prove parity. No public source or measured client run establishes a universal safe per-page tool count, so client-capacity gaps remain explicit instead of becoming a compatibility claim.</p>
+
+    <h2>The three proof layers</h2>
+    <ol>
+      <li><b>Manifest proof:</b> the route map, policy fingerprint, approvals, examples and expected UI deltas are persisted in the target repository.</li>
+      <li><b>Chrome proof:</b> a dedicated headed profile enumerates and executes each tool against the recorded secure verification origin.</li>
+      <li><b>Client proof:</b> the exact client/account shows the page's registrations. In ChatGPT this surface is called <b>Site tools</b>.</li>
+    </ol>
+
+    <h2>Current source boundary</h2>
+    <div class="requirements">
+      <p><b>Last reviewed 2026-08-27.</b> WebMCP is a moving proposal and client availability changes separately. Runtime claims are checked against the WebMCP draft, Chrome implementation guidance and a real Chrome run. ChatGPT model/workspace claims are checked against the official OpenAI Site tools page.</p>
+      <p><a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP draft</a> · <a href="https://developer.chrome.com/docs/ai/webmcp" target="_blank" rel="noopener">Chrome WebMCP docs</a> · <a href="https://learn.chatgpt.com/docs/webmcp" target="_blank" rel="noopener">OpenAI Site tools docs</a></p>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <a href="/">Project page</a>
+  <a href="/imprint.html">Imprint</a>
+  <a href="/privacy.html">Privacy</a>
+  <button type="button" class="foot-btn" data-consent-open hidden>Cookie settings</button>
+</footer>
+
+<div class="consent" id="consent" role="region" aria-label="Cookie consent" hidden>
+  <div class="consent-inner">
+    <p class="consent-text">With your consent, <b>Statistics</b> uses Google Analytics 4 to measure this page. <b>Marketing</b> additionally shares usage signals with the linked Google Ads account for attribution and audience measurement; personalized advertising stays off. Nothing loads and no category cookie is set unless you enable it. You can change this choice at any time. See the <a href="/privacy.html">privacy policy</a>.</p>
+    <div class="consent-controls">
+      <fieldset class="consent-cats">
+        <legend class="sr-only">Consent categories</legend>
+        <label class="consent-cat"><input type="checkbox" data-consent-cat="statistics"> Statistics</label>
+        <label class="consent-cat"><input type="checkbox" data-consent-cat="marketing" disabled> Marketing (requires Statistics)</label>
+      </fieldset>
+      <div class="consent-actions">
+        <button type="button" class="btn" data-consent-decline>Reject all</button>
+        <button type="button" class="btn" data-consent-save>Save choices</button>
+        <button type="button" class="btn" data-consent-accept>Allow all</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module" src="/consent.js"></script>
+</body>
+</html>

@@ -9,6 +9,8 @@ const PAGES = [
   'index.html',
   'de/index.html',
   'webmcp-agent-skill/index.html',
+  'docs/index.html',
+  'docs/site-tools/index.html',
   'imprint.html',
   'privacy.html',
 ];
@@ -18,6 +20,8 @@ const CANONICALS = {
   'index.html': 'https://webmcpify.at/',
   'de/index.html': 'https://webmcpify.at/de/',
   'webmcp-agent-skill/index.html': 'https://webmcpify.at/webmcp-agent-skill/',
+  'docs/index.html': 'https://webmcpify.at/docs/',
+  'docs/site-tools/index.html': 'https://webmcpify.at/docs/site-tools/',
 };
 
 const read = (page) => readFileSync(join(root, page), 'utf8');
@@ -68,17 +72,66 @@ test('the agent-skill page carries the category phrase in title and h1', () => {
 });
 
 /** An orphan page is reachable only through the sitemap. Keep it linked. */
-test('the agent-skill page is linked from the start pages and the sitemap', () => {
+test('the public pages form a linked documentation tree and stay in the sitemap', () => {
   for (const page of ['index.html', 'de/index.html']) {
     assert.ok(
       read(page).includes('href="/webmcp-agent-skill/"'),
       `${page} must link to /webmcp-agent-skill/`,
     );
+    assert.ok(read(page).includes('href="/docs/"'), `${page} must link to /docs/`);
   }
   assert.ok(
-    read('sitemap.xml').includes('<loc>https://webmcpify.at/webmcp-agent-skill/</loc>'),
-    'sitemap.xml must list /webmcp-agent-skill/',
+    read('webmcp-agent-skill/index.html').includes('href="/docs/site-tools/"'),
+    'the agent-skill page must link to the Site tools guide',
   );
+  assert.ok(
+    read('docs/index.html').includes('href="/docs/site-tools/"'),
+    'the documentation index must link to the Site tools guide',
+  );
+  const sitemap = read('sitemap.xml');
+  for (const route of ['webmcp-agent-skill/', 'docs/', 'docs/site-tools/']) {
+    assert.ok(
+      sitemap.includes(`<loc>https://webmcpify.at/${route}</loc>`),
+      `sitemap.xml must list /${route}`,
+    );
+  }
+});
+
+test('the Site tools guidance stays dated, scoped and linked to the official source', () => {
+  const official = 'https://learn.chatgpt.com/docs/webmcp';
+  for (const page of ['webmcp-agent-skill/index.html', 'docs/site-tools/index.html']) {
+    const html = normalize(read(page));
+    for (const fact of [
+      'Site tools',
+      'Available site tools',
+      '2026-08-27',
+      'GPT-5.6 Sol',
+      'Terra',
+      'Luna',
+      'Enterprise',
+      'Edu',
+      'safety review',
+    ]) {
+      assert.ok(html.includes(fact), `${page} is missing dated Site tools fact: ${fact}`);
+    }
+    assert.ok(html.includes(official), `${page} must cite the official Site tools guide`);
+    assert.match(
+      html,
+      /(?:keep (?:the )?(?:target )?page open|keep its browser tab open|page (?:stays|remains) open)/i,
+      `${page} must state page lifetime`,
+    );
+  }
+});
+
+test('coverage claims distinguish curated scope from parity proof', () => {
+  for (const page of ['index.html', 'de/index.html', 'webmcp-agent-skill/index.html', 'docs/index.html']) {
+    const html = normalize(read(page)).toLowerCase();
+    assert.ok(html.includes('curated'), `${page} must name curated coverage`);
+    assert.ok(html.includes('parity'), `${page} must name parity`);
+  }
+  const docs = normalize(read('docs/index.html')).toLowerCase();
+  assert.ok(docs.includes('tool count'), 'docs must say tool count is not parity proof');
+  assert.ok(docs.includes('omission'), 'docs must require omission reasons');
 });
 
 test('the public product pages surface the accurately scoped verification demo', () => {
