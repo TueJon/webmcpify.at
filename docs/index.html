@@ -22,7 +22,7 @@
   <div class="topbar-inner">
     <a class="brand" href="/">webmcpify.at</a>
     <a href="/webmcp-agent-skill/">Agent skill</a>
-    <span class="meta">DOCS · REV 2026-08-27</span>
+    <span class="meta">DOCS · REV 2026-08-31</span>
   </div>
 </header>
 
@@ -48,7 +48,7 @@
         <b>INSTALL →</b>
       </a>
       <a class="doc-link" href="/docs/site-tools/">
-        <span><strong>Find Site tools in ChatGPT</strong><br>Check the supported model, address-bar tool list, page lifetime and account availability in the right order.</span>
+        <span><strong>Find Site tools in ChatGPT</strong><br>Check the supported API subset, model, address-bar tool list, page lifetime and account availability in the right order.</span>
         <b>CLIENT →</b>
       </a>
       <a class="doc-link" href="https://github.com/TueJon/webmcpify/tree/main/skills/webmcpify" target="_blank" rel="noopener">
@@ -71,12 +71,12 @@
     <ol>
       <li><b>Manifest proof:</b> the route map, policy fingerprint, approvals, examples and expected UI deltas are persisted in the target repository.</li>
       <li><b>Chrome proof:</b> a dedicated headed profile enumerates and executes each tool against the recorded secure verification origin.</li>
-      <li><b>Client proof:</b> the exact client/account shows the page's registrations. In ChatGPT this surface is called <b>Site tools</b>.</li>
+      <li><b>Client proof:</b> the exact client/account shows its supported subset of the page's registrations. In ChatGPT this surface is called <b>Site tools</b>; it currently discovers top-level imperative tools, not declarative forms or iframe registrations.</li>
     </ol>
 
     <h2>Current source boundary</h2>
     <div class="requirements">
-      <p><b>Last reviewed 2026-08-27.</b> WebMCP is a moving proposal and client availability changes separately. Runtime claims are checked against the WebMCP draft, Chrome implementation guidance and a real Chrome run. ChatGPT model/workspace claims are checked against the official OpenAI Site tools page.</p>
+      <p><b>Last reviewed 2026-08-31.</b> WebMCP is a moving proposal and client availability changes separately. Runtime claims are checked against the WebMCP draft, Chrome implementation guidance and a real Chrome run. ChatGPT API-subset and model/workspace claims are checked against the official OpenAI Site tools page.</p>
       <p><a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP draft</a> · <a href="https://developer.chrome.com/docs/ai/webmcp" target="_blank" rel="noopener">Chrome WebMCP docs</a> · <a href="https://learn.chatgpt.com/docs/webmcp" target="_blank" rel="noopener">OpenAI Site tools docs</a></p>
     </div>
   </main>

@@ -289,8 +289,10 @@
   <p><span lang="en">ChatGPT calls WebMCP integrations <b>Site tools</b>. In the desktop app's built-in browser, keep the page open, select <b>Site tools</b> in the address bar, then open <b>Available site tools</b>. That list is the fastest client-side answer to “did this page register?”.</span>
   <span lang="de">ChatGPT nennt WebMCP-Integrationen <b>Site tools</b>. Lass die Seite im integrierten Browser der Desktop-App geöffnet, wähle <b>Site tools</b> in der Adressleiste und öffne <b>Available site tools</b>. Diese Liste beantwortet clientseitig am schnellsten: „Hat diese Seite registriert?“</span></p>
   <ul>
-    <li><span lang="en"><b>Model and account:</b> official OpenAI documentation checked 2026-08-27 lists GPT-5.6 Sol and Terra; Luna has WebMCP disabled. Enterprise and Edu workspaces are listed as unavailable, and rollout still varies.</span>
-    <span lang="de"><b>Modell und Konto:</b> Die am 27.08.2026 geprüfte offizielle OpenAI-Dokumentation nennt GPT-5.6 Sol und Terra; bei Luna ist WebMCP deaktiviert. Enterprise- und Edu-Workspaces sind als nicht verfügbar gelistet, und der Rollout kann variieren.</span></li>
+    <li><span lang="en"><b>Model and account:</b> official OpenAI documentation checked 2026-08-31 lists GPT-5.6 Sol and Terra; Luna has WebMCP disabled. Enterprise and Edu workspaces are listed as unavailable, and rollout still varies.</span>
+    <span lang="de"><b>Modell und Konto:</b> Die am 31.08.2026 geprüfte offizielle OpenAI-Dokumentation nennt GPT-5.6 Sol und Terra; bei Luna ist WebMCP deaktiviert. Enterprise- und Edu-Workspaces sind als nicht verfügbar gelistet, und der Rollout kann variieren.</span></li>
+    <li><span lang="en"><b>Client coverage:</b> Site tools currently discover imperative JavaScript tools in the top-level page, not Declarative API form tools or registrations inside iframes.</span>
+    <span lang="de"><b>Client-Abdeckung:</b> Site tools erkennen derzeit imperative JavaScript-Tools in der Top-Level-Seite, nicht Tools der Declarative API auf Formularen oder Registrierungen in iframes.</span></li>
     <li><span lang="en"><b>Page lifetime:</b> tools belong to the open page. Closing or navigating away can make them unavailable between turns.</span>
     <span lang="de"><b>Seiten-Lebensdauer:</b> Tools gehören zur geöffneten Seite. Schließen oder Wegnavigieren kann sie zwischen Turns unverfügbar machen.</span></li>
     <li><span lang="en"><b>Safety:</b> every invocation receives a client-side safety review; normal access and confirmation policies still apply.</span>
@@ -302,8 +304,8 @@
   <div class="faq">
     <details>
       <summary><span lang="en">Why do Site tools look missing in ChatGPT?</span><span lang="de">Warum wirken Site tools in ChatGPT verschwunden?</span></summary>
-      <p><span lang="en">Check the page's Available site tools list first, then the current desktop-app version, supported model and workspace availability. Site tools die with the page, so keep its browser tab open. Chrome verification and ChatGPT account availability are separate checks.</span>
-      <span lang="de">Prüfe zuerst die Liste Available site tools der Seite, dann die aktuelle Desktop-App, ein unterstütztes Modell und die Workspace-Verfügbarkeit. Site tools sterben mit der Seite; lass ihren Browser-Tab offen. Chrome-Verifikation und ChatGPT-Kontoverfügbarkeit sind getrennte Prüfungen.</span></p>
+      <p><span lang="en">Check the page's Available site tools list first, then top-level imperative registration, the current desktop-app version, supported model and workspace availability. Site tools die with the page, so keep its browser tab open. Chrome verification and ChatGPT account availability are separate checks.</span>
+      <span lang="de">Prüfe zuerst die Liste Available site tools der Seite, dann die imperative Registrierung auf der Top-Level-Seite, die aktuelle Desktop-App, ein unterstütztes Modell und die Workspace-Verfügbarkeit. Site tools sterben mit der Seite; lass ihren Browser-Tab offen. Chrome-Verifikation und ChatGPT-Kontoverfügbarkeit sind getrennte Prüfungen.</span></p>
     </details>
     <details>
       <summary><span lang="en">Which agents can run this skill?</span><span lang="de">Welche Agents können diesen Skill ausführen?</span></summary>
