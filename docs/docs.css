@@ -35,6 +35,12 @@ pre {
   font-size: 0.86rem;
   line-height: 1.6;
 }
+pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
 
 .topbar {
   border-bottom: 1px solid var(--ink);
