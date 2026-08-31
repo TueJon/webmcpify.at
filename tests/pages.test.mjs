@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -139,6 +140,14 @@ test('documentation code blocks keep the dark preformatted contrast', () => {
     /pre code\s*{[^}]*background:\s*transparent;[^}]*padding:\s*0;[^}]*color:\s*inherit;[^}]*font-size:\s*inherit;[^}]*}/s,
     'nested code must not retain the pale inline-code background inside dark pre blocks',
   );
+
+  const version = createHash('sha256').update(css).digest('hex').slice(0, 12);
+  for (const page of ['docs/index.html', 'docs/site-tools/index.html']) {
+    assert.ok(
+      read(page).includes(`href="/docs/docs.css?v=${version}"`),
+      `${page} must cache-bust docs.css with its current content hash`,
+    );
+  }
 });
 
 test('coverage claims distinguish curated scope from parity proof', () => {
