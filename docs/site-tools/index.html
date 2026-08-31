@@ -83,7 +83,7 @@ npx playwright test .webmcpify/webmcp.spec.ts</code></pre>
   secure: window.isSecureContext,
   modelContext: typeof document.modelContext
 })</code></pre>
-    <p>A green Chrome harness proves registration and execution in that Chrome environment, including broader WebMCP surfaces such as the Declarative API and frame-aware discovery. It does not prove that a particular ChatGPT account exposes the same subset as Site tools.</p>
+    <p>A green Chrome harness proves registration and execution for the tools that harness exercises in that Chrome environment. It does not prove that a particular ChatGPT account exposes the same subset as Site tools; test that client separately.</p>
 
     <h2>FAQ</h2>
     <div class="faq">
