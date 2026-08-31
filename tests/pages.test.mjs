@@ -104,13 +104,16 @@ test('the Site tools guidance stays dated, scoped and linked to the official sou
     for (const fact of [
       'Site tools',
       'Available site tools',
-      '2026-08-27',
+      '2026-08-31',
       'GPT-5.6 Sol',
       'Terra',
       'Luna',
       'Enterprise',
       'Edu',
       'safety review',
+      'Declarative API',
+      'iframes',
+      'top-level page',
     ]) {
       assert.ok(html.includes(fact), `${page} is missing dated Site tools fact: ${fact}`);
     }
@@ -121,6 +124,12 @@ test('the Site tools guidance stays dated, scoped and linked to the official sou
       `${page} must state page lifetime`,
     );
   }
+
+  const machineSummary = normalize(read('llms.txt'));
+  for (const fact of ['2026-08-31', 'top-level imperative', 'Declarative API', 'iframes']) {
+    assert.ok(machineSummary.includes(fact), `llms.txt is missing Site tools boundary: ${fact}`);
+  }
+  assert.ok(machineSummary.includes(official), 'llms.txt must cite the official Site tools guide');
 });
 
 test('coverage claims distinguish curated scope from parity proof', () => {
