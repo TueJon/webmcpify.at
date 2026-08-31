@@ -132,6 +132,15 @@ test('the Site tools guidance stays dated, scoped and linked to the official sou
   assert.ok(machineSummary.includes(official), 'llms.txt must cite the official Site tools guide');
 });
 
+test('documentation code blocks keep the dark preformatted contrast', () => {
+  const css = read('docs/docs.css');
+  assert.match(
+    css,
+    /pre code\s*{[^}]*background:\s*transparent;[^}]*padding:\s*0;[^}]*color:\s*inherit;[^}]*font-size:\s*inherit;[^}]*}/s,
+    'nested code must not retain the pale inline-code background inside dark pre blocks',
+  );
+});
+
 test('coverage claims distinguish curated scope from parity proof', () => {
   for (const page of ['index.html', 'de/index.html', 'webmcp-agent-skill/index.html', 'docs/index.html']) {
     const html = normalize(read(page)).toLowerCase();
