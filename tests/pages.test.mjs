@@ -72,6 +72,28 @@ test('the agent-skill page carries the category phrase in title and h1', () => {
   assert.match(normalize(h1).toLowerCase(), /webmcp agent skill/);
 });
 
+test('the agent-skill search snippet stays concise and query-aligned', () => {
+  const html = read('webmcp-agent-skill/index.html');
+  const title = normalize(html.match(/<title>(.*?)<\/title>/s)?.[1] ?? '').replace(/&amp;/g, '&');
+  const description = html.match(/<meta name="description" content="([^"]*)">/)?.[1] ?? '';
+
+  // Editorial guards, not claims about fixed Google pixel or character limits.
+  assert.ok(title.length <= 65, `agent-skill title is too diffuse (${title.length} chars)`);
+  assert.ok(description.length <= 160, `agent-skill description is too diffuse (${description.length} chars)`);
+  for (const phrase of ['webmcp agent skill', 'codex', 'claude code', 'webmcpify']) {
+    assert.ok(title.toLowerCase().includes(phrase), `agent-skill title is missing ${phrase}`);
+  }
+  for (const phrase of ['install', 'approve', 'verify', 'real chrome']) {
+    assert.ok(description.toLowerCase().includes(phrase), `agent-skill description is missing ${phrase}`);
+  }
+});
+
+test('the agent-skill page exposes its content through one main landmark', () => {
+  const html = read('webmcp-agent-skill/index.html');
+  assert.equal((html.match(/<main\b/g) ?? []).length, 1);
+  assert.equal((html.match(/<\/main>/g) ?? []).length, 1);
+});
+
 /** An orphan page is reachable only through the sitemap. Keep it linked. */
 test('the public pages form a linked documentation tree and stay in the sitemap', () => {
   for (const page of ['index.html', 'de/index.html']) {
