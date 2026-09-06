@@ -59,6 +59,30 @@ test('every indexable page declares its own canonical and stays indexable', () =
   }
 });
 
+test('every page advertises the machine-readable site description', () => {
+  for (const page of PAGES) {
+    assert.ok(
+      read(page).includes('<link rel="describedby" href="/llms.txt" type="text/markdown">'),
+      `${page} must advertise /llms.txt`,
+    );
+  }
+});
+
+test('llms.txt gives agents a direct, specification-shaped path to the skill', () => {
+  const summary = read('llms.txt');
+  assert.match(summary, /^# webmcpify\n\n> /);
+  for (const phrase of [
+    'agent skill for WebMCP integration',
+    'make an existing website agent-ready',
+    'npx skills add TueJon/webmcpify',
+    'https://raw.githubusercontent.com/TueJon/webmcpify/main/skills/webmcpify/SKILL.md',
+    'https://raw.githubusercontent.com/TueJon/webmcpify/main/README.md',
+  ]) {
+    assert.ok(summary.includes(phrase), `llms.txt is missing agent discovery fact: ${phrase}`);
+  }
+  assert.match(summary, /## Start here\n\n- \[[^\]]+\]\(https:\/\//);
+});
+
 /**
  * The category-phrase guard. webmcpify is a coined single token: it cannot match
  * a search for "webmcp agent skill", so this page exists to carry those words in
@@ -70,6 +94,11 @@ test('the agent-skill page carries the category phrase in title and h1', () => {
   const h1 = html.match(/<h1[^>]*>(.*?)<\/h1>/s)?.[1] ?? '';
   assert.match(normalize(title).toLowerCase(), /webmcp agent skill/);
   assert.match(normalize(h1).toLowerCase(), /webmcp agent skill/);
+});
+
+test('the agent-skill page answers the generic integration-skill query', () => {
+  const html = normalize(read('webmcp-agent-skill/index.html')).toLowerCase();
+  assert.ok(html.includes('agent skill for webmcp integration'));
 });
 
 test('the agent-skill search snippet stays concise and query-aligned', () => {
