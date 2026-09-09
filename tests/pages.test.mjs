@@ -77,9 +77,9 @@ test('llms.txt gives agents a direct, specification-shaped path to the skill', (
   assert.match(summary, /## Start here\n\n- \[[^\]]+\]\(https:\/\//);
 });
 
-test('release and community copy names the shipped version and public contribution', () => {
+test('release and community copy names the coordinated version target and public contribution', () => {
   const docs = read('docs/index.html');
-  assert.match(docs, /VERSION 0\.5\.0/);
+  assert.match(docs, /VERSION TARGET 0\.5\.0/);
   assert.match(docs, /github\.com\/arnabwithab/);
   assert.match(docs, /TueJon\/webmcpify\/pull\/13/);
 });
