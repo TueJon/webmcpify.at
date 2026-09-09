@@ -27,7 +27,8 @@
         "additionalProperties": false
       },
       "annotations": {
-        "readOnlyHint": true
+        "readOnlyHint": true,
+        "consequentialHint": false
       }
     },
     {
@@ -39,7 +40,8 @@
         "additionalProperties": false
       },
       "annotations": {
-        "readOnlyHint": true
+        "readOnlyHint": true,
+        "consequentialHint": false
       }
     },
     {
@@ -51,7 +53,8 @@
         "additionalProperties": false
       },
       "annotations": {
-        "readOnlyHint": true
+        "readOnlyHint": true,
+        "consequentialHint": false
       }
     },
     {
@@ -75,7 +78,8 @@
         "additionalProperties": false
       },
       "annotations": {
-        "readOnlyHint": false
+        "readOnlyHint": false,
+        "consequentialHint": false
       }
     },
     {
@@ -100,7 +104,8 @@
         "additionalProperties": false
       },
       "annotations": {
-        "readOnlyHint": false
+        "readOnlyHint": false,
+        "consequentialHint": false
       },
       "declarative": true
     }

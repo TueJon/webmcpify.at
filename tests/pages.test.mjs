@@ -1,20 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { globSync, readFileSync } from 'node:fs';
+import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const PAGES = [
-  'index.html',
-  'de/index.html',
-  'webmcp-agent-skill/index.html',
-  'docs/index.html',
-  'docs/site-tools/index.html',
-  'imprint.html',
-  'privacy.html',
-];
+// Globbed, not listed: a newly added route must inherit the same discovery and
+// consent contracts without relying on somebody updating a second registry.
+const PAGES = globSync('**/*.html', { cwd: root }).map((p) => relative('.', p)).sort();
 
 /** Indexable page → the canonical URL it must declare for itself. */
 const CANONICALS = {
@@ -81,6 +75,13 @@ test('llms.txt gives agents a direct, specification-shaped path to the skill', (
     assert.ok(summary.includes(phrase), `llms.txt is missing agent discovery fact: ${phrase}`);
   }
   assert.match(summary, /## Start here\n\n- \[[^\]]+\]\(https:\/\//);
+});
+
+test('release and community copy names the shipped version and public contribution', () => {
+  const docs = read('docs/index.html');
+  assert.match(docs, /VERSION 0\.5\.0/);
+  assert.match(docs, /github\.com\/arnabwithab/);
+  assert.match(docs, /TueJon\/webmcpify\/pull\/13/);
 });
 
 /**
