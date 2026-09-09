@@ -93,7 +93,7 @@ function declarativeTools() {
         ...('required' in select.attrs ? { required: [param] } : {}),
         additionalProperties: false,
       },
-      annotations: { readOnlyHint: false },
+      annotations: { readOnlyHint: false, consequentialHint: false },
       declarative: true,
     },
   ];

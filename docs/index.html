@@ -6,6 +6,7 @@
 <title>webmcpify docs — the WebMCP agent skill</title>
 <meta name="description" content="Documentation for the webmcpify WebMCP agent skill: choose curated core coverage or route-by-route parity, install the skill, and verify Site tools in real clients.">
 <link rel="canonical" href="https://webmcpify.at/docs/">
+<link rel="describedby" href="/llms.txt" type="text/markdown">
 <link rel="webmcp" href="/.well-known/webmcp" type="application/json">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://webmcpify.at/docs/">
@@ -22,7 +23,7 @@
   <div class="topbar-inner">
     <a class="brand" href="/">webmcpify.at</a>
     <a href="/webmcp-agent-skill/">Agent skill</a>
-    <span class="meta">DOCS · REV 2026-08-31</span>
+    <span class="meta">DOCS · REV 2026-09-09</span>
   </div>
 </header>
 
@@ -36,7 +37,7 @@
   </nav>
 
   <main>
-    <p class="meta">OPEN SOURCE · MIT · VERSION 0.5.0 PREPARED</p>
+    <p class="meta">OPEN SOURCE · MIT · VERSION TARGET 0.5.0</p>
     <h1>Docs for an inspectable WebMCP run.</h1>
     <p class="lede">webmcpify is a WebMCP agent skill for curated core coverage or route-by-route parity. These guides separate what the coding agent builds, what Chrome verifies, and what a client such as ChatGPT can actually see.</p>
     <span class="stamp">SOURCE-TRACEABLE, NOT A SCORECARD</span>
@@ -76,9 +77,12 @@
 
     <h2>Current source boundary</h2>
     <div class="requirements">
-      <p><b>Last reviewed 2026-08-31.</b> WebMCP is a moving proposal and client availability changes separately. Runtime claims are checked against the WebMCP draft, Chrome implementation guidance and a real Chrome run. ChatGPT API-subset and model/workspace claims are checked against the official OpenAI Site tools page.</p>
+      <p><b>Last reviewed 2026-09-09.</b> WebMCP is a moving proposal and client availability changes separately. Runtime claims are checked against the WebMCP draft, Chrome implementation guidance and a real Chrome run. The current draft and Chrome docs define <code>consequentialHint</code> for significant real-world or non-reversible effects, while the measured Chrome 150 build still omitted it from <code>getTools()</code>; application authorization and confirmation remain the actual safety boundary. ChatGPT API-subset and model/workspace claims are checked against the official OpenAI Site tools page.</p>
       <p><a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP draft</a> · <a href="https://developer.chrome.com/docs/ai/webmcp" target="_blank" rel="noopener">Chrome WebMCP docs</a> · <a href="https://learn.chatgpt.com/docs/webmcp" target="_blank" rel="noopener">OpenAI Site tools docs</a></p>
     </div>
+
+    <h2>Community</h2>
+    <p>webmcpify is maintained in public. Thanks to <a href="https://github.com/arnabwithab" target="_blank" rel="noopener">@arnabwithab</a> for the native/spec-shaped I/O compatibility work in <a href="https://github.com/TueJon/webmcpify/pull/13" target="_blank" rel="noopener">pull request #13</a>. Attribution follows the public contribution only; no private identity data is collected or published.</p>
   </main>
 </div>
 

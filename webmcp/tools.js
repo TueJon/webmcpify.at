@@ -60,7 +60,7 @@ const TOOLS = [
       },
       additionalProperties: false,
     },
-    annotations: { readOnlyHint: true },
+    annotations: { readOnlyHint: true, consequentialHint: false },
     execute: ({ agent } = {}) =>
       `${INSTALL_ROUTES[agent] ?? INSTALL_ROUTES.npx}\n\nThe skill is MIT-licensed and self-contained: https://github.com/TueJon/webmcpify`,
   },
@@ -69,7 +69,7 @@ const TOOLS = [
     description:
       'Returns the seven phases of the webmcpify pipeline (DETECT through AUDIT) with a one-line explanation each. Read-only.',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false },
-    annotations: { readOnlyHint: true },
+    annotations: { readOnlyHint: true, consequentialHint: false },
     execute: () => PHASES.map(([n, d], i) => `${i + 1}. ${n} — ${d}`).join('\n'),
   },
   {
@@ -77,7 +77,7 @@ const TOOLS = [
     description:
       'Returns the FAQ of webmcpify.at (what WebMCP is, code-safety guarantees, security model, supported agents) in the currently selected page language. Read-only.',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false },
-    annotations: { readOnlyHint: true },
+    annotations: { readOnlyHint: true, consequentialHint: false },
     execute: () => faqEntries().join('\n\n'),
   },
   {
@@ -92,7 +92,7 @@ const TOOLS = [
       required: ['language'],
       additionalProperties: false,
     },
-    annotations: { readOnlyHint: false },
+    annotations: { readOnlyHint: false, consequentialHint: false },
     execute: ({ language }) => {
       if (typeof setLang === 'function') setLang(language);
       else {
