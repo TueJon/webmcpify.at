@@ -26,7 +26,7 @@ Important boundaries:
 - [Verification phase](https://raw.githubusercontent.com/TueJon/webmcpify/main/skills/webmcpify/references/verify.md): Real-browser execution and UI-state verification contract for every approved tool.
 - [Discovery guidance](https://raw.githubusercontent.com/TueJon/webmcpify/main/skills/webmcpify/references/discovery.md): Optional pre-visit discovery, manifest limits, public-tool rules, and drift checks.
 - [Documentation index](https://webmcpify.at/docs/): Coverage targets, proof layers, source boundaries, and dated compatibility notes.
-- [Prepared v0.5.0 release notes](https://raw.githubusercontent.com/TueJon/webmcpify/main/release/v0.5.0.md): Coordinated capability milestone, compatibility boundary, and contributor credit in plain text; the GitHub release remains authoritative for publication state.
+- [Prepared v0.5.1 release notes](https://raw.githubusercontent.com/TueJon/webmcpify/main/release/v0.5.1.md): Current and Chrome 150 execution compatibility with exactly-once application-tool invocation; the GitHub release remains authoritative for publication state.
 
 ## Standards and current platform status
 
