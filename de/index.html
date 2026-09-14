@@ -450,8 +450,8 @@
       <li>
         <span class="no">05</span>
         <h3>VERIFY</h3>
-        <p><span lang="en">Runs every tool in real Chrome: schema check, valid and invalid calls, and the resulting UI state. Pass or fail, per tool.</span>
-        <span lang="de">Führt jedes Tool im echten Chrome aus: Schema-Check, gültige und ungültige Calls, resultierender UI-State. Pass oder Fail, pro Tool.</span></p>
+        <p><span lang="en">Runs approved tools in a dedicated Chrome test context: valid and invalid calls, UI state, and an independent check of mutations and unchanged records.</span>
+        <span lang="de">Führt freigegebene Tools in einem eigenen Chrome-Testkontext aus: gültige und ungültige Calls, UI-State und eine unabhängige Prüfung von Änderungen und unveränderten Datensätzen.</span></p>
       </li>
       <li>
         <span class="no">06</span>
@@ -513,8 +513,8 @@
         <tr>
           <td>.webmcpify/manifest.json</td>
           <td class="qty">1</td>
-          <td><span lang="en">The single source of truth: every tool, its schema, mutation class, approval record, and verification status. Survives context wipes; any run resumes from it.</span>
-          <span lang="de">Die Single Source of Truth: jedes Tool, sein Schema, seine Mutationsklasse, Freigabe und Verifikationsstatus. Übersteht Context-Wipes; jeder Run setzt daran an.</span></td>
+          <td><span lang="en">The single source of truth: every tool, its schema, mutation class, approval record, and verification status. Resumes after context loss; changed files, contracts or browser environments invalidate affected verification evidence.</span>
+          <span lang="de">Die Single Source of Truth: jedes Tool, sein Schema, seine Mutationsklasse, Freigabe und Verifikationsstatus. Setzt nach Kontextverlust fort; geänderte Dateien, Contracts oder Browser-Umgebungen machen betroffene Verifikationsbelege ungültig.</span></td>
         </tr>
         <tr>
           <td>webmcp.spec.ts</td>

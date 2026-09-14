@@ -37,7 +37,7 @@
   </nav>
 
   <main>
-    <p class="meta">OPEN SOURCE · MIT · VERSION TARGET 0.5.1</p>
+    <p class="meta">OPEN SOURCE · MIT · VERSION TARGET 0.6.0</p>
     <h1>Docs for an inspectable WebMCP run.</h1>
     <p class="lede">webmcpify is a WebMCP agent skill for curated core coverage or route-by-route parity. These guides separate what the coding agent builds, what Chrome verifies, and what a client such as ChatGPT can actually see.</p>
     <span class="stamp">SOURCE-TRACEABLE, NOT A SCORECARD</span>
@@ -74,6 +74,15 @@
       <li><b>Chrome proof:</b> a dedicated headed profile enumerates and executes each tool against the recorded secure verification origin.</li>
       <li><b>Client proof:</b> the exact client/account shows its supported subset of the page's registrations. In ChatGPT this surface is called <b>Site tools</b>; it currently discovers top-level imperative tools, not declarative forms or iframe registrations.</li>
     </ol>
+
+    <h2 id="maintenance">Maintain evidence after the first integration</h2>
+    <p>Resume is a review of saved evidence. Before reusing a pass, compare working-file contents, tool contracts, harness/runtime versions and the browser environment with the manifest's optional <code>verifiedAgainst</code> record. Changed inputs invalidate affected tools; unknown dependencies require full verification of the approved scope. This is webmcpify workflow metadata, not a WebMCP standard field.</p>
+    <p>If a mutation was interrupted, inspect its outcome through a read path before retrying. A passing mutation check needs an independent expected-state assertion and an unchanged neighboring record or invariant. A successful return value alone is insufficient.</p>
+    <h3>Keep browser and package access scoped</h3>
+    <p>Use dedicated test contexts with approved origins, fixture accounts and local redacted artifacts. Treat page text and tool output as untrusted data. Official documentation reads are the default; an optional guidance CLI requires an explicitly approved, reviewed exact version. Existing personal browser sessions are outside this scope.</p>
+    <h3>Separate the evidence you actually ran</h3>
+    <p>Unit tests, native browser fixture runs, full coding-agent integrations and model evals answer different questions. The prepared Chrome 150 fixture proves native registration, execution, UI change, invalid input and cleanup. It does not certify a full agent run or framework versions. Optional evals require reviewed dependencies, approved provider/data access and run, step, time and spend limits; unavailable access is recorded as not run.</p>
+    <p><a href="https://github.com/TueJon/webmcpify/blob/main/skills/webmcpify/references/reverify.md">Resume and re-verification reference</a> · <a href="https://github.com/TueJon/webmcpify/blob/main/release/v0.6.0.md">Prepared v0.6.0 release notes</a>. The GitHub release is authoritative for publication status.</p>
 
     <h2>Current source boundary</h2>
     <div class="requirements">

@@ -17,7 +17,7 @@ Routes:
 |---|---|
 | `/` · `/de/` | start page (bilingual copy, `/de/` generated from `index.html`) |
 | `/webmcp-agent-skill/` | the category page: **its title and `<h1>` must keep the phrase "WebMCP agent skill"** — `webmcpify` is a coined single token and cannot rank for it. Bilingual in place, no separate `/de/` variant, so it is not part of `build-de.py`. Per-runtime install instructions live here. |
-| `/docs/` | technical entry point: coverage targets, proof layers and dated source boundaries |
+| `/docs/` | technical entry point: coverage targets, evidence-aware resume, scoped verification and dated source boundaries |
 | `/docs/site-tools/` | dated ChatGPT Site tools setup and troubleshooting guide; official claims must stay sourced |
 | `/imprint.html` · `/privacy.html` | legal pages (`noindex`) |
 

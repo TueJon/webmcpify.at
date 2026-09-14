@@ -267,6 +267,13 @@
     übersteht Kontextfenster, Sessions und sogar einen Agent-Wechsel.</span></li>
   </ul>
 
+  <h2><span lang="en">Keep the next run trustworthy</span><span lang="de">Auch dem nächsten Run vertrauen</span></h2>
+  <p><span lang="en">Resume from the manifest, then compare file contents, approved contracts and the browser environment before reusing a pass. Reconcile interrupted mutations through a read path before retrying. Verification checks both the intended change and a neighboring record that must stay unchanged.</span>
+  <span lang="de">Am Manifest fortsetzen und vor der Wiederverwendung eines bestandenen Checks Dateiinhalte, freigegebene Contracts und Browser-Umgebung vergleichen. Unterbrochene Änderungen vor einem Retry über einen Lesepfad abgleichen. Die Verifikation prüft die beabsichtigte Änderung und einen benachbarten Datensatz, der unverändert bleiben muss.</span></p>
+  <p><span lang="en">Use only approved test origins, accounts and fixtures in a dedicated browser context. Official documentation reads are the default; optional third-party CLI execution needs a reviewed exact version and approval. Optional model evals need explicit data, time and spend limits.</span>
+  <span lang="de">Nur freigegebene Test-Origins, Konten und Fixtures in einem eigenen Browserkontext verwenden. Offizielle Dokumentation wird standardmäßig gelesen; optionale Drittanbieter-CLIs brauchen eine geprüfte exakte Version und Freigabe. Optionale Modell-Evals brauchen explizite Daten-, Zeit- und Kostenlimits.</span></p>
+  <p><a href="/docs/#maintenance"><span lang="en">Read the maintenance and evidence contract →</span><span lang="de">Wartungs- und Nachweisregeln lesen →</span></a></p>
+
   <h2><span lang="en">What it will not do</span><span lang="de">Was es nicht tut</span></h2>
   <ul>
     <li><span lang="en">Touch unrelated logic or UI. Every diff hunk traces to a manifest entry, and files that
