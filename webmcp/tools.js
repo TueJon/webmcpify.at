@@ -28,7 +28,7 @@ const PHASES = [
   ['INVENTORY', 'builds a route map for curated core coverage or a route-by-route interaction census for parity; zero code changes'],
   ['GATE', 'the human approves or rejects every tool; server mutations need individual sign-off'],
   ['INTEGRATE', 'registers approved tools via document.modelContext, feature-detected, using only code paths the UI already uses'],
-  ['VERIFY', 'runs every tool in current headed Chrome: schema check, valid and invalid calls, resulting UI state'],
+  ['VERIFY', 'runs approved tools in a dedicated Chrome test context: valid and invalid calls, UI state, independent mutation and unchanged-record checks'],
   ['HEAL', 'classifies failures before repair, fixes implementation defects, and re-verifies affected tools'],
   ['AUDIT', 'maps every diff hunk to an approved tool or recorded setup; the rest gets flagged'],
 ];

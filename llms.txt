@@ -26,7 +26,7 @@ Important boundaries:
 - [Verification phase](https://raw.githubusercontent.com/TueJon/webmcpify/main/skills/webmcpify/references/verify.md): Real-browser execution and UI-state verification contract for every approved tool.
 - [Discovery guidance](https://raw.githubusercontent.com/TueJon/webmcpify/main/skills/webmcpify/references/discovery.md): Optional pre-visit discovery, manifest limits, public-tool rules, and drift checks.
 - [Documentation index](https://webmcpify.at/docs/): Coverage targets, proof layers, source boundaries, and dated compatibility notes.
-- [Prepared v0.5.1 release notes](https://raw.githubusercontent.com/TueJon/webmcpify/main/release/v0.5.1.md): Current and Chrome 150 execution compatibility with exactly-once application-tool invocation; the GitHub release remains authoritative for publication state.
+- [Prepared v0.6.0 release notes](https://raw.githubusercontent.com/TueJon/webmcpify/main/release/v0.6.0.md): Evidence-aware resume, scoped browser/package access, independent mutation assertions and bounded optional evals; the GitHub release remains authoritative for publication state.
 
 ## Standards and current platform status
 
@@ -39,3 +39,9 @@ Important boundaries:
 
 - [Live WebMCP discovery manifest](https://webmcpify.at/.well-known/webmcp): Site-level, non-standard pre-visit tool summary; runtime registration remains authoritative.
 - [Reproducible proof pack](https://github.com/TueJon/webmcpify/tree/main/proof): Recording, captured source, checksums, and the explicitly scoped verification claim.
+
+## Maintenance evidence
+
+Reuse a pass only after comparing working-file contents, approved contracts, harness/runtime and browser environment with saved evidence. Changed inputs invalidate affected tools; unknown dependencies require full approved-scope verification. Reconcile interrupted mutations before retrying. Native fixture proof does not certify full-agent runs, framework versions or model evals.
+
+- [Resume and re-verification](https://raw.githubusercontent.com/TueJon/webmcpify/main/skills/webmcpify/references/reverify.md): Evidence invalidation and safe recovery.
