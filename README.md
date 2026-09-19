@@ -60,16 +60,17 @@ The site is itself agent-ready, in the three layers a WebMCP integration can hav
 
 ## Deploy
 
-The site is served directly from a git clone on the host — no build, no pipeline:
+Merging to `main` deploys automatically. `.github/workflows/site.yml` runs the contract
+tests and the generated-file check on every PR, then on every push to `main`:
 
-- Host: `tuejon.at`, docroot `/opt/webmcpify` (clone of `main`), nginx vhost
-  `/etc/nginx/sites-available/25-webmcpify.conf` (TLS via Let's Encrypt/certbot,
-  http→https and www→apex 301s, HSTS).
-- Redeploy after merging to `main`:
+1. pulls `main` into the docroot on the host through a restricted deploy key, whose
+   forced command only runs `git pull --ff-only` and prints the deployed `HEAD`;
+2. fails unless the deployed commit contains the pushed one;
+3. verifies `https://webmcpify.at/` (200 + HSTS) and every public route.
 
-  ```bash
-  ssh tj@tuejon.at 'cd /opt/webmcpify && git pull'
-  ```
+Host: `tuejon.at`, docroot `/opt/webmcpify` (clone of `main`, no build step), nginx vhost
+`/etc/nginx/sites-available/25-webmcpify.conf` (TLS via Let's Encrypt/certbot,
+http→https and www→apex 301s, HSTS). Jobs run on the repo's self-hosted `tuejon-ci`
+runner and skip pull requests from forks.
 
-- Verify: `curl -sI https://webmcpify.at/` (200, `strict-transport-security` present)
-  and spot-check changed pages.
+Manual fallback (same effect as the pipeline): `ssh tj@tuejon.at 'cd /opt/webmcpify && git pull --ff-only'`.

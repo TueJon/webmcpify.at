@@ -1,0 +1,58 @@
+name: Site
+
+# Tests every PR; every push to main deploys to tuejon and verifies the live site.
+# The deploy is a restricted `git pull` of a static docroot: no build, no restart.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    # The runner lives on VD-FW next to production keys: never run fork code there.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, Linux, X64, tuejon-ci]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Contract tests
+        run: node --test 'tests/*.test.mjs'
+      - name: Legal pages are present
+        run: |
+          test -f imprint.html
+          test -f privacy.html
+      - name: Generated German page and WebMCP manifest are current
+        run: |
+          python3 build-de.py
+          node build-manifest.mjs
+          git diff --exit-code
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: [self-hosted, Linux, X64, tuejon-ci]
+    concurrency:
+      group: webmcpify-at-deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Pull main into /opt/webmcpify on tuejon
+        # The key's forced command runs `git pull --ff-only` and prints the deployed HEAD.
+        run: |
+          deployed="$(ssh -i ~/.ssh/webmcpify-at-deploy -o IdentitiesOnly=yes -o BatchMode=yes tj@tuejon.at)"
+          echo "deployed $deployed for $GITHUB_SHA"
+          git fetch -q origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" "$deployed"
+      - name: Verify the public site
+        run: |
+          curl -fsSI https://webmcpify.at/ | grep -i '^strict-transport-security:'
+          for path in / /de/ /docs/ /docs/site-tools/ /webmcp-agent-skill/ /imprint.html /privacy.html /llms.txt /sitemap.xml /.well-known/webmcp; do
+            code="$(curl -s -o /dev/null -w '%{http_code}' "https://webmcpify.at$path")"
+            echo "$code $path"
+            test "$code" = 200
+          done
