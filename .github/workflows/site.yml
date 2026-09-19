@@ -20,6 +20,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Contract tests
         run: node --test 'tests/*.test.mjs'
+      - name: Legal pages are present
+        run: |
+          test -f imprint.html
+          test -f privacy.html
       - name: Generated German page and WebMCP manifest are current
         run: |
           python3 build-de.py
@@ -47,7 +51,7 @@ jobs:
       - name: Verify the public site
         run: |
           curl -fsSI https://webmcpify.at/ | grep -i '^strict-transport-security:'
-          for path in / /de/ /docs/ /docs/site-tools/ /webmcp-agent-skill/ /llms.txt /sitemap.xml /.well-known/webmcp; do
+          for path in / /de/ /docs/ /docs/site-tools/ /webmcp-agent-skill/ /imprint.html /privacy.html /llms.txt /sitemap.xml /.well-known/webmcp; do
             code="$(curl -s -o /dev/null -w '%{http_code}' "https://webmcpify.at$path")"
             echo "$code $path"
             test "$code" = 200
