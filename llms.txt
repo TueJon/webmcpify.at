@@ -25,14 +25,15 @@ Important boundaries:
 - [Integration phase](https://raw.githubusercontent.com/TueJon/webmcpify/main/skills/webmcpify/references/integrate.md): Imperative and declarative implementation rules, mutation boundaries, and compatibility guidance.
 - [Verification phase](https://raw.githubusercontent.com/TueJon/webmcpify/main/skills/webmcpify/references/verify.md): Real-browser execution and UI-state verification contract for every approved tool.
 - [Discovery guidance](https://raw.githubusercontent.com/TueJon/webmcpify/main/skills/webmcpify/references/discovery.md): Optional pre-visit discovery, manifest limits, public-tool rules, and drift checks.
+- [Dated native compatibility evidence](https://raw.githubusercontent.com/TueJon/webmcpify/main/skills/webmcpify/references/native-compatibility.md): Chrome 150 limitations and five synthetic Chrome Beta 156 probes from 2026-10-05; cancellation can leave unknown effects and simulation is separate from native acceptance.
 - [Documentation index](https://webmcpify.at/docs/): Coverage targets, proof layers, source boundaries, and dated compatibility notes.
-- [Prepared v0.6.0 release notes](https://raw.githubusercontent.com/TueJon/webmcpify/main/release/v0.6.0.md): Evidence-aware resume, scoped browser/package access, independent mutation assertions and bounded optional evals; the GitHub release remains authoritative for publication state.
+- [Prepared v0.7.1 release notes](https://raw.githubusercontent.com/TueJon/webmcpify/main/release/v0.7.1.md): Preserved execution options, cooperative cancellation and dated native Chrome evidence; the GitHub release remains authoritative for publication state.
 
 ## Standards and current platform status
 
 - [WebMCP proposal](https://webmachinelearning.github.io/webmcp/): W3C Web Machine Learning Community Group draft for page-provided tools.
 - [Chrome WebMCP documentation](https://developer.chrome.com/docs/ai/webmcp): Current Chrome origin-trial and implementation guidance.
-- [Using Site tools in ChatGPT](https://webmcpify.at/docs/site-tools/): Dated setup and troubleshooting guide. As checked on 2026-08-31, ChatGPT discovers top-level imperative JavaScript tools, not Declarative API forms or registrations inside iframes; availability varies during rollout.
+- [Using Site tools in ChatGPT](https://webmcpify.at/docs/site-tools/): Dated setup and troubleshooting guide. As checked on 2026-10-12, ChatGPT discovers top-level imperative JavaScript tools, not Declarative API forms or registrations inside iframes; availability varies during rollout.
 - [Official ChatGPT Site tools documentation](https://learn.chatgpt.com/docs/webmcp): Primary source for supported models, accounts, discovery, lifetime, and safety review.
 
 ## Optional
