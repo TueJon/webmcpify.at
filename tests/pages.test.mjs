@@ -79,7 +79,7 @@ test('llms.txt gives agents a direct, specification-shaped path to the skill', (
 
 test('release and community copy names the coordinated version target and public contribution', () => {
   const docs = read('docs/index.html');
-  assert.match(docs, /VERSION TARGET 0\.6\.0/);
+  assert.match(docs, /VERSION TARGET 0\.7\.1/);
   assert.match(docs, /side-effect-free tool before invoking any real tool, then executes each real tool exactly once/);
   assert.match(docs, /github\.com\/arnabwithab/);
   assert.match(docs, /TueJon\/webmcpify\/pull\/13/);
@@ -158,9 +158,9 @@ test('the Site tools guidance stays dated, scoped and linked to the official sou
     for (const fact of [
       'Site tools',
       'Available site tools',
-      '2026-08-31',
+      '2026-10-12',
       'GPT-5.6 Sol',
-      'Terra',
+      'GPT-6 Sol',
       'Luna',
       'Enterprise',
       'Edu',
@@ -180,7 +180,7 @@ test('the Site tools guidance stays dated, scoped and linked to the official sou
   }
 
   const machineSummary = normalize(read('llms.txt'));
-  for (const fact of ['2026-08-31', 'top-level imperative', 'Declarative API', 'iframes']) {
+  for (const fact of ['2026-10-12', 'top-level imperative', 'Declarative API', 'iframes']) {
     assert.ok(machineSummary.includes(fact), `llms.txt is missing Site tools boundary: ${fact}`);
   }
   assert.ok(machineSummary.includes(official), 'llms.txt must cite the official Site tools guide');
