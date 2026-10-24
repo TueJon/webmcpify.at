@@ -13,10 +13,18 @@ permissions:
 
 jobs:
   test:
-    # The runner lives on VD-FW next to production keys: never run fork code there.
+    # Keep fork approval/guards; tests also run under an unprivileged account.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: [self-hosted, Linux, X64, tuejon-ci]
+    runs-on: [self-hosted, Linux, X64, tuejon-ci, ci-public]
     steps:
+      - name: Verify runner isolation
+        run: |
+          test "$(id -un)" = ci-public
+          test -z "$(id -nG | tr ' ' '\n' | grep -E '^(sudo|docker)$' || true)"
+          test ! -r /home/vd/.ssh/id_ed25519
+          test ! -r /run/docker.sock
+          ! sudo -n true 2>/dev/null
+          python3 -c 'import os; assert not os.access("/home/vd", os.R_OK | os.X_OK)'
       - uses: actions/checkout@v4
       - name: Contract tests
         run: node --test 'tests/*.test.mjs'
@@ -33,7 +41,9 @@ jobs:
   deploy:
     needs: test
     if: github.event_name == 'push'
-    runs-on: [self-hosted, Linux, X64, tuejon-ci]
+    # Route the push deploy to vd's restricted key; labels are not authorization.
+    # Review workflow changes before approving a fork's run.
+    runs-on: [self-hosted, Linux, X64, tuejon-deploy]
     concurrency:
       group: webmcpify-at-deploy
       cancel-in-progress: false
