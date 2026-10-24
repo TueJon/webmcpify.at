@@ -41,7 +41,8 @@ jobs:
   deploy:
     needs: test
     if: github.event_name == 'push'
-    # Only the trusted push job may access vd's restricted deployment key.
+    # Route the push deploy to vd's restricted key; labels are not authorization.
+    # Review workflow changes before approving a fork's run.
     runs-on: [self-hosted, Linux, X64, tuejon-deploy]
     concurrency:
       group: webmcpify-at-deploy
