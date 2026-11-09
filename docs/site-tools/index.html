@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Use ChatGPT Site tools with WebMCP — webmcpify docs</title>
-<meta name="description" content="Dated setup and troubleshooting guide for ChatGPT Site tools: supported models, top-level imperative tool support, page lifetime and headed-Chrome verification.">
+<meta name="description" content="Dated setup and troubleshooting guide for ChatGPT Site tools: account permissions, JavaScript and form tools, secure frames, page lifetime and Chrome verification.">
 <link rel="canonical" href="https://webmcpify.at/docs/site-tools/">
 <link rel="describedby" href="/llms.txt" type="text/markdown">
 <link rel="webmcp" href="/.well-known/webmcp" type="application/json">
@@ -23,7 +23,7 @@
   <div class="topbar-inner">
     <a class="brand" href="/">webmcpify.at</a>
     <a href="/docs/">Docs</a>
-    <span class="meta">VERIFIED 2026-10-12</span>
+    <span class="meta">DOCS CHECKED 2026-11-09</span>
   </div>
 </header>
 
@@ -37,7 +37,7 @@
   </nav>
 
   <main>
-    <p class="meta">CLIENT GUIDE · SNAPSHOT 2026-10-12</p>
+    <p class="meta">CLIENT GUIDE · SNAPSHOT 2026-11-09</p>
     <h1>Use Site tools in ChatGPT.</h1>
     <p class="lede">ChatGPT calls WebMCP integrations <b>Site tools</b>. Treat the browser's own Available site tools list as ground truth for the page that is open right now.</p>
     <span class="stamp">PAGE-BOUND, MODEL-GATED</span>
@@ -47,9 +47,9 @@
       <ul>
         <li><b>Website:</b> the page registers WebMCP from a secure context. Use HTTPS in production or a trustworthy loopback origin in development.</li>
         <li><b>ChatGPT:</b> update the desktop app, then open the website in its built-in browser.</li>
-        <li><b>Model:</b> official OpenAI documentation checked 2026-10-12 lists GPT-5.6 Sol or GPT-6 Sol. GPT-5.6 Luna currently has WebMCP disabled.</li>
-        <li><b>Workspace:</b> the official page requires an administrator to allow Site tools through Enterprise workspace policy; Edu is unavailable, and availability can also depend on rollout.</li>
-        <li><b>Client API:</b> ChatGPT currently discovers imperative JavaScript tools in the top-level page. Declarative API form tools and tools registered inside iframes are not available as Site tools.</li>
+        <li><b>Model and access:</b> a supported model and access through your account or managed workspace's browser policy are required. The current official page does not list model names or a workspace exclusion matrix; verify access in the exact account.</li>
+        <li><b>Permissions:</b> browser settings and site permissions still apply. Check <b>Enable site tools</b> under <b>Settings → Browser → Permissions</b>.</li>
+        <li><b>Client API:</b> the official page documents JavaScript tools and HTML form tools in the top-level page and same-origin or cross-origin iframes. Each frame needs a secure context; access is checked for the tool provider's origin.</li>
       </ul>
     </div>
 
@@ -67,9 +67,9 @@
       <thead><tr><th>Symptom</th><th>Check</th><th>Meaning</th></tr></thead>
       <tbody>
         <tr><td>No Site tools control</td><td>Desktop-app version, selected model, workspace and rollout.</td><td>The client surface may be unavailable before the site is involved.</td></tr>
-        <tr><td>Control exists, expected tool absent</td><td>Available site tools while the exact page is open; then top-level imperative registration and secure context.</td><td>The page did not register it in the current document, registration failed, or it uses a declarative form or iframe that this client does not discover.</td></tr>
+        <tr><td>Control exists, expected tool absent</td><td>Available site tools while the exact page is open; registration or form metadata, frame secure context and provider-origin access.</td><td>Check document lifetime, registration errors and permissions rather than assuming iframe or form tools are unsupported.</td></tr>
         <tr><td>Tool worked, then vanished</td><td>Did the browser close, navigate, reload or replace the page between turns?</td><td>Tools belong to their page; page teardown ends that registration.</td></tr>
-        <tr><td>Assistant uses ordinary browser interaction</td><td>Confirm GPT-5.6 Sol or GPT-6 Sol plus Work or Codex and inspect Available site tools directly.</td><td>Fallback browser behavior can look like a broken integration.</td></tr>
+        <tr><td>Assistant uses ordinary browser interaction</td><td>Confirm a supported model, account/workspace access and browser permissions; inspect Available site tools directly.</td><td>Fallback browser behavior can look like a broken integration.</td></tr>
         <tr><td>Tool call is held or asks for confirmation</td><td>Review the requested action and client safety result.</td><td>Every invocation receives a client-side safety review; normal confirmation policy still applies.</td></tr>
       </tbody>
     </table>
@@ -102,7 +102,7 @@ npx playwright test .webmcpify/webmcp.spec.ts</code></pre>
       </details>
       <details>
         <summary>Does every tool that works in Chrome appear as a Site tool?</summary>
-        <p>No. As checked 2026-10-12, ChatGPT's built-in browser supports imperative tools registered in the top-level page, but not declarative form tools or registrations inside iframes. Regular browser interaction may still operate those forms.</p>
+        <p>No account-level compatibility promise follows from a Chrome test. The official guide checked 2026-11-09 documents JavaScript registration, HTML forms and secure same-origin or cross-origin iframes. Verify the actual account, provider-origin permissions and Available site tools list.</p>
       </details>
       <details>
         <summary>What about plain Chat or a Work workspace?</summary>
@@ -112,11 +112,11 @@ npx playwright test .webmcpify/webmcp.spec.ts</code></pre>
 
     <h2>Sources and date boundary</h2>
     <ul>
-      <li><a href="https://learn.chatgpt.com/docs/webmcp" target="_blank" rel="noopener">OpenAI: Site tools</a>, checked 2026-10-12 for naming, model/workspace availability, supported API subset, controls, page lifetime and safety review.</li>
-      <li><a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP draft</a>, dated 2026-08-26, for the secure-context Document API.</li>
+      <li><a href="https://learn.chatgpt.com/docs/webmcp" target="_blank" rel="noopener">OpenAI: Site tools</a>, checked 2026-11-09 for account/workspace policy, form/frame discovery, controls, page lifetime and safety review. This is a documentation check, not a live account test.</li>
+      <li><a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">WebMCP draft</a>, dated 2026-11-02, for the secure-context Document API.</li>
       <li><a href="https://developer.chrome.com/docs/ai/webmcp" target="_blank" rel="noopener">Chrome WebMCP documentation</a> for origin-trial and local verification behavior.</li>
     </ul>
-    <p>Re-check these pages before copying model names or workspace claims into another public surface.</p>
+    <p>The official guide permits omitting <code>exposedTo</code> for agent discovery. This is distinct from in-page cross-origin discovery, which still requires embedder delegation, provider exposure and consumer opt-in. Re-check the primary sources before publishing availability claims.</p>
   </main>
 </div>
 

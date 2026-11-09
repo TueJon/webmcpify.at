@@ -33,7 +33,7 @@ Important boundaries:
 
 - [WebMCP proposal](https://webmachinelearning.github.io/webmcp/): W3C Web Machine Learning Community Group draft for page-provided tools.
 - [Chrome WebMCP documentation](https://developer.chrome.com/docs/ai/webmcp): Current Chrome origin-trial and implementation guidance.
-- [Using Site tools in ChatGPT](https://webmcpify.at/docs/site-tools/): Dated setup and troubleshooting guide. As checked on 2026-10-12, ChatGPT discovers top-level imperative JavaScript tools, not Declarative API forms or registrations inside iframes; availability varies during rollout.
+- [Using Site tools in ChatGPT](https://webmcpify.at/docs/site-tools/): Official documentation checked 2026-11-09 describes JavaScript registration, HTML forms and secure same-origin/cross-origin iframes; account/workspace policy and provider-origin permissions still apply. Documentation evidence is separate from account verification.
 - [Official ChatGPT Site tools documentation](https://learn.chatgpt.com/docs/webmcp): Primary source for supported models, accounts, discovery, lifetime, and safety review.
 
 ## Optional

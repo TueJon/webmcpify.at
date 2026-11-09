@@ -72,7 +72,7 @@
     <ol>
       <li><b>Manifest proof:</b> the route map, policy fingerprint, approvals, examples and expected UI deltas are persisted in the target repository.</li>
       <li><b>Chrome proof:</b> a dedicated headed profile enumerates and executes each tool against the recorded secure verification origin.</li>
-      <li><b>Client proof:</b> the exact client/account shows its supported subset of the page's registrations. In ChatGPT this surface is called <b>Site tools</b>; it currently discovers top-level imperative tools, not declarative forms or iframe registrations.</li>
+      <li><b>Client proof:</b> the exact client/account shows its supported tools. In ChatGPT this surface is called <b>Site tools</b>; official documentation checked 2026-11-09 describes JavaScript registration, HTML forms and secure same-origin or cross-origin iframes. Account/workspace policy and provider-origin permissions still apply.</li>
     </ol>
 
     <h2 id="maintenance">Maintain evidence after the first integration</h2>
@@ -85,6 +85,7 @@
     <p><a href="https://github.com/TueJon/webmcpify/blob/main/skills/webmcpify/references/reverify.md">Resume and re-verification reference</a> · <a href="https://github.com/TueJon/webmcpify/blob/main/release/v0.7.1.md">Prepared v0.7.1 release notes</a>. The GitHub release is authoritative for publication status.</p>
 
     <h2>Current source boundary</h2>
+    <p><b>Additional read-only probe · 2026-11-09.</b> Headed Chrome 156.0.8078.47 returned object callbacks as JSON text, strings as unquoted text, and absent values as the string <code>undefined</code>. The draft's scalar serialization rules differ; preserve raw evidence and explicit result guards. This browser did not expose <code>outputSchema</code> metadata. Schema declaration is not automatic output validation, and simulation does not prove native support. A document-replacement probe timed out; no document-lifetime or WPT conformance pass is claimed.</p>
     <div class="requirements">
       <p><b>Last reviewed 2026-10-12.</b> Chrome 149+ is the WebMCP origin-trial minimum; support for individual features depends on the browser version and must be verified. The synthetic Chrome Beta 156.0.8078.4 run on 2026-10-05 passed five native probes: object input, callback execution signal, cooperative caller cancellation, registration removal preserving a started invocation, and omitted input defaulting to <code>{}</code>. Successful imperative results arrived as serialized JSON strings. This does not prove declarative navigation, debugging annotations or every Chrome version. Chrome 150 required legacy JSON-string input and lacked callback options and omitted-input support; webmcpify probes with a side-effect-free tool before invoking any real tool, then executes each real tool exactly once.</p>
       <p>The imperative API is a CG draft, not a finalized standard. <a href="https://github.com/webmachinelearning/webmcp/pull/338" target="_blank" rel="noopener">Upstream PR #338</a> removed the declarative section on 2026-10-08; forms remain an experimental Chrome implementation described in the <a href="https://developer.chrome.com/docs/ai/webmcp/declarative-api" target="_blank" rel="noopener">Chrome declarative guide</a> and a separate explainer.</p>
