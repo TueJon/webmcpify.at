@@ -297,10 +297,10 @@
   <p><span lang="en">ChatGPT calls WebMCP integrations <b>Site tools</b>. In the desktop app's built-in browser, keep the page open, select <b>Site tools</b> in the address bar, then open <b>Available site tools</b>. That list is the fastest client-side answer to “did this page register?”.</span>
   <span lang="de">ChatGPT nennt WebMCP-Integrationen <b>Site tools</b>. Lass die Seite im integrierten Browser der Desktop-App geöffnet, wähle <b>Site tools</b> in der Adressleiste und öffne <b>Available site tools</b>. Diese Liste beantwortet clientseitig am schnellsten: „Hat diese Seite registriert?“</span></p>
   <ul>
-    <li><span lang="en"><b>Model and account:</b> official OpenAI documentation checked 2026-10-12 lists GPT-5.6 Sol or GPT-6 Sol; Luna has WebMCP disabled. Enterprise requires an administrator to allow Site tools through workspace policy; Edu is unavailable, and rollout still varies.</span>
-    <span lang="de"><b>Modell und Konto:</b> Die am 12.10.2026 geprüfte offizielle OpenAI-Dokumentation nennt GPT-5.6 Sol oder GPT-6 Sol; bei Luna ist WebMCP deaktiviert. In Enterprise muss ein Administrator Site tools per Workspace-Richtlinie erlauben; Edu ist nicht verfügbar, und der Rollout kann variieren.</span></li>
-    <li><span lang="en"><b>Client coverage:</b> Site tools currently discover imperative JavaScript tools in the top-level page, not Declarative API form tools or registrations inside iframes.</span>
-    <span lang="de"><b>Client-Abdeckung:</b> Site tools erkennen derzeit imperative JavaScript-Tools in der Top-Level-Seite, nicht Tools der Declarative API auf Formularen oder Registrierungen in iframes.</span></li>
+    <li><span lang="en"><b>Model and account:</b> official documentation checked 2026-11-09 requires a supported model and access through your account or managed workspace's browser policy. It does not list model names or workspace exclusions; check the actual account and browser permissions.</span>
+    <span lang="de"><b>Modell und Konto:</b> Die am 09.11.2026 geprüfte offizielle Dokumentation verlangt ein unterstütztes Modell und Zugriff über das Konto oder die Browser-Richtlinie des verwalteten Workspace. Modellnamen und Workspace-Ausschlüsse werden nicht aufgelistet; prüfe das konkrete Konto und die Browser-Berechtigungen.</span></li>
+    <li><span lang="en"><b>Client coverage:</b> the guide documents JavaScript tools and HTML forms in the top-level page and same-origin or cross-origin iframes. Every frame needs a secure context; access is checked for the tool provider's origin.</span>
+    <span lang="de"><b>Client-Abdeckung:</b> Der Leitfaden beschreibt JavaScript-Tools und HTML-Formulare in der Hauptseite sowie gleich- und fremdoriginären iframes. Jeder Frame braucht einen sicheren Kontext; der Zugriff wird für die Herkunft des Tools geprüft.</span></li>
     <li><span lang="en"><b>Page lifetime:</b> tools belong to the open page. Closing or navigating away can make them unavailable between turns.</span>
     <span lang="de"><b>Seiten-Lebensdauer:</b> Tools gehören zur geöffneten Seite. Schließen oder Wegnavigieren kann sie zwischen Turns unverfügbar machen.</span></li>
     <li><span lang="en"><b>Safety:</b> every invocation receives a client-side safety review; normal access and confirmation policies still apply.</span>
@@ -312,8 +312,8 @@
   <div class="faq">
     <details>
       <summary><span lang="en">Why do Site tools look missing in ChatGPT?</span><span lang="de">Warum wirken Site tools in ChatGPT verschwunden?</span></summary>
-      <p><span lang="en">Check the page's Available site tools list first, then top-level imperative registration, the current desktop-app version, supported model and workspace availability. Site tools die with the page, so keep its browser tab open. Chrome verification and ChatGPT account availability are separate checks.</span>
-      <span lang="de">Prüfe zuerst die Liste Available site tools der Seite, dann die imperative Registrierung auf der Top-Level-Seite, die aktuelle Desktop-App, ein unterstütztes Modell und die Workspace-Verfügbarkeit. Site tools sterben mit der Seite; lass ihren Browser-Tab offen. Chrome-Verifikation und ChatGPT-Kontoverfügbarkeit sind getrennte Prüfungen.</span></p>
+      <p><span lang="en">Check the page's Available site tools list first, then registration or form metadata, each frame's secure context, provider-origin permissions and account/workspace access. Site tools belong to the page, so keep its browser tab open. Chrome verification and ChatGPT account availability are separate checks.</span>
+      <span lang="de">Prüfe zuerst Available site tools, dann Registrierung oder Formular-Metadaten, den sicheren Kontext jedes Frames, Berechtigungen der Tool-Herkunft und Konto-/Workspace-Zugriff. Site tools gehören zur Seite; lass den Browser-Tab offen. Chrome-Verifikation und ChatGPT-Kontoverfügbarkeit sind getrennte Prüfungen.</span></p>
     </details>
     <details>
       <summary><span lang="en">Which agents can run this skill?</span><span lang="de">Welche Agents können diesen Skill ausführen?</span></summary>

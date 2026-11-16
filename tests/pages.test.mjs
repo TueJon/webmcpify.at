@@ -158,20 +158,19 @@ test('the Site tools guidance stays dated, scoped and linked to the official sou
     for (const fact of [
       'Site tools',
       'Available site tools',
-      '2026-10-12',
-      'GPT-5.6 Sol',
-      'GPT-6 Sol',
-      'Luna',
-      'Enterprise',
-      'Edu',
+      '2026-11-09',
+      'supported model',
+      'browser policy',
       'safety review',
-      'Declarative API',
+      'HTML form',
       'iframes',
       'top-level page',
     ]) {
       assert.ok(html.includes(fact), `${page} is missing dated Site tools fact: ${fact}`);
     }
     assert.ok(html.includes(official), `${page} must cite the official Site tools guide`);
+    assert.doesNotMatch(html, /GPT-5\.6 Sol|GPT-6 Sol|Edu is unavailable|not Declarative API/,
+      `${page} must not retain the superseded availability matrix`);
     assert.match(
       html,
       /(?:keep (?:the )?(?:target )?page open|keep its browser tab open|page (?:stays|remains) open)/i,
@@ -180,7 +179,7 @@ test('the Site tools guidance stays dated, scoped and linked to the official sou
   }
 
   const machineSummary = normalize(read('llms.txt'));
-  for (const fact of ['2026-10-12', 'top-level imperative', 'Declarative API', 'iframes']) {
+  for (const fact of ['2026-11-09', 'HTML forms', 'cross-origin', 'provider-origin']) {
     assert.ok(machineSummary.includes(fact), `llms.txt is missing Site tools boundary: ${fact}`);
   }
   assert.ok(machineSummary.includes(official), 'llms.txt must cite the official Site tools guide');
