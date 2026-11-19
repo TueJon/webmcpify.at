@@ -2,7 +2,7 @@
 
 - **Audit date:** 2026-07-24 (re-audit, same day — iteration 2, post-merge)
 - **Jurisdiction:** Austria (operator seat, `.at` domain, WKO member; German-language variant targets DACH visitors)
-- **Site:** https://webmcpify.at (static landing page, EN + `/de/`) — deployed from `main` @ `65e392c`, docroot `/opt/webmcpify` on tuejon.at (nginx, netcup DE). Live deployment confirmed in this audit: response `content-length`/`etag` for `/` and `/privacy.html` match the local repo byte-for-byte, `last-modified: Fri, 24 Jul 2026 18:39:25 GMT`.
+- **Site:** https://webmcpify.at (static landing page, EN + `/de/`) — deployed from `main` @ `65e392c`, served by nginx (netcup DE). Live deployment confirmed in this audit: response `content-length`/`etag` for `/` and `/privacy.html` match the local repo byte-for-byte, `last-modified: Fri, 24 Jul 2026 18:39:25 GMT`.
 - **Business entity:** TWB-Digital OG, FN 663697a (LG Korneuburg), Waldweg 28/2, 2020 Hollabrunn, UID ATU82973212 — microenterprise (3 partners), WKO Fachgruppe UBIT NÖ
 - **Business type:** informational presentation of the operator's open-source MIT-licensed developer tool, now with consent-gated first-party GA4 web measurement. Still no e-commerce, no forms, no newsletter, no accounts.
 - **Previous audit:** this same file, base commit `350f00c`, written earlier the same day (2026-07-24). Since then, two PRs merged and deployed: `bc77d86` (privacy policy, self-hosted fonts, consent-clean localStorage — closes P1.1/P1.2/P3.1/P4.1/P4.2/P4.3 from that audit) and `65e392c` (the GA4 measurement branch that audit reviewed pre-deploy as PR #5, now live). This document supersedes it; see **Previous Audit Diff** below.
@@ -245,8 +245,8 @@ stress; Google's June 2026 architecture change).
 
 ### 3.1 Add missing security headers on the vhost
 
-- **File (server, not repo):** `/etc/nginx/sites-available/25-webmcpify.conf` on
-  tuejon.at. Confirmed still missing via live header check today:
+- **Server configuration:** The site’s nginx configuration controls these headers.
+  The audit identified the following missing headers:
   `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`/CSP `frame-ancestors`.
   HSTS is present and correct (`strict-transport-security: max-age=31536000`).
 - **New since this morning:** if a CSP is added, it now needs to allowlist
@@ -370,7 +370,7 @@ IndexedDB, Cache API, service workers: still none.
 
 | Service | Provider | Country | Data processed | DPA required? | DPA status | Transfer mechanism |
 |---|---|---|---|---|---|---|
-| Hosting (tuejon.at server) | netcup GmbH, Karlsruhe | DE (EU) | Access logs (IP, UA, timestamps) | Yes (Art. 28) | **Unconfirmed — check/conclude (P2.3)** | EU only |
+| Hosting | netcup GmbH, Karlsruhe | DE (EU) | Access logs (IP, UA, timestamps) | Yes (Art. 28) | **Unconfirmed — check/conclude (P2.3)** | EU only |
 | Google Analytics 4 (now live) | Google Ireland Ltd | IE (US sub-processing) | Pseudonymous usage data (see inventory above) | Yes | **Unconfirmed — privacy.html asserts "in place," not verified against the admin console (P2.1)** | EU→US: DPF adequacy (EU) 2023/1795 — **watch: under fresh scrutiny since 2026-06-29, see P4.1** |
 | Google Ads (linked, conversion + audience signals) | Google Ireland Ltd / Google LLC | IE / US | `gclid`, `_gcl_au`, audience/remarketing signal (`ga-audiences`) | Yes | Same as above — bundled with the GA4 DPT | Same as above |
 | Let's Encrypt (TLS) | ISRG | US | No visitor personal data (cert issuance only) | No | N/A | N/A |
