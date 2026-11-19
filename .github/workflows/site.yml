@@ -1,6 +1,6 @@
 name: Site
 
-# Tests every PR; every push to main deploys to tuejon and verifies the live site.
+# Tests every PR; every push to main deploys and verifies the live site.
 # The deploy is a restricted `git pull` of a static docroot: no build, no restart.
 on:
   pull_request:
@@ -18,13 +18,16 @@ jobs:
     runs-on: [self-hosted, Linux, X64, tuejon-ci, ci-public]
     steps:
       - name: Verify runner isolation
+        env:
+          PROTECTED_HOME: ${{ secrets.PUBLIC_RUNNER_PROTECTED_HOME }}
         run: |
+          test -n "$PROTECTED_HOME"
           test "$(id -un)" = ci-public
           test -z "$(id -nG | tr ' ' '\n' | grep -E '^(sudo|docker)$' || true)"
-          test ! -r /home/vd/.ssh/id_ed25519
+          test ! -r "$PROTECTED_HOME/.ssh/id_ed25519"
           test ! -r /run/docker.sock
           ! sudo -n true 2>/dev/null
-          python3 -c 'import os; assert not os.access("/home/vd", os.R_OK | os.X_OK)'
+          python3 -c 'import os; assert not os.access(os.environ["PROTECTED_HOME"], os.R_OK | os.X_OK)'
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -44,7 +47,7 @@ jobs:
   deploy:
     needs: test
     if: github.event_name == 'push'
-    # Route the push deploy to vd's restricted key; labels are not authorization.
+    # Route the push deploy to the restricted deployment key; labels are not authorization.
     # Review workflow changes before approving a fork's run.
     runs-on: [self-hosted, Linux, X64, tuejon-deploy]
     concurrency:
@@ -54,10 +57,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Pull main into /opt/webmcpify on tuejon
+      - name: Deploy the current revision
         # The key's forced command runs `git pull --ff-only` and prints the deployed HEAD.
+        env:
+          DEPLOY_TARGET: ${{ secrets.WEBMCPIFY_DEPLOY_TARGET }}
         run: |
-          deployed="$(ssh -i ~/.ssh/webmcpify-at-deploy -o IdentitiesOnly=yes -o BatchMode=yes tj@tuejon.at)"
+          test -n "$DEPLOY_TARGET"
+          deployed="$(ssh -i ~/.ssh/webmcpify-at-deploy -o IdentitiesOnly=yes -o BatchMode=yes "$DEPLOY_TARGET")"
           echo "deployed $deployed for $GITHUB_SHA"
           git fetch -q origin main
           git merge-base --is-ancestor "$GITHUB_SHA" "$deployed"
